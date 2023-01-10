@@ -58,7 +58,12 @@ The workcode is the letter designator for an assigned time an employee will work
 - ID - a string value for use to represent the work/leave code.
 - Title - a string value used to provide a short description of the code for use.
 - StartTime - the number value for the hour of the day the employee will start work.  This value will be zero (0) for leave related codes.
+- ShiftCode - The integer value to correspond with the company's premimum code.
 - IsLeave - a boolean value to indicate if the work code is for shift assignment or as a leave code.
+- TextColor - a string value for the RGB Value to be used in displaying this 
+code into the client and any printout.
+- BackColor - a string value for the RGB Value for the background to be displayed
+in the client and printouts for this code.
 
 ### Team Class
 

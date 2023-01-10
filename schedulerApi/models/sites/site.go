@@ -1,6 +1,6 @@
 package sites
 
-import "github.com/erneap/scheduler/scheduler-api/models/employees"
+import "github.com/erneap/scheduler/schedulerApi/models/employees"
 
 type Site struct {
 	ID              string               `json:"id" bson:"id"`
