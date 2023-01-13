@@ -121,6 +121,7 @@ type EmployeeName struct {
 }
 
 type EmployeeData struct {
+	CompanyInfo CompanyInfo    `json:"companyinfo"`
 	Assignments []Assignment   `json:"assignments,omitempty"`
 	Variations  []Variation    `json:"variations,omitempty"`
 	Balances    []AnnualLeave  `json:"balance,omitempty"`

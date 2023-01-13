@@ -14,7 +14,7 @@ type LaborCode struct {
 	WBS              string    `json:"wbs" bson:"wbs"`
 	MinimumEmployees int       `json:"minimumEmployees" bson:"minimumEmployees"`
 	NotAssignedName  string    `json:"notAssignedName" bson:"notAssignedName"`
-	HoursPerEmployee int       `json:"hoursPerEmployee" bson:"hoursPerEmployee"`
+	HoursPerEmployee float64   `json:"hoursPerEmployee" bson:"hoursPerEmployee"`
 	Exercise         bool      `json:"exercise" bson:"exercise"`
 	StartDate        time.Time `json:"startDate" bson:"startDate"`
 	EndDate          time.Time `json:"endDate" bson:"endDate"`

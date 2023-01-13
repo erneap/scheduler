@@ -16,4 +16,13 @@ func main() {
 	userConvert := converters.UserConverter{}
 	userConvert.ReadUsers()
 	userConvert.WriteUsers()
+
+	teamConvert := converters.TeamConverter{
+		BaseLocation: "/Users/antonerne/Projects/scheduler/DatabaseExport",
+	}
+	teamConvert.ReadTeam()
+	teamConvert.ReadCompanyHolidayDates()
+	teamConvert.ReadForecastReports()
+	teamConvert.WriteTeam()
+
 }

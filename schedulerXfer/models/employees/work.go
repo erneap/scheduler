@@ -52,6 +52,7 @@ func (c ByEmployeeWork) Less(i, j int) bool {
 func (c ByEmployeeWork) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
 type EmployeeWorkRecord struct {
+	ID            primitive.ObjectID `json:"id" bson:"_id"`
 	EmployeeID    primitive.ObjectID `json:"employeeID" bson:"employeeID"`
 	Year          uint               `json:"year" bson:"year"`
 	EncryptedWork string             `json:"-" bson:"work"`

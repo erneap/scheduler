@@ -32,6 +32,7 @@ type Company struct {
 	ID         string           `json:"id" bson:"id"`
 	Name       string           `json:"name" bson:"name"`
 	IngestType string           `json:"ingest" bson:"ingest"`
+	IngestPwd  string           `json:"ingestPwd" bson:"ingestPwd"`
 	Holidays   []CompanyHoliday `json:"holidays,omitempty" bson:"holidays,omitempty"`
 }
 

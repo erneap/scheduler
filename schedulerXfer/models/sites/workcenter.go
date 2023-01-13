@@ -5,7 +5,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type Shift struct {
 	ID              string   `json:"id" bson:"id"`
 	Name            string   `json:"name" bson:"name"`
-	SortID          uint     `json:"sortid" bson:"sortid"`
+	SortID          uint     `json:"sort" bson:"sort"`
 	AssociatedCodes []string `json:"associatedCodes,omitempty" bson:"associatedCodes,omitempty"`
 	PayCode         uint     `json:"payCode" bson:"payCode"`
 }
@@ -21,7 +21,7 @@ func (c ByShift) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 type Position struct {
 	ID       string               `json:"id" bson:"id"`
 	Name     string               `json:"name" bson:"name"`
-	SortID   uint                 `json:"sortid" bson:"sortid"`
+	SortID   uint                 `json:"sort" bson:"sort"`
 	Assigned []primitive.ObjectID `json:"assigned" bson:"assigned"`
 }
 
@@ -36,7 +36,7 @@ func (c ByPosition) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 type Workcenter struct {
 	ID        string     `json:"id" bson:"id"`
 	Name      string     `json:"name" bson:"name"`
-	SortID    uint       `json:"sortid" bson:"sortid"`
+	SortID    uint       `json:"sort" bson:"sort"`
 	Shifts    []Shift    `json:"shifts,omitempty" bson:"shifts,omitempty"`
 	Positions []Position `json:"positions,omitempty" bson:"positions,omitempty"`
 }
