@@ -175,6 +175,7 @@ func (sc *Schedule) SetScheduleDays(days int) error {
 type Variation struct {
 	ID        uint      `json:"id" bson:"id"`
 	Site      string    `json:"site" bson:"site"`
+	IsMids    bool      `json:"mids" bson:"mids"`
 	StartDate time.Time `json:"startdate" bson:"startdate"`
 	EndDate   time.Time `json:"enddate" bson:"enddate"`
 	Schedule  Schedule  `json:"schedule" bson:"schedule"`

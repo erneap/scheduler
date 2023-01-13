@@ -12,17 +12,26 @@ func main() {
 
 	config.ConnectDB()
 
+	baseLoc := "/Users/antonerne/Projects/scheduler/DatabaseExport"
+
 	fmt.Println("Copying Users")
 	userConvert := converters.UserConverter{}
 	userConvert.ReadUsers()
 	userConvert.WriteUsers()
 
 	teamConvert := converters.TeamConverter{
-		BaseLocation: "/Users/antonerne/Projects/scheduler/DatabaseExport",
+		BaseLocation: baseLoc,
 	}
 	teamConvert.ReadTeam()
 	teamConvert.ReadCompanyHolidayDates()
 	teamConvert.ReadForecastReports()
-	teamConvert.WriteTeam()
+	team := teamConvert.WriteTeam()
 
+	employeeConvert := converters.EmployeeConverter{
+		BaseLocation: baseLoc,
+		Team:         *team,
+		SiteID:       "dgsc",
+	}
+	employeeConvert.ReadEmployees()
+	employeeConvert.Write()
 }

@@ -363,11 +363,12 @@ func (t *TeamConverter) ReadSiteLaborCodes(dgsc *sites.Site, baseDate time.Time)
 	}
 }
 
-func (t *TeamConverter) WriteTeam() {
+func (t *TeamConverter) WriteTeam() *sites.Team {
 	teamCollection := config.GetCollection(config.DB, "scheduler", "teams")
 
 	teamCollection.DeleteMany(context.TODO(), bson.M{})
 
 	t.Team.ID = primitive.NewObjectID()
 	teamCollection.InsertOne(context.TODO(), t.Team)
+	return &t.Team
 }
