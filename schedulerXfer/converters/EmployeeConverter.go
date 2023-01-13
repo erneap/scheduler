@@ -22,7 +22,7 @@ import (
 type EmployeeConverter struct {
 	BaseLocation string
 	Users        []users.User
-	TeamID       primitive.ObjectID
+	Team         sites.Team
 	SiteID       string
 	Employees    []employees.Employee
 	EmployeeWork []employees.EmployeeWorkRecord
@@ -31,11 +31,8 @@ type EmployeeConverter struct {
 func (e *EmployeeConverter) GetTeamInfo() {
 	teamCol := config.GetCollection(config.DB, "scheduler", "teams")
 
-	var team sites.Team
-
 	filter := bson.M{"name": "DCGS Field Support"}
-	teamCol.FindOne(context.TODO(), filter).Decode(&team)
-	e.TeamID = team.ID
+	teamCol.FindOne(context.TODO(), filter).Decode(&e.Team)
 
 	e.GetUsers()
 }
@@ -102,7 +99,7 @@ func (e *EmployeeConverter) ReadEmployees() {
 			}
 			if endDate.Equal(zeroDate) || endDate.After(baseDate) {
 				emp := employees.Employee{
-					TeamID: e.TeamID,
+					TeamID: e.Team.ID,
 					SiteID: "dgsc",
 					Name: employees.EmployeeName{
 						FirstName:  row[columns["FirstName"]],
@@ -146,8 +143,87 @@ func (e *EmployeeConverter) ReadEmployees() {
 					asgmt.RotationDate = ParseDate(row[columns["ScheduleChangeDate"]])
 					asgmt.AddSchedule(7)
 				}
+				emp.Data.Assignments = append(emp.Data.Assignments, asgmt)
+				// check employee against the user's list based on last, first names
+				found := false
+				for _, user := range e.Users {
+					if strings.EqualFold(user.LastName, emp.Name.LastName) &&
+						strings.EqualFold(user.FirstName, emp.Name.FirstName) {
+						found = true
+						emp.ID = user.ID
+					}
+				}
+				if !found {
+					emp.ID = primitive.NewObjectID()
+				}
 				e.Employees = append(e.Employees, emp)
 			}
 		}
 	}
+}
+
+func (e *EmployeeConverter) ReadEmployeeLaborCodes(baseDate time.Time) {
+	log.Println("Reading Employee's Labor Codes")
+
+	path := filepath.Join(e.BaseLocation, "EmployeeLaborCodes.xlsx")
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		log.Fatal("EmplooyeeLaborCodes not present")
+	}
+
+	f, err := excelize.OpenFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	// create map of column headers
+	columns := make(map[string]int)
+
+	rows, err := f.GetRows("EmployeeLaborCodes")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i, row := range rows {
+		if i == 0 {
+			for j, colCell := range row {
+				columns[colCell] = j
+			}
+		} else {
+			empID := row[columns["EmployeeID"]]
+			chargeNumber := row[columns["WorkCode"]]
+			extension := row[columns["Extension"]]
+
+			// before a labor code is added to an employee if must first be checked
+			// to see if the team record still includes it.
+			useWorkcode := false
+			for _, site := range e.Team.Sites {
+				for _, fcRpt := range site.ForecastReports {
+					for _, lc := range fcRpt.LaborCodes {
+						if lc.ChargeNumber == chargeNumber && lc.Extension == extension {
+							useWorkcode = true
+						}
+					}
+				}
+			}
+			if useWorkcode {
+				for j, emp := range e.Employees {
+					if emp.Data.CompanyInfo.EmployeeID == empID {
+						emp.Data.LaborCodes = append(emp.Data.LaborCodes,
+							employees.EmployeeLaborCode{
+								ChargeNumber: chargeNumber,
+								Extension:    extension,
+							})
+						e.Employees[j] = emp
+					}
+				}
+			}
+		}
+	}
+
 }
