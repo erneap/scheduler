@@ -1,6 +1,7 @@
 package services
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/erneap/scheduler/schedulerApi/models/sites"
@@ -33,4 +34,29 @@ func CreateSite(teamid primitive.ObjectID, id, name string) *sites.Site {
 		UpdateTeam(team)
 	}
 	return answer
+}
+
+func GetSite(teamid primitive.ObjectID, siteid string) (*sites.Site, error) {
+	team, err := GetTeam(teamid)
+	if err != nil {
+		return nil, err
+	}
+
+	var answer sites.Site
+	for _, site := range team.Sites {
+		if strings.EqualFold(site.ID, siteid) {
+			answer = site
+		}
+	}
+	return &answer, nil
+}
+
+func GetSites(teamid primitive.ObjectID) ([]sites.Site, error) {
+	team, err := GetTeam(teamid)
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Sort(sites.BySites(team.Sites))
+	return team.Sites, nil
 }
