@@ -60,3 +60,35 @@ func GetSites(teamid primitive.ObjectID) ([]sites.Site, error) {
 	sort.Sort(sites.BySites(team.Sites))
 	return team.Sites, nil
 }
+
+func UpdateSite(teamid primitive.ObjectID, nsite sites.Site) error {
+	team, err := GetTeam(teamid)
+	if err != nil {
+		return err
+	}
+
+	for s, site := range team.Sites {
+		if strings.EqualFold(site.ID, nsite.ID) {
+			team.Sites[s] = nsite
+		}
+	}
+	return UpdateTeam(team)
+}
+
+func DeleteSite(teamid primitive.ObjectID, siteid string) error {
+	team, err := GetTeam(teamid)
+	if err != nil {
+		return err
+	}
+
+	found := -1
+	for s := 0; s < len(team.Sites) && found < 0; s++ {
+		if strings.EqualFold(team.Sites[s].ID, siteid) {
+			found = s
+		}
+	}
+	if found >= 0 {
+		team.Sites = append(team.Sites[:found], team.Sites[found+1:]...)
+	}
+	return UpdateTeam(team)
+}
