@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"sort"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -142,4 +143,27 @@ func (e *EmployeeWorkRecord) Decrypt() error {
 	}
 	json.Unmarshal(plainText, &e.Work)
 	return nil
+}
+
+func (e *EmployeeWorkRecord) RemoveWork(start, end time.Time) {
+	startPos := -1
+	endPos := -1
+	sort.Sort(ByEmployeeWork(e.Work))
+
+	for i, wk := range e.Work {
+		if startPos < 0 && (wk.DateWorked.Equal(start) || wk.DateWorked.After(start)) &&
+			(wk.DateWorked.Equal(end) || wk.DateWorked.Before(end)) {
+			startPos = i
+		} else if startPos >= 0 && (wk.DateWorked.Equal(start) ||
+			wk.DateWorked.After(start)) && (wk.DateWorked.Equal(end) ||
+			wk.DateWorked.Before(end)) {
+			endPos = i
+		}
+		if startPos >= 0 {
+			if endPos < 0 {
+				endPos = startPos
+			}
+			e.Work = append(e.Work[:startPos], e.Work[endPos+1:]...)
+		}
+	}
 }

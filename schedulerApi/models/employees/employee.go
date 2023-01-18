@@ -113,6 +113,27 @@ func (e *Employee) Decrypt() error {
 	return nil
 }
 
+func (e *Employee) RemoveLeaves(start, end time.Time) {
+	sort.Sort(ByLeaveDay(e.Data.Leaves))
+	startpos := -1
+	endpos := -1
+	for i, lv := range e.Data.Leaves {
+		if startpos < 0 && (lv.LeaveDate.Equal(start) || lv.LeaveDate.After(start)) &&
+			(lv.LeaveDate.Equal(end) || lv.LeaveDate.Before(end)) {
+			startpos = i
+		} else if startpos >= 0 && (lv.LeaveDate.Equal(start) || lv.LeaveDate.After(start)) &&
+			(lv.LeaveDate.Equal(end) || lv.LeaveDate.Before(end)) {
+			endpos = i
+		}
+	}
+	if startpos >= 0 {
+		if endpos < 0 {
+			endpos = startpos
+		}
+		e.Data.Leaves = append(e.Data.Leaves[:startpos], e.Data.Leaves[endpos+1:]...)
+	}
+}
+
 type EmployeeName struct {
 	FirstName  string `json:"first"`
 	MiddleName string `json:"middle"`
