@@ -11,3 +11,8 @@ type AuthenticationResponse struct {
 	Employee  *employees.Employee `json:"employee,omitempty"`
 	Exception string              `json:"exception"`
 }
+
+type EmployeeResponse struct {
+	Employee  *employees.Employee `json:"employee, omitempty"`
+	Exception string              `json:"exception"`
+}

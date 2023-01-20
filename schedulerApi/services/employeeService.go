@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/erneap/scheduler/schedulerApi/models/config"
@@ -23,17 +24,22 @@ import (
 func CreateEmployee(first, middle, last, teamID, siteid string) (*employees.Employee, error) {
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
+	teamid, err := primitive.ObjectIDFromHex(teamID)
+	if err != nil {
+		return nil, err
+	}
 
 	filter := bson.M{
 		"name.firstName": first,
 		"name.lastName":  last,
+		"team":           teamid,
 	}
 
 	// first check to see of an employee already exists for this first and last
 	// name.  If present, change filter to include middle if not blank, but if
 	// middle is blank, return old employee record
 	var emp employees.Employee
-	err := empCol.FindOne(context.TODO(), filter).Decode(&emp)
+	err = empCol.FindOne(context.TODO(), filter).Decode(&emp)
 	if err == nil || err != mongo.ErrNoDocuments {
 		if middle == "" {
 			emp.Decrypt()
@@ -43,6 +49,7 @@ func CreateEmployee(first, middle, last, teamID, siteid string) (*employees.Empl
 			"name.firstName":  first,
 			"name.middleName": middle,
 			"name.lastName":   last,
+			"team":            teamid,
 		}
 
 		err = empCol.FindOne(context.TODO(), filter).Decode(&emp)
@@ -52,7 +59,7 @@ func CreateEmployee(first, middle, last, teamID, siteid string) (*employees.Empl
 		}
 	}
 
-	emp.TeamID, _ = primitive.ObjectIDFromHex(teamID)
+	emp.TeamID = teamid
 	emp.SiteID = siteid
 	emp.Name = employees.EmployeeName{
 		FirstName:  first,
@@ -83,13 +90,17 @@ func CreateEmployee(first, middle, last, teamID, siteid string) (*employees.Empl
 func GetEmployee(id string) (*employees.Employee, error) {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 
-	oEmpID, _ := primitive.ObjectIDFromHex(id)
+	oEmpID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
 	filter := bson.M{
 		"_id": oEmpID,
 	}
 
 	var emp employees.Employee
-	err := empCol.FindOne(context.TODO(), filter).Decode(&emp)
+	err = empCol.FindOne(context.TODO(), filter).Decode(&emp)
 	if err != nil {
 		return nil, err
 	}
@@ -125,12 +136,14 @@ func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 	return employees, nil
 }
 
-func UpdateEmployee(emp employees.Employee) error {
+func UpdateEmployee(emp *employees.Employee) error {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 
 	filter := bson.M{
 		"_id": emp.ID,
 	}
+
+	emp.Encrypt()
 
 	_, err := empCol.ReplaceOne(context.TODO(), filter, emp)
 	return err
@@ -144,6 +157,12 @@ func DeleteEmployee(empID string) error {
 		"_id": oEmpID,
 	}
 
-	_, err := empCol.DeleteOne(context.TODO(), filter)
-	return err
+	result, err := empCol.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return err
+	}
+	if result.DeletedCount <= 0 {
+		return errors.New("employee not found")
+	}
+	return nil
 }

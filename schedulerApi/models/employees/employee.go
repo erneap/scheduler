@@ -193,6 +193,18 @@ func (e *EmployeeData) GetWorkday(date time.Time) *Workday {
 	return wkday
 }
 
+func (e *EmployeeData) RemoveAssignment(id uint) {
+	pos := -1
+	for i, asgmt := range e.Assignments {
+		if asgmt.ID == id {
+			pos = i
+		}
+	}
+	if pos >= 0 {
+		e.Assignments = append(e.Assignments[:pos], e.Assignments[pos+1:]...)
+	}
+}
+
 func (e *EmployeeData) PurgeOldData(date time.Time) {
 	// purge old assignments based on assignment end date
 	sort.Sort(ByAssignment(e.Assignments))

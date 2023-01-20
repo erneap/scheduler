@@ -163,7 +163,7 @@ func ChangeUser(c *gin.Context) {
 		case "last", "lastname":
 			emp.Name.LastName = data.StringValue()
 		}
-		services.UpdateEmployee(*emp)
+		services.UpdateEmployee(emp)
 	}
 
 	err = services.UpdateUser(*user)
