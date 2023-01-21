@@ -314,6 +314,7 @@ func (e *EmployeeData) UpdateLeaveRequest(request, field, value string) error {
 					return err
 				}
 				req.StartDate = lvDate
+				req.Status = "REQUESTED"
 				// reset the leave dates
 				req.SetLeaveDays(e)
 			case "enddate", "end":
@@ -322,11 +323,13 @@ func (e *EmployeeData) UpdateLeaveRequest(request, field, value string) error {
 					return err
 				}
 				req.EndDate = lvDate
+				req.Status = "REQUESTED"
 				// reset the leave dates
 				req.SetLeaveDays(e)
 			case "approve":
 				req.ApprovedBy = value
 				req.ApprovalDate = time.Now().UTC()
+				req.Status = "APPROVED"
 				for _, rLv := range req.RequestedDays {
 					found := false
 					for j, lv := range e.Leaves {
@@ -360,6 +363,7 @@ func (e *EmployeeData) UpdateLeaveRequest(request, field, value string) error {
 						req.RequestedDays[j] = lv
 					}
 				}
+				req.Status = "REQUESTED"
 				if !found {
 					lv := LeaveDay{
 						LeaveDate: lvDate,
