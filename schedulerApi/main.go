@@ -53,6 +53,17 @@ func main() {
 				balance.PUT("/", controllers.CreateEmployeeLeaveBalance)
 				balance.DELETE("/:empid/:year", controllers.DeleteEmployeeLeaveBalance)
 			}
+			lvReq := emp.Group("/request").Use(middleware.CheckJWT())
+			{
+				lvReq.POST("/", controllers.CreateEmployeeLeaveRequest)
+				lvReq.PUT("/", controllers.UpdateEmployeeLeaveRequest)
+				lvReq.DELETE("/:empid/:reqid", controllers.DeleteEmployeeLeaveRequest)
+			}
+			lCode := emp.Group("/laborcode").Use(middleware.CheckJWT())
+			{
+				lCode.POST("/", controllers.AddEmployeeLaborCode)
+				lCode.DELETE("/:empid/:chgno/:ext", controllers.DeleteEmployeeLaborCode)
+			}
 		}
 	}
 

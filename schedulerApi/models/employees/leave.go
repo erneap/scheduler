@@ -1,9 +1,8 @@
 package employees
 
 import (
+	"sort"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AnnualLeave struct {
@@ -12,12 +11,20 @@ type AnnualLeave struct {
 	Carryover float64 `json:"carryover" bson:"carryover"`
 }
 
+type ByBalance []AnnualLeave
+
+func (c ByBalance) Len() int { return len(c) }
+func (c ByBalance) Less(i, j int) bool {
+	return c[i].Year < c[j].Year
+}
+func (c ByBalance) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+
 type LeaveDay struct {
-	LeaveDate time.Time          `json:"leavedate" bson:"leavedate"`
-	Code      string             `json:"code" bson:"code"`
-	Hours     float64            `json:"hours" bson:"hours"`
-	Status    string             `json:"status" bson:"status"`
-	RequestID primitive.ObjectID `json:"requestid" bson:"requestid"`
+	LeaveDate time.Time `json:"leavedate" bson:"leavedate"`
+	Code      string    `json:"code" bson:"code"`
+	Hours     float64   `json:"hours" bson:"hours"`
+	Status    string    `json:"status" bson:"status"`
+	RequestID string    `json:"requestid" bson:"requestid"`
 }
 
 type ByLeaveDay []LeaveDay
@@ -29,15 +36,16 @@ func (c ByLeaveDay) Less(i, j int) bool {
 func (c ByLeaveDay) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
 type LeaveRequest struct {
-	ID            primitive.ObjectID `json:"id" bson:"id"`
-	RequestDate   time.Time          `json:"requestDate" bson:"requestDate"`
-	PrimaryCode   string             `json:"primarycode" bson:"primarycode"`
-	StartDate     time.Time          `json:"startdate" bson:"startdate"`
-	EndDate       time.Time          `json:"enddate" bson:"enddate"`
-	Status        string             `json:"status" bson:"status"`
-	ApprovedBy    primitive.ObjectID `json:"approvedby" bson:"approvedby"`
-	ApprovalDate  time.Time          `json:"approvalDate" bson:"approvalDate"`
-	RequestedDays []LeaveDay         `json:"requesteddays" bson:"requesteddays"`
+	ID            string     `json:"id" bson:"id"`
+	EmployeeID    string     `json:"employeeid,omitempty"`
+	RequestDate   time.Time  `json:"requestDate" bson:"requestDate"`
+	PrimaryCode   string     `json:"primarycode" bson:"primarycode"`
+	StartDate     time.Time  `json:"startdate" bson:"startdate"`
+	EndDate       time.Time  `json:"enddate" bson:"enddate"`
+	Status        string     `json:"status" bson:"status"`
+	ApprovedBy    string     `json:"approvedby" bson:"approvedby"`
+	ApprovalDate  time.Time  `json:"approvalDate" bson:"approvalDate"`
+	RequestedDays []LeaveDay `json:"requesteddays" bson:"requesteddays"`
 }
 
 type ByLeaveRequest []LeaveRequest
@@ -46,7 +54,7 @@ func (c ByLeaveRequest) Len() int { return len(c) }
 func (c ByLeaveRequest) Less(i, j int) bool {
 	if c[i].StartDate.Equal(c[j].StartDate) {
 		if c[i].EndDate.Equal(c[j].EndDate) {
-			return c[i].ID.Timestamp().Before(c[j].ID.Timestamp())
+			return c[i].ID < c[j].ID
 		}
 		return c[i].EndDate.Before(c[j].EndDate)
 	}
@@ -63,10 +71,53 @@ func (lr *LeaveRequest) SetLeaveDay(date time.Time, code string, hours float64) 
 	}
 }
 
-type ByBalance []AnnualLeave
-
-func (c ByBalance) Len() int { return len(c) }
-func (c ByBalance) Less(i, j int) bool {
-	return c[i].Year < c[j].Year
+func (lr *LeaveRequest) SetLeaveDays(emp *EmployeeData) {
+	sDate := time.Date(lr.StartDate.Year(), lr.StartDate.Month(),
+		lr.StartDate.Day(), 0, 0, 0, 0, time.UTC)
+	sort.Sort(ByLeaveDay(lr.RequestedDays))
+	endPos := -1
+	for i, lv := range lr.RequestedDays {
+		if lv.LeaveDate.Before(lr.StartDate) {
+			endPos = i
+		}
+	}
+	if endPos >= 0 {
+		lr.RequestedDays = lr.RequestedDays[:endPos+1]
+	}
+	endPos = -1
+	for i, lv := range lr.RequestedDays {
+		if endPos < 0 && lv.LeaveDate.After(lr.EndDate) {
+			endPos = i
+		}
+	}
+	if endPos >= 0 {
+		lr.RequestedDays = lr.RequestedDays[:endPos]
+	}
+	for sDate.Before(lr.EndDate) || sDate.Equal(lr.EndDate) {
+		found := false
+		for _, lv := range lr.RequestedDays {
+			if lv.LeaveDate.Equal(sDate) {
+				found = true
+			}
+		}
+		if !found {
+			wd := emp.GetWorkday(sDate)
+			if wd.Code != "" {
+				hours := wd.Hours
+				if lr.PrimaryCode == "H" {
+					hours = 8.0
+				}
+				lv := LeaveDay{
+					LeaveDate: sDate,
+					Code:      lr.PrimaryCode,
+					Hours:     hours,
+					Status:    "REQUESTED",
+					RequestID: lr.ID,
+				}
+				lr.RequestedDays = append(lr.RequestedDays, lv)
+			}
+		}
+		sDate = sDate.AddDate(0, 0, 1)
+	}
+	sort.Sort(ByLeaveDay(lr.RequestedDays))
 }
-func (c ByBalance) Swap(i, j int) { c[i], c[j] = c[j], c[i] }

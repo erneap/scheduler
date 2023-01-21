@@ -719,3 +719,184 @@ func DeleteEmployeeLeaveBalance(c *gin.Context) {
 	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
+
+func CreateEmployeeLeaveRequest(c *gin.Context) {
+	var data web.EmployeeLeaveRequest
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.EmployeeResponse{Employee: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	emp, err := services.GetEmployee(data.EmployeeID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.EmployeeResponse{Employee: nil,
+				Exception: "Employee Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	emp.Data.NewLeaveRequest(data.EmployeeID, data.Code, data.StartDate,
+		data.EndDate)
+
+	err = services.UpdateEmployee(emp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	// return the corrected employee back to the client.
+	emp.Decrypt()
+	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
+}
+
+func UpdateEmployeeLeaveRequest(c *gin.Context) {
+	var data web.UpdateRequest
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.EmployeeResponse{Employee: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	emp, err := services.GetEmployee(data.ID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.EmployeeResponse{Employee: nil,
+				Exception: "Employee Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	err = emp.Data.UpdateLeaveRequest(data.OptionalID, data.Field,
+		data.StringValue())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	err = services.UpdateEmployee(emp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	// return the corrected employee back to the client.
+	emp.Decrypt()
+	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
+}
+
+func DeleteEmployeeLeaveRequest(c *gin.Context) {
+	empID := c.Param("empid")
+	reqID := c.Param("reqid")
+
+	emp, err := services.GetEmployee(empID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.EmployeeResponse{Employee: nil,
+				Exception: "Employee Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	err = emp.Data.DeleteLeaveRequest(reqID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	err = services.UpdateEmployee(emp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	// return the corrected employee back to the client.
+	emp.Decrypt()
+	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
+}
+
+func AddEmployeeLaborCode(c *gin.Context) {
+	var data web.EmployeeLaborCodeRequest
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.EmployeeResponse{Employee: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	emp, err := services.GetEmployee(data.EmployeeID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.EmployeeResponse{Employee: nil,
+				Exception: "Employee Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	emp.Data.AddLaborCode(data.ChargeNumber, data.Extension)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	err = services.UpdateEmployee(emp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	// return the corrected employee back to the client.
+	emp.Decrypt()
+	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
+}
+
+func DeleteEmployeeLaborCode(c *gin.Context) {
+	empID := c.Param("empid")
+	chgNo := c.Param("chgno")
+	ext := c.Param("ext")
+
+	emp, err := services.GetEmployee(empID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.EmployeeResponse{Employee: nil,
+				Exception: "Employee Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	emp.Data.DeleteLaborCode(chgNo, ext)
+
+	err = services.UpdateEmployee(emp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	// return the corrected employee back to the client.
+	emp.Decrypt()
+	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
+}

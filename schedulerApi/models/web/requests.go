@@ -11,9 +11,10 @@ type AuthenticationRequest struct {
 }
 
 type UpdateRequest struct {
-	ID    string `json:"id"`
-	Field string `json:"field"`
-	Value any    `json:"value"`
+	ID         string `json:"id"`
+	OptionalID string `json:"optional,omitempty"`
+	Field      string `json:"field"`
+	Value      any    `json:"value"`
 }
 
 func (ur *UpdateRequest) StringValue() string {
@@ -107,4 +108,17 @@ type LeaveBalanceRequest struct {
 	Year        int     `json:"year"`
 	AnnualLeave float64 `json:"annual,omitempty"`
 	CarryOver   float64 `json:"carryover,omitempty"`
+}
+
+type EmployeeLeaveRequest struct {
+	EmployeeID string    `json:"employee"`
+	Code       string    `json:"code"`
+	StartDate  time.Time `json:"startdate"`
+	EndDate    time.Time `json:"enddate"`
+}
+
+type EmployeeLaborCodeRequest struct {
+	EmployeeID   string `json:"employee"`
+	ChargeNumber string `json:"chargeNumber"`
+	Extension    string `json:"extension"`
 }
