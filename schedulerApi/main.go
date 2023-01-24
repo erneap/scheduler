@@ -17,6 +17,7 @@ func main() {
 
 	// add routes
 	router := gin.Default()
+	roles := []string{"ADMIN", "SCHEDULER", "LEADER"}
 	api := router.Group("/scheduler/api/v1")
 	{
 		users := api.Group("/user")
@@ -25,10 +26,10 @@ func main() {
 			users.PUT("/password", middleware.CheckJWT(), controllers.ChangePassword)
 			users.PUT("/changes", middleware.CheckJWT(), controllers.ChangeUser)
 		}
-		emp := router.Group("/employee")
+		emp := api.Group("/employee")
 		{
 			emp.GET("/:empid", middleware.CheckJWT(), controllers.GetEmployee)
-			emp.POST("/", middleware.CheckJWT(), middleware.CheckRole("ADMIN"),
+			emp.POST("/", middleware.CheckJWT(), middleware.CheckRoles("scheduler", roles),
 				controllers.CreateEmployee)
 			emp.PUT("/", middleware.CheckJWT(), controllers.UpdateEmployeeBasic)
 			emp.DELETE("/:empid", middleware.CheckJWT(), controllers.DeleteEmployee)
@@ -63,6 +64,23 @@ func main() {
 			{
 				lCode.POST("/", controllers.AddEmployeeLaborCode)
 				lCode.DELETE("/:empid/:chgno/:ext", controllers.DeleteEmployeeLaborCode)
+			}
+		}
+		site := api.Group("/site", middleware.CheckJWT(),
+			middleware.CheckRoles("scheduler", roles))
+		{
+			site.GET("/:teamid/:siteid", controllers.GetSite)
+			site.GET("/:teamid/:siteid/:employees", controllers.GetSite)
+			site.POST("/", controllers.CreateSite)
+			site.PUT("/", controllers.UpdateSite)
+			site.DELETE("/:teamid/:siteid", controllers.DeleteSite)
+
+			wkctr := site.Group("/workcenter")
+			{
+				wkctr.POST("/", controllers.CreateWorkcenter)
+				wkctr.PUT("/", controllers.UpdateWorkcenter)
+				wkctr.DELETE("/:teamid/:siteid/:wkctrid",
+					controllers.DeleteSiteWorkcenter)
 			}
 		}
 	}

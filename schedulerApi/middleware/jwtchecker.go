@@ -75,7 +75,7 @@ func CheckJWT() gin.HandlerFunc {
 	}
 }
 
-func CheckRole(role string) gin.HandlerFunc {
+func CheckRole(prog, role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
@@ -101,7 +101,48 @@ func CheckRole(role string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		if !user.IsInGroup(role) {
+		if !user.IsInGroup(prog, role) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not in group"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+func CheckRoles(prog string, roles []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString := c.GetHeader("Authorization")
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "request does not contain an access token"})
+			c.Abort()
+			return
+		}
+		claims, err := ValidateToken(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+		userID, err := primitive.ObjectIDFromHex(claims.UserID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "user identifer incorrect: " + err.Error()})
+			c.Abort()
+			return
+		}
+		user := services.GetUser(userID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user not found: " + err.Error()})
+			c.Abort()
+			return
+		}
+		inRole := false
+		for i := 0; i < len(roles) && !inRole; i++ {
+			if user.IsInGroup(prog, roles[i]) {
+				inRole = true
+			}
+		}
+		if !inRole {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not in group"})
 			c.Abort()
 			return

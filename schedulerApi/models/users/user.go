@@ -49,10 +49,11 @@ func (u *User) GetFullName() string {
 	return u.FirstName + " " + string(u.MiddleName[0]) + ". " + u.LastName
 }
 
-func (u *User) IsInGroup(group string) bool {
+func (u *User) IsInGroup(app, group string) bool {
 	answer := false
 	for _, perm := range u.Workgroups {
-		if strings.EqualFold(group, perm) {
+		parts := strings.Split(perm, "-")
+		if strings.EqualFold(app, parts[0]) && strings.EqualFold(group, parts[1]) {
 			answer = true
 		}
 	}

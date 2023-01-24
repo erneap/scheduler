@@ -75,16 +75,20 @@ func CreateTeam(name string) *sites.Team {
 }
 
 // CRUD Retrieve function single and multiple(All)
-func GetTeam(id primitive.ObjectID) (*sites.Team, error) {
+func GetTeam(id string) (*sites.Team, error) {
+	teamid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
 	teamCol := config.GetCollection(config.DB, "scheduler", "teams")
 
 	filter := bson.M{
-		"_id": id,
+		"_id": teamid,
 	}
 
 	var team *sites.Team
 
-	err := teamCol.FindOne(context.TODO(), filter).Decode(team)
+	err = teamCol.FindOne(context.TODO(), filter).Decode(team)
 	if err != nil {
 		return nil, err
 	}

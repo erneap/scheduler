@@ -5,17 +5,16 @@ import (
 	"strings"
 
 	"github.com/erneap/scheduler/schedulerApi/models/sites"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Every service will have functions for completing the CRUD functions
 // the retrieve functions will be for individual site and the whole list of
 // tea's sotes.
 
-func CreateSite(teamid primitive.ObjectID, id, name string) *sites.Site {
+func CreateSite(teamid string, id, name string) (*sites.Site, error) {
 	team, err := GetTeam(teamid)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	var answer *sites.Site
@@ -31,12 +30,16 @@ func CreateSite(teamid primitive.ObjectID, id, name string) *sites.Site {
 			Name: name,
 		}
 		team.Sites = append(team.Sites, *answer)
-		UpdateTeam(team)
+	} else {
+		answer.ID = id
+		answer.Name = name
 	}
-	return answer
+	UpdateTeam(team)
+
+	return answer, nil
 }
 
-func GetSite(teamid primitive.ObjectID, siteid string) (*sites.Site, error) {
+func GetSite(teamid, siteid string) (*sites.Site, error) {
 	team, err := GetTeam(teamid)
 	if err != nil {
 		return nil, err
@@ -51,7 +54,7 @@ func GetSite(teamid primitive.ObjectID, siteid string) (*sites.Site, error) {
 	return &answer, nil
 }
 
-func GetSites(teamid primitive.ObjectID) ([]sites.Site, error) {
+func GetSites(teamid string) ([]sites.Site, error) {
 	team, err := GetTeam(teamid)
 	if err != nil {
 		return nil, err
@@ -61,7 +64,7 @@ func GetSites(teamid primitive.ObjectID) ([]sites.Site, error) {
 	return team.Sites, nil
 }
 
-func UpdateSite(teamid primitive.ObjectID, nsite sites.Site) error {
+func UpdateSite(teamid string, nsite sites.Site) error {
 	team, err := GetTeam(teamid)
 	if err != nil {
 		return err
@@ -75,7 +78,7 @@ func UpdateSite(teamid primitive.ObjectID, nsite sites.Site) error {
 	return UpdateTeam(team)
 }
 
-func DeleteSite(teamid primitive.ObjectID, siteid string) error {
+func DeleteSite(teamid, siteid string) error {
 	team, err := GetTeam(teamid)
 	if err != nil {
 		return err
