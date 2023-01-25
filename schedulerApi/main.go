@@ -81,6 +81,34 @@ func main() {
 				wkctr.PUT("/", controllers.UpdateWorkcenter)
 				wkctr.DELETE("/:teamid/:siteid/:wkctrid",
 					controllers.DeleteSiteWorkcenter)
+
+				position := wkctr.Group("/position")
+				{
+					position.POST("/", controllers.CreateWorkcenterPosition)
+					position.PUT("/", controllers.UpdateWorkcenterPosition)
+					position.DELETE("/:teamid/:siteid/:wkctrid/:posid",
+						controllers.DeleteWorkcenterPosition)
+				}
+
+				shifts := wkctr.Group("/shift")
+				{
+					shifts.POST("/", controllers.CreateWorkcenterShift)
+					shifts.PUT("/", controllers.UpdateWorkcenterShift)
+					shifts.DELETE("/:teamid/:siteid/:wkctrid/:shiftid",
+						controllers.DeleteWorkcenterShift)
+				}
+			}
+			lCode := site.Group("/laborcode")
+			{
+				lCode.POST("/", controllers.CreateSiteLaborCode)
+				lCode.PUT("/", controllers.UpdateSiteLaborCode)
+				lCode.DELETE("/:teamid/:siteid/:chgno/:ext",
+					controllers.DeleteSiteLaborCode)
+			}
+			rpt := site.Group("/forecast")
+			{
+				rpt.POST("/", controllers.CreateSiteForecastReport)
+				rpt.PUT("/", controllers.UpdateSiteForecastReport)
 			}
 		}
 	}
