@@ -975,3 +975,46 @@ func UpdateSiteForecastReport(c *gin.Context) {
 
 	c.JSON(http.StatusOK, web.SiteResponse{Team: nil, Site: site, Exception: ""})
 }
+
+func DeleteSiteForecastReport(c *gin.Context) {
+	teamID := c.Param("teamid")
+	siteID := c.Param("siteid")
+	rptID, err := strconv.Atoi(c.Param("rptid"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+			Exception: err.Error()})
+	}
+
+	site, err := services.GetSite(teamID, siteID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.SiteResponse{Team: nil, Site: nil,
+				Exception: "Site Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	found := -1
+	for i, rpt := range site.ForecastReports {
+		if rpt.ID == rptID {
+			found = i
+		}
+	}
+	if found < 0 {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+			Exception: "Report Not Found"})
+	}
+
+	site.ForecastReports = append(site.ForecastReports[:found],
+		site.ForecastReports[found+1:]...)
+	if err = services.UpdateSite(teamID, *site); err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, web.SiteResponse{Team: nil, Site: site, Exception: ""})
+}
