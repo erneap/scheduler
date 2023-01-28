@@ -962,6 +962,15 @@ func UpdateSiteForecastReport(c *gin.Context) {
 					rpt.LaborCodes = append(rpt.LaborCodes[:found],
 						rpt.LaborCodes[found+1:]...)
 				}
+			case "resetperiods":
+				tDate, _ := time.Parse("2006-01-02", data.Value)
+				rpt.ChargePeriodsStart(tDate)
+			case "moveperiod":
+				parts := strings.Split(data.Value, "|")
+				fromDate, _ := time.Parse("2006-01-02", parts[0])
+				toDate, _ := time.Parse("2006-01-02", parts[1])
+				prdDate, _ := time.Parse("2006-01-02", parts[2])
+				rpt.MovePeriodBetweenMonths(fromDate, toDate, prdDate)
 			}
 			site.ForecastReports[r] = rpt
 		}

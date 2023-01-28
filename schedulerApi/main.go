@@ -109,6 +109,39 @@ func main() {
 			{
 				rpt.POST("/", controllers.CreateSiteForecastReport)
 				rpt.PUT("/", controllers.UpdateSiteForecastReport)
+				rpt.DELETE("/:teamid/:siteid/:rptid",
+					controllers.DeleteSiteForecastReport)
+			}
+		}
+
+		team := api.Group("/team", middleware.CheckJWT())
+		{
+			team.GET("/:teamid", controllers.GetTeam)
+			team.POST("/", middleware.CheckRoles("scheduler", roles),
+				controllers.CreateTeam)
+			team.PUT("/", middleware.CheckRoles("scheduler", roles),
+				controllers.UpdateTeam)
+			team.DELETE("/:teamid", middleware.CheckRoles("scheduler", roles),
+				controllers.DeleteTeam)
+			wcode := team.Group("/workcode", middleware.CheckRoles("schedulers", roles))
+			{
+				wcode.POST("/", controllers.CreateWorkcode)
+				wcode.PUT("/", controllers.UpdateTeamWorkcode)
+				wcode.DELETE("/:teamid/:wcid", controllers.DeleteTeamWorkcode)
+			}
+			comp := team.Group("/company", middleware.CheckRoles("scheduler", roles))
+			{
+				comp.POST("/", controllers.CreateTeamCompany)
+				comp.PUT("/", controllers.UpdateTeamCompany)
+				comp.DELETE("/:teamid/:companyid", controllers.DeleteTeamCompany)
+
+				holiday := comp.Group("/holiday")
+				{
+					holiday.POST("/", controllers.CreateCompanyHoliday)
+					holiday.PUT("/", controllers.UpdateCompanyHoliday)
+					holiday.DELETE("/:teamid/:companyid/:holidayid",
+						controllers.DeleteCompanyHoliday)
+				}
 			}
 		}
 	}
