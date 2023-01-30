@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -113,6 +114,27 @@ func (e *Employee) Decrypt() error {
 	return nil
 }
 
+func (e *Employee) RemoveLeaves(start, end time.Time) {
+	sort.Sort(ByLeaveDay(e.Data.Leaves))
+	startpos := -1
+	endpos := -1
+	for i, lv := range e.Data.Leaves {
+		if startpos < 0 && (lv.LeaveDate.Equal(start) || lv.LeaveDate.After(start)) &&
+			(lv.LeaveDate.Equal(end) || lv.LeaveDate.Before(end)) {
+			startpos = i
+		} else if startpos >= 0 && (lv.LeaveDate.Equal(start) || lv.LeaveDate.After(start)) &&
+			(lv.LeaveDate.Equal(end) || lv.LeaveDate.Before(end)) {
+			endpos = i
+		}
+	}
+	if startpos >= 0 {
+		if endpos < 0 {
+			endpos = startpos
+		}
+		e.Data.Leaves = append(e.Data.Leaves[:startpos], e.Data.Leaves[endpos+1:]...)
+	}
+}
+
 type EmployeeName struct {
 	FirstName  string `json:"first"`
 	MiddleName string `json:"middle"`
@@ -172,6 +194,18 @@ func (e *EmployeeData) GetWorkday(date time.Time) *Workday {
 	return wkday
 }
 
+func (e *EmployeeData) RemoveAssignment(id uint) {
+	pos := -1
+	for i, asgmt := range e.Assignments {
+		if asgmt.ID == id {
+			pos = i
+		}
+	}
+	if pos >= 0 {
+		e.Assignments = append(e.Assignments[:pos], e.Assignments[pos+1:]...)
+	}
+}
+
 func (e *EmployeeData) PurgeOldData(date time.Time) {
 	// purge old assignments based on assignment end date
 	sort.Sort(ByAssignment(e.Assignments))
@@ -219,7 +253,7 @@ func (e *EmployeeData) UpdateLeave(date time.Time, code, status string,
 			lv.Status = status
 			lv.Hours = hours
 			if requestID != nil {
-				lv.RequestID = *requestID
+				lv.RequestID = requestID.Hex()
 			}
 		}
 	}
@@ -229,30 +263,36 @@ func (e *EmployeeData) UpdateLeave(date time.Time, code, status string,
 			Code:      code,
 			Hours:     hours,
 			Status:    status,
-			RequestID: *requestID,
+			RequestID: requestID.Hex(),
 		}
 		e.Leaves = append(e.Leaves, lv)
 		sort.Sort(ByLeaveDay(e.Leaves))
 	}
 }
 
-func (e *EmployeeData) NewLeaveRequest(code string, start, end time.Time) {
+func (e *EmployeeData) NewLeaveRequest(empID, code string, start, end time.Time) {
 	lr := LeaveRequest{
-		ID:          primitive.NewObjectID(),
+		ID:          primitive.NewObjectID().Hex(),
+		EmployeeID:  empID,
 		RequestDate: time.Now().UTC(),
 		PrimaryCode: code,
 		StartDate:   start,
 		EndDate:     end,
 		Status:      "REQUESTED",
 	}
-	sDate := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.UTC)
+	sDate := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0,
+		time.UTC)
 	for sDate.Before(end) || sDate.Equal(end) {
 		wd := e.GetWorkday(sDate)
 		if wd.Code != "" {
+			hours := wd.Hours
+			if code == "H" {
+				hours = 8.0
+			}
 			lv := LeaveDay{
 				LeaveDate: sDate,
 				Code:      code,
-				Hours:     wd.Hours,
+				Hours:     hours,
 				Status:    "REQUESTED",
 				RequestID: lr.ID,
 			}
@@ -264,7 +304,127 @@ func (e *EmployeeData) NewLeaveRequest(code string, start, end time.Time) {
 	sort.Sort(ByLeaveRequest(e.Requests))
 }
 
-func (e *EmployeeData) UpdateLeaveRequest(id primitive.ObjectID,
-	start, end time.Time, code, status string) {
+func (e *EmployeeData) UpdateLeaveRequest(request, field, value string) error {
+	for i, req := range e.Requests {
+		if req.ID == request {
+			switch strings.ToLower(field) {
+			case "startdate", "start":
+				lvDate, err := time.Parse("2006-01-02", value)
+				if err != nil {
+					return err
+				}
+				req.StartDate = lvDate
+				req.Status = "REQUESTED"
+				// reset the leave dates
+				req.SetLeaveDays(e)
+			case "enddate", "end":
+				lvDate, err := time.Parse("2006-01-02", value)
+				if err != nil {
+					return err
+				}
+				req.EndDate = lvDate
+				req.Status = "REQUESTED"
+				// reset the leave dates
+				req.SetLeaveDays(e)
+			case "approve":
+				req.ApprovedBy = value
+				req.ApprovalDate = time.Now().UTC()
+				req.Status = "APPROVED"
+				for _, rLv := range req.RequestedDays {
+					found := false
+					for j, lv := range e.Leaves {
+						if lv.LeaveDate.Equal(rLv.LeaveDate) {
+							found = true
+							if lv.Status != "ACTUAL" {
+								lv.Code = rLv.Code
+								lv.Hours = rLv.Hours
+								lv.Status = "APPROVED"
+								lv.RequestID = rLv.RequestID
+								e.Leaves[j] = lv
+							}
+							if !found {
+								rLv.Status = "APPROVED"
+								e.Leaves = append(e.Leaves, rLv)
+							}
+						}
+					}
+				}
+			case "day", "requestday":
+				parts := strings.Split(value, "|")
+				lvDate, _ := time.Parse("2006-01-02", parts[0])
+				code := parts[1]
+				hours, _ := strconv.ParseFloat(parts[2], 64)
+				found := false
+				for j, lv := range req.RequestedDays {
+					if lv.LeaveDate.Equal(lvDate) {
+						found = true
+						lv.Code = code
+						lv.Hours = hours
+						req.RequestedDays[j] = lv
+					}
+				}
+				req.Status = "REQUESTED"
+				if !found {
+					lv := LeaveDay{
+						LeaveDate: lvDate,
+						Code:      code,
+						Hours:     hours,
+						Status:    "REQUESTED",
+						RequestID: req.ID,
+					}
+					req.RequestedDays = append(req.RequestedDays, lv)
+				}
+			}
+			e.Requests[i] = req
+		}
+	}
+	return nil
+}
 
+func (e *EmployeeData) DeleteLeaveRequest(request string) error {
+	pos := -1
+	for i, req := range e.Requests {
+		if req.ID == request {
+			pos = i
+		}
+	}
+	if pos < 0 {
+		return errors.New("request not found")
+	}
+	e.Requests = append(e.Requests[:pos], e.Requests[pos+1:]...)
+	return nil
+}
+
+func (e *EmployeeData) HasLaborCode(chargeNumber, extension string) bool {
+	found := false
+	for _, lc := range e.LaborCodes {
+		if lc.ChargeNumber == chargeNumber && lc.Extension == extension {
+			found = true
+		}
+	}
+	return found
+}
+
+func (e *EmployeeData) AddLaborCode(chargeNo, ext string) {
+	if !e.HasLaborCode(chargeNo, ext) {
+		lc := EmployeeLaborCode{
+			ChargeNumber: chargeNo,
+			Extension:    ext,
+		}
+		e.LaborCodes = append(e.LaborCodes, lc)
+	}
+}
+
+func (e *EmployeeData) DeleteLaborCode(chargeNo, ext string) {
+	if e.HasLaborCode(chargeNo, ext) {
+		pos := -1
+		for i, lc := range e.LaborCodes {
+			if lc.ChargeNumber == chargeNo && lc.Extension == ext {
+				pos = i
+			}
+		}
+		if pos >= 0 {
+			e.LaborCodes = append(e.LaborCodes[:pos], e.LaborCodes[pos+1:]...)
+		}
+	}
 }

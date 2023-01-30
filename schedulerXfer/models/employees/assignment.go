@@ -63,6 +63,26 @@ func (a *Assignment) AddSchedule(days int) {
 	a.Schedules = append(a.Schedules, sch)
 }
 
+func (a *Assignment) ChangeScheduleDays(schedID uint, days int) {
+	for i, sch := range a.Schedules {
+		if sch.ID == schedID {
+			sort.Sort(ByWorkday(sch.Workdays))
+			if len(sch.Workdays) > days {
+				sch.Workdays = sch.Workdays[:days]
+			} else if len(sch.Workdays) < days {
+				for j := len(sch.Workdays); j <= days; j++ {
+					wd := Workday{
+						ID:    uint(j),
+						Hours: 0.0,
+					}
+					sch.Workdays = append(sch.Workdays, wd)
+				}
+			}
+			a.Schedules[i] = sch
+		}
+	}
+}
+
 func (a *Assignment) UpdateWorkday(schID, wdID uint, wkctr, code string,
 	hours float64) error {
 	for _, sch := range a.Schedules {
@@ -198,8 +218,37 @@ func (a *Variation) UseVariation(site string, date time.Time) bool {
 		(a.EndDate.Equal(date) || a.EndDate.After(date))
 }
 
+func (a *Variation) SetScheduleDays() {
+	start := time.Date(a.StartDate.Year(), a.StartDate.Month(), a.StartDate.Day(),
+		0, 0, 0, 0, time.UTC)
+	end := time.Date(a.EndDate.Year(), a.EndDate.Month(), a.EndDate.Day(), 0, 0,
+		0, 0, time.UTC)
+	for start.Weekday() != time.Sunday {
+		start = start.AddDate(0, 0, -1)
+	}
+	for end.Weekday() != time.Saturday {
+		end = end.AddDate(0, 0, 1)
+	}
+
+	a.Schedule.Workdays = a.Schedule.Workdays[:0]
+	count := uint(0)
+	for start.Before(end) || start.Equal(end) {
+		count++
+		wd := Workday{
+			ID: count,
+		}
+		a.Schedule.Workdays = append(a.Schedule.Workdays, wd)
+		start = start.AddDate(0, 0, 1)
+	}
+}
+
 func (a *Variation) GetWorkday(site string, date time.Time) *Workday {
-	days := int(math.Floor(date.Sub(a.StartDate).Hours() / 24))
+	start := time.Date(a.StartDate.Year(), a.StartDate.Month(), a.StartDate.Day(),
+		0, 0, 0, 0, time.UTC)
+	for start.Weekday() != time.Sunday {
+		start = start.AddDate(0, 0, -1)
+	}
+	days := int(math.Floor(date.Sub(start).Hours() / 24))
 	iDay := days % len(a.Schedule.Workdays)
 	return a.Schedule.GetWorkday(uint(iDay))
 }
