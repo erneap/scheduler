@@ -36,3 +36,46 @@ export interface IForecastReport {
   periods?: ForecastPeriod[];
   laborCodes?: LaborCode[];
 }
+
+export class ForecastReport implements IForecastReport {
+  id: number;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  periods?: ForecastPeriod[];
+  laborCodes?: LaborCode[];
+
+  constructor(fr?: IForecastReport) {
+    this.id = (fr) ? fr.id : 0;
+    this.name = (fr) ? fr.name : 'New Forecast';
+    this.startDate = (fr) ? new Date(fr.startDate) : new Date();
+    this.endDate = (fr) ? new Date(fr.endDate) : new Date();
+    this.periods = [];
+    if (fr && fr.periods && fr.periods.length > 0) {
+      fr.periods.forEach(prd => {
+        this.periods?.push(new ForecastPeriod(prd));
+      });
+      this.periods.sort((a,b) => a.compareTo(b));
+    }
+    this.laborCodes = [];
+    if (fr && fr.laborCodes && fr.laborCodes.length > 0) {
+      fr.laborCodes.forEach(lc => {
+        this.laborCodes?.push(new LaborCode(lc));
+      });
+      this.laborCodes.sort((a,b) => a.compareTo(b))
+    }
+  }
+
+  compareTo(other?: ForecastReport): number {
+    if (other) {
+      if (this.startDate.getTime() === other.startDate.getTime()) {
+        if (this.endDate.getTime() === other.endDate.getTime()) {
+          return (this.name < other.name) ? -1 : 1;
+        }
+        return (this.endDate.getTime() < other.endDate.getTime()) ? -1 : 1;
+      }
+      return (this.startDate.getTime() < other.startDate.getTime()) ? -1 : 1;
+    }
+    return -1;
+  }
+}

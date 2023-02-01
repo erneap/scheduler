@@ -26,6 +26,7 @@ func Login(c *gin.Context) {
 
 	user, err := services.GetUserByEmail(data.EmailAddress)
 	if err != nil {
+		log.Println(err.Error())
 		c.JSON(http.StatusNotFound,
 			web.AuthenticationResponse{User: &users.User{},
 				Token: "", Exception: "User not found"})

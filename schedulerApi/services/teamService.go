@@ -86,13 +86,13 @@ func GetTeam(id string) (*sites.Team, error) {
 		"_id": teamid,
 	}
 
-	var team *sites.Team
+	var team sites.Team
 
-	err = teamCol.FindOne(context.TODO(), filter).Decode(team)
+	err = teamCol.FindOne(context.TODO(), filter).Decode(&team)
 	if err != nil {
 		return nil, err
 	}
-	return team, nil
+	return &team, nil
 }
 
 func GetTeams() ([]sites.Team, error) {

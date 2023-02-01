@@ -964,7 +964,7 @@ func UpdateSiteForecastReport(c *gin.Context) {
 				}
 			case "resetperiods":
 				tDate, _ := time.Parse("2006-01-02", data.Value)
-				rpt.ChargePeriodsStart(tDate)
+				rpt.ChangePeriodsStart(tDate)
 			case "moveperiod":
 				parts := strings.Split(data.Value, "|")
 				fromDate, _ := time.Parse("2006-01-02", parts[0])

@@ -101,4 +101,11 @@ export class Workcenter implements IWorkcenter {
       this.positions.sort((a,b) => a.compareTo(b));
     }
   }
+
+  compareTo(other?: Workcenter): number {
+    if (other) {
+      return (this.sort < other.sort) ? -1 : 1;
+    }
+    return -1;
+  }
 }

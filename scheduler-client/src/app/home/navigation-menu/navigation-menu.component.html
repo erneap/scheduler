@@ -1,0 +1,60 @@
+<mat-accordion>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Employee</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-nav-list>
+      <a mat-list-item>Schedule</a>
+      <a mat-list-item>PTO/Holiday Listing</a>
+      <a mat-list-item>Leave Requests</a>
+      <a mat-list-item>Assigned Labor Codes</a>
+    </mat-nav-list>
+  </mat-expansion-panel>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Site Schedule</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-nav-list>
+      <a mat-list-item>Schedule</a>
+      <a mat-list-item 
+        *ngIf="this.authService.isScheduler || this.authService.isLeader"
+        >Coverage</a>
+    </mat-nav-list>
+  </mat-expansion-panel>
+  <mat-expansion-panel 
+    *ngIf="this.authService.isScheduler || this.authService.isLeader"
+    hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Site Employees</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-nav-list>
+      <a mat-list-item>Assignments</a>
+      <a mat-list-item>Variations</a>
+      <a mat-list-item>Leaves</a>
+      <a mat-list-item>Leave Requests</a>
+    </mat-nav-list>
+  </mat-expansion-panel>
+  <mat-expansion-panel 
+    *ngIf="this.authService.isScheduler || this.authService.isLeader"
+    hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Site Setup</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-nav-list>
+      <a mat-list-item>Workcenters</a>
+      <a mat-list-item>Labor Codes Maintenance</a>
+      <a mat-list-item>Forecast Report Maintenance</a>
+    </mat-nav-list>
+  </mat-expansion-panel>
+  <mat-expansion-panel 
+    *ngIf="this.authService.isScheduler || this.authService.isLeader || this.authService.isCompanyLead"
+    hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Data Ingest</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-nav-list>
+      <a mat-list-item>Upload Ingest</a>
+      <a mat-list-item>Manual Work/Leave Entry</a>
+    </mat-nav-list>
+  </mat-expansion-panel>
+</mat-accordion>

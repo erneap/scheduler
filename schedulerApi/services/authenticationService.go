@@ -63,36 +63,37 @@ func CreateUser(email, first, middle, last, password string) *users.User {
 
 // CRUD Retrieve Functions (One and ALL)
 func GetUser(id primitive.ObjectID) *users.User {
-	var user *users.User
+	var user users.User
 
 	filter := bson.M{
 		"_id": id,
 	}
 
 	err := config.GetCollection(config.DB, "authenticate", "users").
-		FindOne(context.TODO(), filter).Decode(user)
+		FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
 
-	return user
+	return &user
 }
 
 func GetUserByEmail(emailAddress string) (*users.User, error) {
-	var user *users.User
+	var user users.User
 
+	log.Println(emailAddress)
 	filter := bson.M{
 		"emailAddress": emailAddress,
 	}
 
 	err := config.GetCollection(config.DB, "authenticate", "users").
-		FindOne(context.TODO(), filter).Decode(user)
+		FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 func GetUsers() []users.User {
