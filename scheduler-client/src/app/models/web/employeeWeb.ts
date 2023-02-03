@@ -1,4 +1,6 @@
 import { IEmployee } from "../employees/employee";
+import { ISite } from "../sites/site";
+import { ITeam } from "../teams/team";
 import { IUser } from "../users/user";
 
 export interface AuthenticationRequest {
@@ -83,6 +85,8 @@ export interface AuthenticationResponse {
   user?: IUser;
   token: string;
   employee?: IEmployee;
+  site: ISite;
+  team: ITeam;
   exception: string;
 }
 

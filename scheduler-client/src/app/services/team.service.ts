@@ -11,10 +11,15 @@ export class TeamService extends CacheService {
   }
 
   getTeam(): Team | undefined{
+    const iTeam = this.getItem<ITeam>('current-team');
+    if (iTeam) {
+      return new Team(iTeam);
+    }
     return undefined;
   }
 
-  setTeam(team: ITeam) {
-
+  setTeam(iteam: ITeam) {
+    const team = new Team(iteam);
+    this.setItem('current-team', team);
   }
 }

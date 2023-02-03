@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/erneap/scheduler/schedulerApi/middleware"
+	"github.com/erneap/scheduler/schedulerApi/models/employees"
 	"github.com/erneap/scheduler/schedulerApi/models/users"
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
@@ -73,10 +74,31 @@ func Login(c *gin.Context) {
 				Token: "", Exception: err.Error()})
 	}
 
+	team, err := services.GetTeam(emp.TeamID.Hex())
+	if err != mongo.ErrNoDocuments {
+		c.JSON(http.StatusNotFound,
+			web.AuthenticationResponse{User: &users.User{},
+				Token: "", Exception: err.Error()})
+	}
+
+	site, err := services.GetSite(team.ID.Hex(), emp.SiteID)
+	if err != mongo.ErrNoDocuments {
+		c.JSON(http.StatusNotFound,
+			web.AuthenticationResponse{User: &users.User{},
+				Token: "", Exception: err.Error()})
+	}
+
+	emps, err := services.GetEmployees(team.ID.Hex(), emp.SiteID)
+	if len(emps) > 0 {
+		site.Employees = append([]employees.Employee{}, emps...)
+	}
+
 	answer := web.AuthenticationResponse{
 		User:      user,
 		Token:     tokenString,
 		Employee:  emp,
+		Team:      team,
+		Site:      site,
 		Exception: "",
 	}
 	c.JSON(http.StatusOK, answer)
