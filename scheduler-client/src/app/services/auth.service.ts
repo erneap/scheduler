@@ -19,6 +19,7 @@ export class AuthService extends CacheService {
   isLeader = false;
   isAdmin = false;
   isCompanyLead = false;
+  schedulerLabel = "Scheduler";
 
   authStatus = new BehaviorSubject<IAuthStatus>( 
     this.getItem('authStatus') || defaultAuthStatus);
@@ -46,6 +47,7 @@ export class AuthService extends CacheService {
   logout() {
     this.clearToken();
     this.isAuthenticated = false;
+    this.setWebLabel("", "");
     this.router.navigate(["/home"]);
   }
 
@@ -103,6 +105,16 @@ export class AuthService extends CacheService {
   clearToken() {
     this.removeItem('jwt');
     this.removeItem('current-user');
+  }
+
+  setWebLabel(team: string, site: string) {
+    if (team === "" && site === "") {
+      this.schedulerLabel = "Scheduler";
+    } else if (site === "") {
+      this.schedulerLabel = `${team.toUpperCase()} Scheduler`;
+    } else {
+      this.schedulerLabel = `${team.toUpperCase()} - ${site.toUpperCase()} Scheduler`;
+    }
   }
 }
 

@@ -5,7 +5,7 @@
       <mat-icon>menu</mat-icon>
     </button>
     <mat-icon svgIcon="calendar"></mat-icon>
-    <a mat-button routerLink="home"><h1>Osan Scheduler</h1></a>
+    <a mat-button routerLink="home"><h1>{{this.authService.schedulerLabel}}</h1></a>
     <span class="flex-spacer"></span>
     <button mat-icon-button *ngIf="this.authService.isAuthenticated"
       matTooltip="Show User's Profile/set password"

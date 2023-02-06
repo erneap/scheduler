@@ -85,8 +85,8 @@ export interface AuthenticationResponse {
   user?: IUser;
   token: string;
   employee?: IEmployee;
-  site: ISite;
-  team: ITeam;
+  site?: ISite;
+  team?: ITeam;
   exception: string;
 }
 

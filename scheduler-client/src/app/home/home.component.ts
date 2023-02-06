@@ -10,6 +10,9 @@ import { PasswordExpireDialogComponent } from './password-expire-dialog/password
 import { WaitDialogComponent } from './wait-dialog/wait-dialog.component';
 import { DialogService } from '../services/dialog-service.service';
 import { IpService } from '../services/ip-service.service';
+import { EmployeeService } from '../services/employee.service';
+import { SiteService } from '../services/site.service';
+import { TeamService } from '../services/team.service';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +27,9 @@ export class HomeComponent {
 
   constructor(
     public authService: AuthService,
+    protected employeeService: EmployeeService,
+    protected siteService: SiteService,
+    protected teamService: TeamService,
     private httpClient: HttpClient,
     private formBuilder: FormBuilder,
     private router: Router,
@@ -76,6 +82,8 @@ export class HomeComponent {
       '/scheduler/api/v1/user/login', data
     ).subscribe({
       next: (data) => {
+        let team = "";
+        let site = "";
         this.dialogService.closeSpinner();
         this.authService.isAuthenticated = true;
         if (data.user) {
@@ -92,6 +100,18 @@ export class HomeComponent {
         if (data.token) {
           this.authService.setToken(data.token);
         }
+        if (data.employee) {
+          this.employeeService.setEmployee(data.employee);
+        }
+        if (data.site) {
+          this.siteService.setSite(data.site);
+          site = data.site.name;
+        }
+        if (data.team) {
+          this.teamService.setTeam(data.team);
+          team = data.team.name;
+        }
+        this.authService.setWebLabel(team, site);
         if (data.exception && data.exception !== '') {
           this.loginError = data.exception;
           this.authService.isAuthenticated = false;
