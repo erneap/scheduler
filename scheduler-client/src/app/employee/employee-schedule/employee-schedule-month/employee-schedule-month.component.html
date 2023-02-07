@@ -1,1 +1,24 @@
-<p>employee-schedule-month works!</p>
+<div class="fxLayout-column-center">
+  <div class="fxLayout-row-center">
+    <div class="movement" (click)="changeMonth('down', 'year')">&lt;&lt;</div>
+    <div class="movement" (click)="changeMonth('down', 'month')">&lt;</div>
+    <div class="month">{{monthLabel}}</div>
+    <div class="movement" (click)="changeMonth('up', 'month')">&gt;</div>
+    <div class="movement" (click)="changeMonth('up', 'year')">&gt;&gt;</div>
+  </div>
+  <div class="fxLayout-row-center">
+    <div class="daycell weekend">SUN</div>
+    <div class="daycell weekday">MON</div>
+    <div class="daycell weekday">TUE</div>
+    <div class="daycell weekday">WED</div>
+    <div class="daycell weekday">THU</div>
+    <div class="daycell weekday">FRI</div>
+    <div class="daycell weekend">SAT</div>
+  </div>
+  <ng-container *ngFor="let week of workweeks">
+    <div class="fxLayout-row-center">
+      <app-employee-schedule-day *ngFor="let day of week.getWorkdays()"
+        [workday]="day"></app-employee-schedule-day>
+    </div>
+  </ng-container>
+</div>

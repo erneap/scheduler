@@ -20,6 +20,7 @@ type Employee struct {
 	ID            primitive.ObjectID `json:"id" bson:"_id"`
 	TeamID        primitive.ObjectID `json:"team" bson:"team"`
 	SiteID        string             `json:"site" bson:"site"`
+	UserID        primitive.ObjectID `json:"userid" bson:"userid"`
 	Name          EmployeeName       `json:"name" bson:"name"`
 	EncryptedData string             `json:"_" bson:"encrypted"`
 	Data          EmployeeData       `json:"data" bson:"-"`

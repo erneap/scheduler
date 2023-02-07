@@ -82,7 +82,6 @@ func GetUser(id primitive.ObjectID) *users.User {
 func GetUserByEmail(emailAddress string) (*users.User, error) {
 	var user users.User
 
-	log.Println(emailAddress)
 	filter := bson.M{
 		"emailAddress": emailAddress,
 	}

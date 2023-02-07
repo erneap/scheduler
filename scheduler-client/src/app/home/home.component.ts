@@ -78,6 +78,8 @@ export class HomeComponent {
     let data = { emailAddress: this.loginForm.value.email,
       password: this.loginForm.value.password };
     this.dialogService.showSpinner();
+    this.authService.loginError = "";
+    
     this.httpClient.post<AuthenticationResponse>(
       '/scheduler/api/v1/user/login', data
     ).subscribe({
@@ -117,7 +119,7 @@ export class HomeComponent {
           this.authService.isAuthenticated = false;
         }
         if (this.authService.isAuthenticated) {
-          this.router.navigate(['/missions']);
+          this.router.navigate(['/employee/schedule']);
         }
       },
       error: (err) => {

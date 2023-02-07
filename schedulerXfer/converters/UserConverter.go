@@ -40,6 +40,7 @@ func (u *UserConverter) WriteUsers() {
 		for i, perm := range usr.Workgroups {
 			usr.Workgroups[i] = "metrics-" + perm
 		}
+		usr.Workgroups = append(usr.Workgroups, "scheduler-employee")
 		newCol.InsertOne(context.TODO(), usr)
 	}
 }

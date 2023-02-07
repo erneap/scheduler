@@ -33,6 +33,7 @@ func Login(c *gin.Context) {
 				Token: "", Exception: "User not found"})
 		return
 	}
+
 	if err := user.Authenticate(data.Password); err != nil {
 		exception := err.Error()
 		err := services.UpdateUser(*user)
@@ -67,28 +68,35 @@ func Login(c *gin.Context) {
 	}
 
 	// get Employee record for user if available
-	emp, err := services.GetEmployee(string(user.ID.Hex()))
-	if err != mongo.ErrNoDocuments {
-		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
-				Token: "", Exception: err.Error()})
+	emp, err := services.GetEmployee(user.ID.Hex())
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound,
+				web.AuthenticationResponse{User: &users.User{},
+					Token: "", Exception: err.Error()})
+		} else {
+			log.Println(err.Error())
+			c.JSON(http.StatusNotFound,
+				web.AuthenticationResponse{User: &users.User{},
+					Token: "", Exception: err.Error()})
+		}
 	}
 
 	team, err := services.GetTeam(emp.TeamID.Hex())
-	if err != mongo.ErrNoDocuments {
+	if err != nil {
 		c.JSON(http.StatusNotFound,
 			web.AuthenticationResponse{User: &users.User{},
 				Token: "", Exception: err.Error()})
 	}
 
 	site, err := services.GetSite(team.ID.Hex(), emp.SiteID)
-	if err != mongo.ErrNoDocuments {
+	if err != nil {
 		c.JSON(http.StatusNotFound,
 			web.AuthenticationResponse{User: &users.User{},
 				Token: "", Exception: err.Error()})
 	}
 
-	emps, err := services.GetEmployees(team.ID.Hex(), emp.SiteID)
+	emps, _ := services.GetEmployees(team.ID.Hex(), emp.SiteID)
 	if len(emps) > 0 {
 		site.Employees = append([]employees.Employee{}, emps...)
 	}

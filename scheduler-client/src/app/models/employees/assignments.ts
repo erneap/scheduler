@@ -10,6 +10,7 @@ export class Workday implements IWorkday {
   workcenter: string;
   code: string;
   hours: number;
+  date?: Date;
 
   constructor(wd?: IWorkday) {
     this.id = (wd) ? wd.id : 0;
@@ -134,7 +135,11 @@ export class Assignment implements IAssignment {
     if (date.getTime() <= this.endDate.getTime() 
       && date.getTime() >= this.startDate.getTime()
       && this.site.toLowerCase() === site.toLowerCase()) {
-      let mSecs = date.getTime() - this.startDate.getTime();
+      let start = new Date(this.startDate);
+      while (start.getDay() != 6) {
+        start = new Date(start.getTime() - (24 * 3600000));
+      }
+      let mSecs = date.getTime() - start.getTime();
       let days = Math.floor(mSecs / (24 * 3600000));
       if (this.schedules.length === 1 || this.rotationdays <= 0) {
         let iDay = days % this.schedules[0].workdays.length;
@@ -196,8 +201,10 @@ export class Variation implements IVariation {
       while (start.getDay() !== 0) {
         start = new Date(start.getTime() - (24 * 3600000));
       }
+      console.log(`${start} - ${date}`);
       let days = Math.floor(date.getTime() - start.getTime() / (24 * 3600000));
       let iDay = days % this.schedule.workdays.length;
+      console.log(iDay);
       return this.schedule.getWorkday(iDay);
     }
     return undefined;

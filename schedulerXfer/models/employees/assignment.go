@@ -85,9 +85,10 @@ func (a *Assignment) ChangeScheduleDays(schedID uint, days int) {
 
 func (a *Assignment) UpdateWorkday(schID, wdID uint, wkctr, code string,
 	hours float64) error {
-	for _, sch := range a.Schedules {
+	for s, sch := range a.Schedules {
 		if sch.ID == schID {
 			sch.UpdateWorkday(wdID, wkctr, code, hours)
+			a.Schedules[s] = sch
 			return nil
 		}
 	}
@@ -154,12 +155,13 @@ func (sc *Schedule) GetWorkday(id uint) *Workday {
 
 func (sc *Schedule) UpdateWorkday(id uint, wkctr, code string, hours float64) {
 	found := false
-	for _, day := range sc.Workdays {
+	for d, day := range sc.Workdays {
 		if day.ID == id {
 			found = true
 			day.Hours = hours
 			day.Code = code
 			day.Workcenter = wkctr
+			sc.Workdays[d] = day
 		}
 	}
 	if !found {

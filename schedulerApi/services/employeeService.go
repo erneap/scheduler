@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/erneap/scheduler/schedulerApi/models/config"
@@ -102,9 +103,46 @@ func GetEmployee(id string) (*employees.Employee, error) {
 	var emp employees.Employee
 	err = empCol.FindOne(context.TODO(), filter).Decode(&emp)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, err
 	}
-	emp.Decrypt()
+	err = emp.Decrypt()
+	if err != nil {
+		return nil, err
+	}
+	return &emp, nil
+}
+
+func GetEmployeeByName(first, middle, last string) (*employees.Employee, error) {
+	empCol := config.GetCollection(config.DB, "scheduler", "employees")
+
+	filter := bson.M{
+		"name.firstname":  first,
+		"name.middlename": middle,
+		"name.lastname":   last,
+	}
+
+	var emp employees.Employee
+	err := empCol.FindOne(context.TODO(), filter).Decode(&emp)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			filter = bson.M{
+				"name.firstname":  first,
+				"name.middlename": middle[:1],
+				"name.lastname":   last,
+			}
+			err = empCol.FindOne(context.TODO(), filter).Decode(&emp)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	}
+	err = emp.Decrypt()
+	if err != nil {
+		return nil, err
+	}
 	return &emp, nil
 }
 

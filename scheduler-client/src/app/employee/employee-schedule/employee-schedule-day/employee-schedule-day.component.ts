@@ -1,5 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { IWorkday, Workday } from 'src/app/models/employees/assignments';
+import { Workcode } from 'src/app/models/teams/workcode';
+import { TeamService } from 'src/app/services/team.service';
 
 @Component({
   selector: 'app-employee-schedule-day',
@@ -7,36 +9,56 @@ import { IWorkday, Workday } from 'src/app/models/employees/assignments';
   styleUrls: ['./employee-schedule-day.component.scss']
 })
 export class EmployeeScheduleDayComponent {
-  private _celldate: Date = new Date();
-  @Input() 
-  public set celldate(date: Date) {
-    this._celldate = new Date(date);
-  }
-  get celldate(): Date {
-    return this._celldate;
-  }
   private _workday: Workday = new Workday();
   @Input() 
-  public set workday(wd: IWorkday) {
-    this._workday = new Workday(wd);
+  public set workday(wd: Workday) {
+    this._workday = wd;
+    this.setDateClass();
+    this.setWorkdayStyle();
   }
   get workday(): Workday {
     return this._workday;
   }
   dateClass: string = "dayOfMonth";
+  workdayStyle: string = "background-color: white;color: black;"
 
-  constructor() { }
+  constructor(
+    protected teamService: TeamService,
+  ) { }
 
   setDateClass() {
     const today = new Date();
-    if (today.getFullYear() === this.celldate.getFullYear() 
-      && today.getMonth() === this.celldate.getMonth()
-      && today.getDate() === this.celldate.getDate()) {
-      this.dateClass = "dayOfMonth today";
-    } else if (this.celldate.getDay() === 0 || this.celldate.getDay() === 6) {
-      this.dateClass = "dayOfMonth weekend";
+    if (this.workday.date) {
+      if (today.getFullYear() === this.workday.date.getFullYear() 
+        && today.getMonth() === this.workday.date.getMonth()
+        && today.getDate() === this.workday.date.getDate()) {
+        this.dateClass = "dayOfMonth today";
+      } else if (this.workday.date.getDay() === 0 
+        || this.workday.date.getDay() === 6) {
+        this.dateClass = "dayOfMonth weekend";
+      } else {
+        this.dateClass = "dayOfMonth weekday";
+      }
     } else {
       this.dateClass = "dayOfMonth weekday";
+    }
+  }
+
+  setWorkdayStyle() {
+    if (this.workday.code !== "") {
+      // find the workcode setting from the team
+      const team = this.teamService.getTeam()
+      if (team) {
+        let found = false;
+        for (let i=0; i < team.workcodes.length && !found; i++) {
+          let wc: Workcode = team.workcodes[i];
+          if (wc.id.toLowerCase() === this.workday.code.toLowerCase()) {
+            found = true;
+            this.workdayStyle = `background-color:#${wc.backcolor};`
+              + `color:#${wc.textcolor};`;
+          }
+        }
+      }
     }
   }
 }

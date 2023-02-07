@@ -83,42 +83,42 @@ export class EmployeeData implements IEmployeeData {
   constructor(ed?: IEmployeeData) {
     this.companyinfo = (ed) ? new CompanyInfo(ed.companyinfo) : new CompanyInfo();
     this.assignments = [];
-    if (ed && ed.assignments.length > 0) {
+    if (ed && ed.assignments && ed.assignments.length > 0) {
       ed.assignments.forEach(asgmt => {
         this.assignments.push(new Assignment(asgmt));
       });
       this.assignments.sort((a,b) => a.compareTo(b))
     }
     this.variations = [];
-    if (ed && ed.variations.length > 0) {
+    if (ed && ed.variations && ed.variations.length > 0) {
       ed.variations.forEach(vari => {
         this.variations.push(new Variation(vari));
       });
       this.variations.sort((a,b) => a.compareTo(b));
     }
     this.balance = [];
-    if (ed && ed.balance.length > 0) {
+    if (ed && ed.balance && ed.balance.length > 0) {
       ed.balance.forEach(bal => {
         this.balance.push(new AnnualLeave(bal));
       });
       this.balance.sort((a,b) => a.compareTo(b));
     }
     this.leaves = [];
-    if (ed && ed.leaves.length > 0) {
+    if (ed && ed.leaves && ed.leaves.length > 0) {
       ed.leaves.forEach(lv => {
         this.leaves.push(new LeaveDay(lv));
       });
       this.leaves.sort((a,b) => a.compareTo(b));
     }
     this.requests = [];
-    if (ed && ed.requests.length > 0) {
+    if (ed && ed.requests && ed.requests.length > 0) {
       ed.requests.forEach(req => {
         this.requests.push(new LeaveRequest(req));
       });
       this.requests.sort((a,b) => a.compareTo(b));
     }
     this.laborCodes = [];
-    if (ed && ed.laborCodes.length > 0) {
+    if (ed && ed.laborCodes && ed.laborCodes.length > 0) {
       ed.laborCodes.forEach(lc => {
         this.laborCodes.push(new EmployeeLaborCode(lc));
       });
@@ -172,7 +172,9 @@ export class EmployeeData implements IEmployeeData {
       }
     });
     this.leaves.forEach(lv => {
-      if (lv.leavedate.getTime() === date.getTime()
+      if (lv.leavedate.getFullYear() === date.getFullYear()
+        && lv.leavedate.getMonth() === date.getMonth()
+        && lv.leavedate.getDate() === date.getDate()
         && lv.hours >= stdHours) {
         answer.code = lv.code;
         answer.hours = lv.hours;
@@ -195,8 +197,8 @@ export class Employee implements IEmployee {
   id: string;
   team: string;
   site: string;
-  name: IEmployeeName;
-  data: IEmployeeData;
+  name: EmployeeName;
+  data: EmployeeData;
 
   constructor(emp?: IEmployee) {
     this.id = (emp) ? emp.id : '';

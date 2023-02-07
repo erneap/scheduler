@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { Workday } from 'src/app/models/employees/assignments';
 
 @Component({
   selector: 'app-employee-schedule-week',
@@ -6,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./employee-schedule-week.component.scss']
 })
 export class EmployeeScheduleWeekComponent {
-
+  @Input() workdays: Workday[] = []; 
 }

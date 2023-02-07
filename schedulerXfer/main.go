@@ -32,6 +32,8 @@ func main() {
 		Team:         *team,
 		SiteID:       "dgsc",
 	}
+	employeeConvert.GetTeamInfo()
+	employeeConvert.GetUsers()
 	employeeConvert.ReadEmployees()
 	employeeConvert.Write()
 }

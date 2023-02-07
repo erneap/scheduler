@@ -14,6 +14,7 @@ import { DialogService } from './services/dialog-service.service';
 import { PasswordExpireDialogComponent } from './home/password-expire-dialog/password-expire-dialog.component';
 import { NavigationMenuComponent } from './home/navigation-menu/navigation-menu.component';
 import { EmployeeModule } from './employee/employee.module';
+import { NotFoundComponent } from './home/not-found/not-found.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { EmployeeModule } from './employee/employee.module';
     HomeComponent,
     WaitDialogComponent,
     PasswordExpireDialogComponent,
-    NavigationMenuComponent
+    NavigationMenuComponent,
+    NotFoundComponent
   ],
   imports: [
     BrowserModule,

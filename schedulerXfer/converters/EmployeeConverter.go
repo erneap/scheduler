@@ -48,6 +48,9 @@ func (e *EmployeeConverter) GetUsers() {
 	if err = cursor.All(context.TODO(), &e.Users); err != nil {
 		fmt.Println(err)
 	}
+	for _, user := range e.Users {
+		fmt.Println(user.GetFullName())
+	}
 }
 
 func (e *EmployeeConverter) ReadEmployees() {
@@ -304,6 +307,7 @@ func (e *EmployeeConverter) ReadEmployeeSchedules() {
 					if len(emp.Data.Assignments) > 0 {
 						asgmt := emp.Data.Assignments[0]
 						for k, ltr := range schedule {
+
 							if k == 0 {
 								if ltr != "" {
 									asgmt.UpdateWorkday(sortID, uint(6), asgmt.Workcenter, ltr, hours)
@@ -417,6 +421,9 @@ func (e *EmployeeConverter) ReadEmployeeLeaves(baseDate time.Time) {
 			if dateTaken.After(baseDate) {
 				empID := row[columns["EmployeeID"]]
 				code := row[columns["LeaveCode"]]
+				if code[:1] == "H" || code[:1] == "F" {
+					code = "H"
+				}
 				hours := ParseFloat(row[columns["Hours"]])
 				status := strings.ToUpper(row[columns["Status"]])
 				lv := employees.LeaveDay{
