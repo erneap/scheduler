@@ -1,0 +1,28 @@
+<div class="fxLayout fxLayout-column-center">
+  <mat-card style="background-color: #3f51b5; color: white;">
+      <mat-card-header style="text-align: center;">
+          <mat-card-title>
+              <div class="mat-headline">Employee's PTO/Holidays</div>
+              </mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="fxLayout-column-center">
+          <div class="fxLayout-column-center">
+            <div class="fxLayout-row-center">
+              <button mat-button color="warning" (click)="updateYear('down')">
+                &lt;&lt;
+              </button>
+              <span class="flex-spacer"></span>
+              {{year}}
+              <span class="flex-spacer"></span>
+              <button mat-button color="warning" (click)="updateYear('up')">
+                &gt;&gt;
+              </button>
+            </div>
+            <div class="fxLayout-row-center">
+              <app-pto-holiday-holiday *ngIf="showHolidays"
+                [year]="year"></app-pto-holiday-holiday>
+            </div>
+          </div>
+      </mat-card-content>
+  </mat-card>
+</div>

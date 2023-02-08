@@ -10,6 +10,7 @@ import { TeamService } from 'src/app/services/team.service';
 })
 export class EmployeeScheduleDayComponent {
   private _workday: Workday = new Workday();
+  private _month: Date = new Date();
   @Input() 
   public set workday(wd: Workday) {
     this._workday = wd;
@@ -21,6 +22,14 @@ export class EmployeeScheduleDayComponent {
   }
   dateClass: string = "dayOfMonth";
   workdayStyle: string = "background-color: white;color: black;"
+  @Input() 
+  public set month(date: Date) {
+    this._month = new Date(date);
+    this.setWorkdayStyle();
+  }
+  get month(): Date {
+    return this._month;
+  }
 
   constructor(
     protected teamService: TeamService,
@@ -56,9 +65,17 @@ export class EmployeeScheduleDayComponent {
             found = true;
             this.workdayStyle = `background-color:#${wc.backcolor};`
               + `color:#${wc.textcolor};`;
+            if (wc.backcolor.toLowerCase() === 'ffffff' 
+              && this.workday.date?.getMonth() !== this.month.getMonth())  {
+              this.workdayStyle = 'background-color: #C0C0C0;color:#000000;';
+            }
           }
         }
       }
+    } else if (this.workday.date?.getMonth() !== this.month.getMonth()) {
+      this.workdayStyle = 'background-color: #C0C0C0;color:#000000;';
+    } else {
+      this.workdayStyle = 'background-color: #FFFFFF;color:#000000;';
     }
   }
 }

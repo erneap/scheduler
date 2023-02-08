@@ -18,7 +18,7 @@
   <ng-container *ngFor="let week of workweeks">
     <div class="fxLayout-row-center">
       <app-employee-schedule-day *ngFor="let day of week.getWorkdays()"
-        [workday]="day"></app-employee-schedule-day>
+        [workday]="day" [month]="month"></app-employee-schedule-day>
     </div>
   </ng-container>
 </div>

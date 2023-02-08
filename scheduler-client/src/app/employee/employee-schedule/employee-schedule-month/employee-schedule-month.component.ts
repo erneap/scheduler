@@ -46,7 +46,6 @@ export class EmployeeScheduleMonthComponent {
     while (this.endDate.getDay() !== 6) {
       this.endDate = new Date(this.endDate.getTime() + (24 * 3600000));
     }
-    console.log(`${this.startDate} - ${this.endDate}`);
 
     let count = -1;
     let start = new Date(this.startDate);

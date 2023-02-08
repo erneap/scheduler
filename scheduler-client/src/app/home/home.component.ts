@@ -47,7 +47,7 @@ export class HomeComponent {
     });
     if (this.authService.getUser()) {
       this.authService.isAuthenticated = true;
-      this.router.navigate(["/missions"])
+      this.router.navigate(["/employee/schedule"])
     }
   }
 

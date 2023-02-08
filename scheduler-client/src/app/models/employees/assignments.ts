@@ -196,15 +196,15 @@ export class Variation implements IVariation {
   }
 
   getWorkday(site: string, date: Date): Workday | undefined {
-    if (this.useVariation(site, date)) {
+    const tdate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), 
+      date.getDate()));
+    if (this.useVariation(site, tdate)) {
       let start = new Date(this.startdate);
       while (start.getDay() !== 0) {
         start = new Date(start.getTime() - (24 * 3600000));
       }
-      console.log(`${start} - ${date}`);
-      let days = Math.floor(date.getTime() - start.getTime() / (24 * 3600000));
+      let days = Math.floor((tdate.getTime() - start.getTime()) / (24 * 3600000));
       let iDay = days % this.schedule.workdays.length;
-      console.log(iDay);
       return this.schedule.getWorkday(iDay);
     }
     return undefined;

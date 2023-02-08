@@ -76,7 +76,13 @@ export class AuthService extends CacheService {
   getUser(): User | undefined {
     const iUser = this.getItem<IUser>('current-user');
     if (iUser) {
-      return new User(iUser);
+      const user = new User(iUser);
+      this.isScheduler = user.isInGroup("scheduler", "scheduler");
+      this.isLeader = user.isInGroup("scheduler", "leader");
+      this.isAdmin = user.isInGroup("scheduler", "admin");
+      this.isCompanyLead = user.isInGroup("scheduler", "companylead");
+      this.isAuthenticated = true;
+      return user;
     }
     return undefined;
   }
@@ -105,6 +111,9 @@ export class AuthService extends CacheService {
   clearToken() {
     this.removeItem('jwt');
     this.removeItem('current-user');
+    this.removeItem('current-employee');
+    this.removeItem('current-site');
+    this.removeItem('current-team');
   }
 
   setWebLabel(team: string, site: string) {

@@ -1,0 +1,54 @@
+.code {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 35px;
+  height: 35px;
+  border-left: solid 2px black;
+  border-top: solid 1px black;
+  border-bottom: solid 1px black;
+  font-size: 12pt;
+  font-weight: bold;
+  color: black;
+}
+
+.referenceDate {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 125px;
+  height: 35px;
+  border-left: solid 1px black;
+  border-top: solid 1px black;
+  border-bottom: solid 1px black;
+  font-size: 12pt;
+  font-weight: bold;
+  color: black;
+}
+
+.dates {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 296px;
+  height: 35px;
+  border-left: solid 1px black;
+  border-top: solid 1px black;
+  border-bottom: solid 1px black;
+  color: black;
+}
+
+.actual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 65px;
+  height: 35px;
+  border-left: solid 1px black;
+  border-top: solid 1px black;
+  border-bottom: solid 1px black;
+  border-right: solid 2px black;
+  font-size: 12pt;
+  font-weight: bold;
+  color: black;
+}

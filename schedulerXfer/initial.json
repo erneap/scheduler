@@ -157,12 +157,12 @@
     },
     {
       "id": "V",
-      "title": "Holiday",
+      "title": "Vacation/PTO",
       "start": 0,
       "shiftCode": 0,
       "isLeave": true,
       "textcolor": "FFFFFF",
-      "backcolor": "3366ff"
+      "backcolor": "339933"
     }
   ],
   "companies": [

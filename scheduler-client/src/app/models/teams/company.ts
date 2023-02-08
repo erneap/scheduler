@@ -1,3 +1,5 @@
+import { ILeaveDay, LeaveDay } from "../employees/leave";
+
 export interface ICompanyHoliday {
   id: string;
   name: string;
@@ -10,8 +12,10 @@ export class CompanyHoliday implements ICompanyHoliday {
   name: string;
   sort: number;
   actualdates: Date[];
+  leaveDays: LeaveDay[] = [];
+  active: boolean = true;
 
-  constructor(hol: ICompanyHoliday) {
+  constructor(hol?: ICompanyHoliday) {
     this.id = (hol) ? hol.id : '';
     this.name = (hol) ? hol.name : '';
     this.sort = (hol) ? hol.sort : 0;
@@ -43,6 +47,24 @@ export class CompanyHoliday implements ICompanyHoliday {
       });
     }
     return answer;
+  }
+
+  addLeaveDay(lv: ILeaveDay) {
+    if (!this.leaveDays) {
+      this.leaveDays = [];
+    }
+    this.leaveDays.push(new LeaveDay(lv));
+    this.leaveDays.sort((a,b) => a.compareTo(b));
+  }
+
+  getLeaveDayTotalHours(): number {
+    let total = 0.0;
+    if (this.leaveDays) {
+      this.leaveDays.forEach(dt => {
+        total += dt.hours;
+      })
+    }
+    return total;
   }
 }
 

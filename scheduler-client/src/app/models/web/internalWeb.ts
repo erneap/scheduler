@@ -16,7 +16,6 @@ export class WorkWeek {
   }
 
   setWorkday(wd: IWorkday, date: Date) {
-    console.log(`---${date} - ${wd.id}`)
     const wDay = new Workday(wd);
     wDay.date = new Date(date);
     this.week[wDay.id] = wDay;
