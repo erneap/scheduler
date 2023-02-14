@@ -193,9 +193,16 @@ export class LeaveMonth {
     this.leaveGroups = [];
     if (lm && lm.leaveGroups.length > 0) {
       lm.leaveGroups.forEach(lg => {
-        this.leaveGroups.push()
+        this.leaveGroups.push(lg);
       });
       this.leaveGroups.sort((a,b) => a.compareTo(b));
     }
+  }
+
+  compareTo(other?: LeaveMonth): number {
+    if (other) {
+      return (this.month.getTime() < other.month.getTime()) ? -1 : 1;
+    }
+    return -1;
   }
 }

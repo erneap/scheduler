@@ -1,23 +1,24 @@
 .code {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: end;
   width: 35px;
-  height: 35px;
+  height: 25px;
   border-left: solid 2px black;
   border-top: solid 1px black;
   border-bottom: solid 1px black;
   font-size: 12pt;
   font-weight: bold;
-  color: black;
+  color: white;
+  background-color: darkred;
 }
 
 .referenceDate {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: end;
   width: 125px;
-  height: 35px;
+  height: 25px;
   border-left: solid 1px black;
   border-top: solid 1px black;
   border-bottom: solid 1px black;
@@ -29,9 +30,9 @@
 .dates {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: end;
   width: 296px;
-  height: 35px;
+  height: 25px;
   border-left: solid 1px black;
   border-top: solid 1px black;
   border-bottom: solid 1px black;
@@ -41,9 +42,9 @@
 .actual {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: end;
   width: 65px;
-  height: 35px;
+  height: 25px;
   border-left: solid 1px black;
   border-top: solid 1px black;
   border-bottom: solid 1px black;

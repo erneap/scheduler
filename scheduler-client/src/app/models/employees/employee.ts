@@ -183,6 +183,16 @@ export class EmployeeData implements IEmployeeData {
     });
     return answer;
   }
+
+  getStandardWorkday(site: string, date: Date): number {
+    let answer = 8;
+    this.assignments.forEach(asgmt => {
+      if (asgmt.useAssignment(site, date)) {
+        answer = asgmt.getStandardWorkHours();
+      }
+    });
+    return answer;
+  }
 }
 
 export interface IEmployee {

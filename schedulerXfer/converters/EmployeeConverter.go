@@ -372,6 +372,7 @@ func (e *EmployeeConverter) ReadAnnualLeaveBalances(baseDate time.Time) {
 				for k, emp := range e.Employees {
 					if emp.Data.CompanyInfo.EmployeeID == empID {
 						emp.Data.Balances = append(emp.Data.Balances, employees.AnnualLeave{
+							Year:      year,
 							Annual:    annual,
 							Carryover: carryover,
 						})

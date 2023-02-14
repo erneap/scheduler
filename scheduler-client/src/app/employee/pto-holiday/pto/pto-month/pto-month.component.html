@@ -1,1 +1,12 @@
-<p>pto-month works!</p>
+<div class="fxLayout-row-center">
+  <div class="month">{{months[leaveMonth.month.getMonth()]}}</div>
+  <div class="dates">
+    <ng-container *ngFor="let lvs of leaveMonth.leaveGroups; index as i">
+      <app-pto-month-dates-display [leaves]="lvs.leaves">
+      </app-pto-month-dates-display>
+      <ng-container *ngIf="i < (leaveMonth.leaveGroups.length - 1)">, </ng-container>
+    </ng-container>
+  </div>
+  <div class="actual">{{getActualHours()}}</div>
+  <div class="requested">{{getProjectedHours()}}</div>
+</div>

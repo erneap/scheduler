@@ -1,9 +1,10 @@
 import { Component, Host, Input } from '@angular/core';
 import { MatFabButton } from '@angular/material/button';
-import { Employee } from 'src/app/models/employees/employee';
+import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { CompanyHoliday } from 'src/app/models/teams/company';
 import { Team } from 'src/app/models/teams/team';
 import { EmployeeService } from 'src/app/services/employee.service';
+import { SiteService } from 'src/app/services/site.service';
 import { TeamService } from 'src/app/services/team.service';
 
 @Component({
@@ -13,6 +14,7 @@ import { TeamService } from 'src/app/services/team.service';
 })
 export class HolidayComponent {
   private _year: number = (new Date()).getFullYear();
+  private _employee: Employee | undefined;
   @Input() 
   public set year(yr: number) {
     this._year = yr;
@@ -21,18 +23,59 @@ export class HolidayComponent {
   get year(): number {
     return this._year;
   }
+  @Input()
+  public set employee(emp: IEmployee) {
+    this._employee = new Employee(emp);
+    this.setHolidays();
+  }
+  get employee(): Employee {
+    if (this._employee) {
+      return this._employee;
+    } else {
+      this._employee = this.empService.getEmployee();
+      if (this._employee) {
+        return this._employee;
+      }
+      return new Employee();
+    }
+  }
+  @Input()
+  public set employeeid(id: string) {
+    if (id !== '') {
+      const site = this.siteService.getSite();
+      if (site && site.employees && site.employees.length > 0) {
+        site.employees.forEach(emp => {
+          if (emp.id === id) {
+            this._employee = new Employee(emp);
+          }
+        })
+      } 
+    }
+    if (!this._employee) {
+      this._employee = this.empService.getEmployee()
+    }
+    this.setHolidays();
+  }
+  get employeeid(): string {
+    if (this._employee) {
+      return this._employee.id;
+    }
+    return '';
+  }
   holidays: CompanyHoliday[] = [];
 
   constructor(
     protected empService: EmployeeService,
+    protected siteService: SiteService,
     protected teamService: TeamService
   ) {
     this.setHolidays();
+    this._employee = empService.getEmployee()
   }
 
   setHolidays() {
     this.holidays = [];
-    const iEmp = this.empService.getEmployee();
+    const iEmp = this.employee;
     const iTeam = this.teamService.getTeam();
     if (iEmp && iTeam) {
       const emp = new Employee(iEmp);
