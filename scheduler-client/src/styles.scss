@@ -41,9 +41,51 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: start;
+    align-items: flex-start;
     width: 100%;
     padding: 0;
+}
+
+.fxLayout-row-topright {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: flex-start;
+    width: 100%;
+    padding: 0;
+}
+
+.standardCard {
+    width: 90%;
+    background-color: #3f51b3;
+    color: white;
+}
+
+.formField {
+    margin-right: 3px;
+    width: 178px;
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+    margin-right: 5px;
+}
+
+.formFieldWide {
+    margin-right: 3px;
+    width: 250px;
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+    margin-right: 5px;
+    border-left: solid 1px #3f51b3;
+}
+
+.fieldWidth {
+    width: 175px;
+}
+
+.fieldWidthWide {
+    width: 247px;
 }
 
 ::ng-deep .spinner-dialog > mat-dialog-container {

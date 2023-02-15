@@ -1,0 +1,20 @@
+<div class="cell" [style]="dayStyle">
+  <form>
+    <div class="dayOfMonth weekday">{{leave.leavedate.getDate()}}</div>
+    <div class="code">
+      <mat-form-field class="day-form-field">
+        <mat-label>Leave Code</mat-label>
+        <mat-select formControlName="code">
+          <mat-option value=""></mat-option>
+          <mat-option *ngFor="let wc of leaveCodes" [value]="wc.id">{{wc.id}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="hours">
+      <mat-form-field class="day-form-field">
+        <mat-label>Hours</mat-label>
+        <input matInput placeholder="0" formControlName="hours">
+      </mat-form-field>
+    </div>
+  </form>
+</div>

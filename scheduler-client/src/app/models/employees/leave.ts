@@ -96,7 +96,7 @@ export class LeaveRequest implements ILeaveRequest {
     this.approvedby = (lr) ? lr.approvedby : '';
     this.approvalDate = (lr) ? new Date(lr.approvalDate) : new Date(0);
     this.requesteddays = [];
-    if (lr && lr.requesteddays.length > 0) {
+    if (lr && lr.requesteddays && lr.requesteddays.length > 0) {
       lr.requesteddays.forEach(rd => {
         lr.requesteddays.push(new LeaveDay(rd))
       });

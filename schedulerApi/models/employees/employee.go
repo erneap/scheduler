@@ -22,7 +22,7 @@ type Employee struct {
 	SiteID        string             `json:"site" bson:"site"`
 	UserID        primitive.ObjectID `json:"userid" bson:"userid"`
 	Name          EmployeeName       `json:"name" bson:"name"`
-	EncryptedData string             `json:"_" bson:"encrypted"`
+	EncryptedData string             `json:"-" bson:"encrypted"`
 	Data          EmployeeData       `json:"data" bson:"-"`
 	Work          []Work             `json:"work,omitempty"`
 }

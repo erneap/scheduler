@@ -1,7 +1,7 @@
 .code {
   display: flex;
   justify-content: center;
-  align-items: end;
+  align-items: flex-end;
   width: 35px;
   height: 25px;
   border-left: solid 2px black;
@@ -16,7 +16,7 @@
 .referenceDate {
   display: flex;
   justify-content: center;
-  align-items: end;
+  align-items: flex-end;
   width: 125px;
   height: 25px;
   border-left: solid 1px black;
@@ -30,7 +30,7 @@
 .dates {
   display: flex;
   justify-content: center;
-  align-items: end;
+  align-items: flex-end;
   width: 296px;
   height: 25px;
   border-left: solid 1px black;
@@ -42,7 +42,7 @@
 .actual {
   display: flex;
   justify-content: center;
-  align-items: end;
+  align-items: flex-end;
   width: 65px;
   height: 25px;
   border-left: solid 1px black;

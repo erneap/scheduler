@@ -1,5 +1,8 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Employee, IEmployee } from '../models/employees/employee';
+import { EmployeeLeaveRequest } from '../models/web/employeeWeb';
 import { CacheService } from './cache.service';
 import { TeamService } from './team.service';
 
@@ -10,7 +13,8 @@ export class EmployeeService extends CacheService {
   showHolidays: boolean = true;
 
   constructor(
-    protected teamService: TeamService
+    protected teamService: TeamService,
+    private httpClient: HttpClient
   ) 
   { 
     super();
@@ -46,5 +50,25 @@ export class EmployeeService extends CacheService {
       })
     }
     this.setItem('current-employee', emp);
+  }
+
+  getEmployeeID(): string {
+    const emp = this.getEmployee();
+    if (emp) {
+      return emp.id;
+    }
+    return '';
+  }
+
+  addNewLeaveRequest(empid: string, start: Date, end: Date, 
+    code: string): Observable<IEmployee> {
+    const data: EmployeeLeaveRequest = {
+      employee: this.getEmployeeID(),
+      code: code,
+      startdate: start,
+      enddate: end,
+    };
+    const url = '/scheduler/api/v1/employee/request';
+    return this.httpClient.post<IEmployee>(url, data);
   }
 }

@@ -14,6 +14,9 @@ import { HolidayCellDisplayComponent } from './pto-holiday/holiday/holiday-cell/
 import { PtoComponent } from './pto-holiday/pto/pto.component';
 import { PtoMonthComponent } from './pto-holiday/pto/pto-month/pto-month.component';
 import { PtoMonthDatesDisplayComponent } from './pto-holiday/pto/pto-month/pto-month-dates-display/pto-month-dates-display.component';
+import { LeaveRequestComponent } from './leave-request/leave-request.component';
+import { LeaveRequestCalendarComponent } from './leave-request/leave-request-calendar/leave-request-calendar.component';
+import { LeaveRequestCalendarDayComponent } from './leave-request/leave-request-calendar-day/leave-request-calendar-day.component';
 
 
 @NgModule({
@@ -28,7 +31,10 @@ import { PtoMonthDatesDisplayComponent } from './pto-holiday/pto/pto-month/pto-m
     HolidayCellDisplayComponent,
     PtoComponent,
     PtoMonthComponent,
-    PtoMonthDatesDisplayComponent
+    PtoMonthDatesDisplayComponent,
+    LeaveRequestComponent,
+    LeaveRequestCalendarComponent,
+    LeaveRequestCalendarDayComponent
   ],
   imports: [
     CommonModule,

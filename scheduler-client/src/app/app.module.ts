@@ -15,6 +15,9 @@ import { PasswordExpireDialogComponent } from './home/password-expire-dialog/pas
 import { NavigationMenuComponent } from './home/navigation-menu/navigation-menu.component';
 import { EmployeeModule } from './employee/employee.module';
 import { NotFoundComponent } from './home/not-found/not-found.component';
+import { EmployeeService } from './services/employee.service';
+import { SiteService } from './services/site.service';
+import { TeamService } from './services/team.service';
 
 @NgModule({
   declarations: [
@@ -35,7 +38,14 @@ import { NotFoundComponent } from './home/not-found/not-found.component';
     ReactiveFormsModule,
     EmployeeModule
   ],
-  providers: [AuthService, DialogService],
+  providers: [AuthService, DialogService, EmployeeService, SiteService, 
+    TeamService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthHttpInterceptor,
+      multi: true,
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

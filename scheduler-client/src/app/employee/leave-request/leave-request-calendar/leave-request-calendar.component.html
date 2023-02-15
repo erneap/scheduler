@@ -1,0 +1,18 @@
+<div class="fxLayout-column-center">
+  <div class="fxLayout-row-center">
+    <div class="daycell weekend">SUN</div>
+    <div class="daycell weekday">MON</div>
+    <div class="daycell weekday">TUE</div>
+    <div class="daycell weekday">WED</div>
+    <div class="daycell weekday">THU</div>
+    <div class="daycell weekday">FRI</div>
+    <div class="daycell weekend">SAT</div>
+  </div>
+  <ng-container *ngFor="let week of calendar.leaveGroups">
+    <div class="fxLayout-row-center">
+      <app-leave-request-calendar-day *ngFor="let lv of week.leaves"
+        [leave]="lv" [leaveCodes]="leaveCodes" [startDate]="startdate"
+        [endDate]="enddate"></app-leave-request-calendar-day>
+    </div>
+  </ng-container>
+</div>
