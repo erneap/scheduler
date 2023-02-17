@@ -167,7 +167,6 @@ export class LeaveGroup {
 
   addLeave(lv: ILeaveDay) {
     this.leaves.push(new LeaveDay(lv));
-    this.leaves.sort((a,b) => a.compareTo(b));
   }
 
   compareTo(other?: LeaveGroup): number {

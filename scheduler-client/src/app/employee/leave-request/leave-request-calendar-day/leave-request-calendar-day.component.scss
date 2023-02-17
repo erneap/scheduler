@@ -1,5 +1,9 @@
 .day-form-field {
-  font-size: 0.7em;
+  font-size: 1.2em;
+  width: 99% !important;
+  background-color: transparent;
+  text-align: center;
+  border: none;
 }
 
 .dayOfMonth {
@@ -47,4 +51,8 @@
   position: absolute;
   top: 63px;
   width: 99px;
+}
+
+.mat-input-wrapper {
+  width: 75px !important;
 }

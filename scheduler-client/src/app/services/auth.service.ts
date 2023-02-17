@@ -60,6 +60,11 @@ export class AuthService extends CacheService {
     }
   }
 
+  isTokenExpired(): Boolean {
+    const authStatus = this.getDecodedToken();
+    return (Math.floor((new Date()).getTime() / 1000)) >= authStatus.exp;
+  }
+
   getDecodedToken(): IAuthStatus {
     const token = this.getItem<string>('jwt');
     if (token) {
@@ -74,15 +79,19 @@ export class AuthService extends CacheService {
   }
 
   getUser(): User | undefined {
-    const iUser = this.getItem<IUser>('current-user');
-    if (iUser) {
-      const user = new User(iUser);
-      this.isScheduler = user.isInGroup("scheduler", "scheduler");
-      this.isLeader = user.isInGroup("scheduler", "leader");
-      this.isAdmin = user.isInGroup("scheduler", "admin");
-      this.isCompanyLead = user.isInGroup("scheduler", "companylead");
-      this.isAuthenticated = true;
-      return user;
+    if (!this.isTokenExpired()) {
+      const iUser = this.getItem<IUser>('current-user');
+      if (iUser) {
+        const user = new User(iUser);
+        this.isScheduler = user.isInGroup("scheduler", "scheduler");
+        this.isLeader = user.isInGroup("scheduler", "leader");
+        this.isAdmin = user.isInGroup("scheduler", "admin");
+        this.isCompanyLead = user.isInGroup("scheduler", "companylead");
+        this.isAuthenticated = true;
+        return user;
+      }
+    } else {
+      this.clearToken()
     }
     return undefined;
   }

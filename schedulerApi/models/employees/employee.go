@@ -195,6 +195,30 @@ func (e *EmployeeData) GetWorkday(date time.Time) *Workday {
 	return wkday
 }
 
+func (e *EmployeeData) GetStandardWorkday(date time.Time) float64 {
+	answer := 8.0
+	count := 0
+	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0,
+		time.UTC)
+	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	for start.Weekday() != time.Sunday {
+		start = start.AddDate(0, 0, -1)
+	}
+	for end.Weekday() != time.Saturday {
+		end = end.AddDate(0, 0, 1)
+	}
+	for start.Before(end) || start.Equal(end) {
+		wd := e.GetWorkday(start)
+		if wd.Code != "" {
+			count++
+		}
+	}
+	if count < 5 {
+		answer = 10.0
+	}
+	return answer
+}
+
 func (e *EmployeeData) RemoveAssignment(id uint) {
 	pos := -1
 	for i, asgmt := range e.Assignments {
@@ -283,10 +307,14 @@ func (e *EmployeeData) NewLeaveRequest(empID, code string, start, end time.Time)
 	}
 	sDate := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0,
 		time.UTC)
+	std := e.GetStandardWorkday(sDate)
 	for sDate.Before(end) || sDate.Equal(end) {
 		wd := e.GetWorkday(sDate)
 		if wd.Code != "" {
 			hours := wd.Hours
+			if hours == 0.0 {
+				hours = std
+			}
 			if code == "H" {
 				hours = 8.0
 			}
@@ -327,6 +355,65 @@ func (e *EmployeeData) UpdateLeaveRequest(request, field, value string) error {
 				req.Status = "REQUESTED"
 				// reset the leave dates
 				req.SetLeaveDays(e)
+			case "dates":
+				parts := strings.Split(value, "|")
+				start, err := time.ParseInLocation("2006-01-02", parts[0], time.UTC)
+				if err != nil {
+					return err
+				}
+				end, err := time.ParseInLocation("2006-01-02", parts[1], time.UTC)
+				if err != nil {
+					return nil
+				}
+				req.StartDate = time.Date(start.Year(), start.Month(), start.Day(), 0,
+					0, 0, 0, time.UTC)
+				req.EndDate = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0,
+					time.UTC)
+				sort.Sort(ByLeaveDay(req.RequestedDays))
+				begin := -1
+				last := -1
+				for j, lv := range req.RequestedDays {
+					if lv.LeaveDate.Before(req.StartDate) {
+						begin = j
+					} else if lv.LeaveDate.After(req.EndDate) && last < 0 {
+						last = j
+					}
+				}
+				if begin >= 0 && last >= 0 {
+					req.RequestedDays = req.RequestedDays[begin+1 : last]
+				} else if begin >= 0 {
+					req.RequestedDays = req.RequestedDays[begin+1:]
+				} else if last >= 0 {
+					req.RequestedDays = req.RequestedDays[:last]
+				}
+				for start.Before(end) || start.Equal(end) {
+					found := false
+					for _, lv := range req.RequestedDays {
+						if lv.LeaveDate.Equal(start) {
+							found = true
+						}
+					}
+					if !found {
+						wd := e.GetWorkday(start)
+						if wd.Code != "" {
+							hours := wd.Hours
+							if req.PrimaryCode == "H" {
+								hours = 8.0
+							} else if hours == 0.0 {
+								hours = e.GetStandardWorkday(start)
+							}
+							lv := LeaveDay{
+								LeaveDate: start,
+								Code:      req.PrimaryCode,
+								Hours:     hours,
+								Status:    "REQUESTED",
+								RequestID: req.ID,
+							}
+							req.RequestedDays = append(req.RequestedDays, lv)
+						}
+					}
+					start = start.AddDate(0, 0, 1)
+				}
 			case "approve":
 				req.ApprovedBy = value
 				req.ApprovalDate = time.Now().UTC()

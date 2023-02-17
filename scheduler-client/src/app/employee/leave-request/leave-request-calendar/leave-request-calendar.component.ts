@@ -45,15 +45,16 @@ export class LeaveRequestCalendarComponent {
   setMonth() {
     this.calendar = new LeaveMonth();
     let start = new Date(this.startdate);
+
     while (start.getDay() !== 0) {
       start = new Date(start.getTime() - (24 * 3600000));
     }
     let end = new Date(this.enddate);
-    while (end.getDate() !== 6) {
+    while (end.getDay() !== 0) {
       end = new Date(end.getTime() + (24 * 3600000));
     }
     let week: LeaveGroup = new LeaveGroup();
-    while (start.getTime() <= end.getTime()) {
+    while (start.getTime() < end.getTime()) {
       if (start.getDay() == 0) {
         week = new LeaveGroup()
         this.calendar.leaveGroups.push(week);
@@ -69,6 +70,7 @@ export class LeaveRequestCalendarComponent {
         }
       });
       week.addLeave(day);
+      start = new Date(start.getTime() + (24 * 3600000));
     }
   }
 }

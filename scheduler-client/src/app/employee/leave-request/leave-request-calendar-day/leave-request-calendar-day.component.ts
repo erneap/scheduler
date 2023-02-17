@@ -9,20 +9,53 @@ import { Workcode } from 'src/app/models/teams/workcode';
   styleUrls: ['./leave-request-calendar-day.component.scss']
 })
 export class LeaveRequestCalendarDayComponent {
-  private _leave: LeaveDay = new LeaveDay();
+  private _leave: LeaveDay | undefined;
+  private _start: Date | undefined;
+  private _end: Date | undefined;
+  private _codes: Workcode[] = [];
   @Input()
   public set leave(lv: ILeaveDay) {
     this._leave = new LeaveDay(lv);
     this.setLeave()
   }
   get leave(): LeaveDay {
-    return this._leave;
+    if (this._leave) {
+      return this._leave;
+    }
+    return new LeaveDay();
   }
-  @Input() leaveCodes: Workcode[] = [];
-  @Input() startDate: Date = new Date();
-  @Input() endDate: Date = new Date();
+  @Input()
+  public set leaveCodes(cds: Workcode[]) {
+    this._codes = cds;
+    this.setLeave();
+  }
+  get leaveCodes(): Workcode[] {
+    return this._codes;
+  }
+  @Input() 
+  public set startDate(start: Date){
+    this._start = new Date(start);
+    this.setLeave()
+  }
+  get startDate(): Date {
+    if (this._start) {
+      return this._start;
+    }
+    return new Date();
+  }
+  @Input()
+  public set endDate(end: Date) {
+    this._end = new Date(end);
+    this.setLeave();
+  }
+  get endDate(): Date {
+    if (this._end) {
+      return this._end;
+    }
+    return new Date();
+  }
   dayForm: FormGroup;
-  dayStyle: string = 'background-color: white; color: black;';
+  dayStyle: string = 'background-color: black; color: black;';
 
   constructor(
     private fb: FormBuilder,
@@ -34,17 +67,33 @@ export class LeaveRequestCalendarDayComponent {
   }
 
   setLeave() {
-    this.dayForm.controls["code"].setValue(this.leave.code);
-    this.dayForm.controls["hours"].setValue(this.leave.hours);
-    if (this.leave.leavedate.getTime() >= this.startDate.getTime()
-      && this.leave.leavedate.getTime() <= this.endDate.getTime()) {
-      this.leaveCodes.forEach(wc => {
-        if (wc.id.toLowerCase() == this.leave.code.toLowerCase()) {
-          this.dayStyle = `background-color: #${wc.backcolor};color: #${wc.textcolor};`;
+    if (this._leave && this._start && this._end && this._codes.length > 0) {
+      const end = new Date(this.endDate.getTime() + (24 * 3600000));
+      this.dayForm.controls["code"].setValue(this.leave.code);
+      if (this.leave.code !== '') {
+        this.dayForm.controls["hours"].setValue(this.leave.hours);
+      } else {
+        this.dayForm.controls["hours"].setValue('');
+      }
+      if (this.leave.leavedate.getTime() >= this.startDate.getTime()
+        && this.leave.leavedate.getTime() <= end.getTime()) {
+        if (this.leave.code !== '') {
+          this.leaveCodes.forEach(wc => {
+            if (wc.id.toLowerCase() == this.leave.code.toLowerCase()) {
+              this.dayStyle = `background-color: #${wc.backcolor};color: #${wc.textcolor};`;
+            }
+          });
+        } else {
+          this.dayStyle = 'background-color: white;color: black;';
         }
-      });
-    } else {
-      this.dayStyle = `background-color: darkgray;color: black;`;
+      } else {
+        this.dayStyle = `background-color: black;color: black;`;
+      }
     }
+  }
+
+  changeCode() {
+    this.leave.code = this.dayForm.value.code;
+    this.setLeave();
   }
 }

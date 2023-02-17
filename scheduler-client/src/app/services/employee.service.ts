@@ -71,4 +71,6 @@ export class EmployeeService extends CacheService {
     const url = '/scheduler/api/v1/employee/request';
     return this.httpClient.post<IEmployee>(url, data);
   }
+
+  updateLeaveRequest(empid: string)
 }
