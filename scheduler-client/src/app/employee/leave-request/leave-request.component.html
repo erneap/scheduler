@@ -33,21 +33,29 @@
         <div class="fxLayout-column-center" style="width: 68%;">
           <form [formGroup]="editorForm">
             <div class="fxLayout-row-center">
-              <div class="formFieldWide">
-                <mat-form-field class="fieldWidthWide">
-                  <mat-label>Request Inclusive Dates</mat-label>
-                  <mat-date-range-input [rangePicker]="picker">
-                    <input matStartDate formControlName="start" placeholder="Start Date">
-                    <input matEndDate formControlName="end" placeholder="End Date">
-                  </mat-date-range-input>
-                  <mat-hint>Include Normal Time Off</mat-hint>
-                  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                  <mat-date-range-picker #picker></mat-date-range-picker>
+              <div class="formField">
+                <mat-form-field class="fieldWidth">
+                  <mat-label>Request Start</mat-label>
+                  <input matInput [matDatepicker]="startpicker"
+                    formControlName="start" (dateChange)="processChange('start')">
+                  <mat-hint>Include Time Off</mat-hint>
+                  <mat-datepicker-toggle matIconSuffix [for]="startpicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startpicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div class="formField">
+                <mat-form-field class="fieldWidth">
+                  <mat-label>Request End Date</mat-label>
+                  <input matInput [matDatepicker]="endpicker"
+                    formControlName="end" (dateChange)="processChange('end')">
+                  <mat-datepicker-toggle matIconSuffix [for]="endpicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endpicker></mat-datepicker>
                 </mat-form-field>
               </div>
               <div class="formFieldWide">
                 <mat-form-field class="fieldWidthWide">
-                  <mat-select formControlName="primarycode">
+                  <mat-select formControlName="primarycode"
+                    (selectionChange)="processChange('code')">
                     <mat-option *ngFor="let wc of leaveList" [value]="wc.id">
                       {{wc.title}}
                     </mat-option>

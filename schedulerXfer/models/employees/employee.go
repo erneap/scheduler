@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -22,7 +23,7 @@ type Employee struct {
 	SiteID        string             `json:"site" bson:"site"`
 	UserID        primitive.ObjectID `json:"userid" bson:"userid"`
 	Name          EmployeeName       `json:"name" bson:"name"`
-	EncryptedData string             `json:"_" bson:"encrypted"`
+	EncryptedData string             `json:"-" bson:"encrypted"`
 	Data          EmployeeData       `json:"data" bson:"-"`
 	Work          []Work             `json:"work,omitempty"`
 }
@@ -195,6 +196,30 @@ func (e *EmployeeData) GetWorkday(date time.Time) *Workday {
 	return wkday
 }
 
+func (e *EmployeeData) GetStandardWorkday(date time.Time) float64 {
+	answer := 8.0
+	count := 0
+	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0,
+		time.UTC)
+	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	for start.Weekday() != time.Sunday {
+		start = start.AddDate(0, 0, -1)
+	}
+	for end.Weekday() != time.Saturday {
+		end = end.AddDate(0, 0, 1)
+	}
+	for start.Before(end) || start.Equal(end) {
+		wd := e.GetWorkday(start)
+		if wd.Code != "" {
+			count++
+		}
+	}
+	if count < 5 {
+		answer = 10.0
+	}
+	return answer
+}
+
 func (e *EmployeeData) RemoveAssignment(id uint) {
 	pos := -1
 	for i, asgmt := range e.Assignments {
@@ -283,10 +308,14 @@ func (e *EmployeeData) NewLeaveRequest(empID, code string, start, end time.Time)
 	}
 	sDate := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0,
 		time.UTC)
+	std := e.GetStandardWorkday(sDate)
 	for sDate.Before(end) || sDate.Equal(end) {
 		wd := e.GetWorkday(sDate)
 		if wd.Code != "" {
 			hours := wd.Hours
+			if hours == 0.0 {
+				hours = std
+			}
 			if code == "H" {
 				hours = 8.0
 			}
@@ -327,29 +356,116 @@ func (e *EmployeeData) UpdateLeaveRequest(request, field, value string) error {
 				req.Status = "REQUESTED"
 				// reset the leave dates
 				req.SetLeaveDays(e)
+			case "code", "primarycode":
+				req.PrimaryCode = value
+				log.Println(req.PrimaryCode)
+			case "dates":
+				parts := strings.Split(value, "|")
+				start, err := time.ParseInLocation("2006-01-02", parts[0], time.UTC)
+				if err != nil {
+					return err
+				}
+				end, err := time.ParseInLocation("2006-01-02", parts[1], time.UTC)
+				if err != nil {
+					return nil
+				}
+				req.StartDate = time.Date(start.Year(), start.Month(), start.Day(), 0,
+					0, 0, 0, time.Local)
+				req.EndDate = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0,
+					time.Local)
+				sort.Sort(ByLeaveDay(req.RequestedDays))
+				begin := -1
+				last := -1
+				for j, lv := range req.RequestedDays {
+					if lv.LeaveDate.Before(req.StartDate) {
+						begin = j
+					} else if lv.LeaveDate.After(req.EndDate) && last < 0 {
+						last = j
+					}
+				}
+				if begin >= 0 && last >= 0 {
+					req.RequestedDays = req.RequestedDays[begin+1 : last]
+				} else if begin >= 0 {
+					req.RequestedDays = req.RequestedDays[begin+1:]
+				} else if last >= 0 {
+					req.RequestedDays = req.RequestedDays[:last]
+				}
+				for start.Before(end) || start.Equal(end) {
+					found := false
+					for _, lv := range req.RequestedDays {
+						if lv.LeaveDate.Equal(start) {
+							found = true
+						}
+					}
+					if !found {
+						wd := e.GetWorkday(start)
+						log.Println(start.Format("2006-01-02") + " - |" + strconv.FormatInt(int64(len(wd.Code)), 10) + "|")
+						if wd.Code != "" {
+							hours := wd.Hours
+							if req.PrimaryCode == "H" {
+								hours = 8.0
+							} else if hours == 0.0 {
+								hours = e.GetStandardWorkday(start)
+							}
+							lv := LeaveDay{
+								LeaveDate: start,
+								Code:      req.PrimaryCode,
+								Hours:     hours,
+								Status:    "REQUESTED",
+								RequestID: req.ID,
+							}
+							req.RequestedDays = append(req.RequestedDays, lv)
+						}
+					}
+					start = start.AddDate(0, 0, 1)
+				}
 			case "approve":
 				req.ApprovedBy = value
 				req.ApprovalDate = time.Now().UTC()
 				req.Status = "APPROVED"
+				var deletes []int
 				for _, rLv := range req.RequestedDays {
 					found := false
 					for j, lv := range e.Leaves {
 						if lv.LeaveDate.Equal(rLv.LeaveDate) {
 							found = true
-							if lv.Status != "ACTUAL" {
-								lv.Code = rLv.Code
-								lv.Hours = rLv.Hours
-								lv.Status = "APPROVED"
-								lv.RequestID = rLv.RequestID
-								e.Leaves[j] = lv
-							}
-							if !found {
-								rLv.Status = "APPROVED"
-								e.Leaves = append(e.Leaves, rLv)
+							if rLv.Code != "" && !found {
+								if lv.Status != "ACTUAL" {
+									lv.Code = rLv.Code
+									lv.Hours = rLv.Hours
+									lv.Status = "APPROVED"
+									lv.RequestID = rLv.RequestID
+									e.Leaves[j] = lv
+								}
+								if !found {
+									rLv.Status = "APPROVED"
+									e.Leaves = append(e.Leaves, rLv)
+									if strings.ToLower(rLv.Code) == "h" && rLv.Hours == 8.0 {
+										std := e.GetStandardWorkday(rLv.LeaveDate)
+										if std > rLv.Hours {
+											lv := LeaveDay{
+												LeaveDate: rLv.LeaveDate,
+												Code:      "V",
+												Hours:     std - rLv.Hours,
+												Status:    "APPROVED",
+												RequestID: req.ID,
+											}
+											e.Leaves = append(e.Leaves, lv)
+										}
+									}
+								}
+							} else if !found {
+								deletes = append(deletes, j)
 							}
 						}
 					}
 				}
+				if len(deletes) > 0 {
+					for i := len(deletes) - 1; i >= 0; i-- {
+						e.Leaves = append(e.Leaves[:deletes[i]], e.Leaves[deletes[i]-1:]...)
+					}
+				}
+				sort.Sort(ByLeaveDay(e.Leaves))
 			case "day", "requestday":
 				parts := strings.Split(value, "|")
 				lvDate, _ := time.Parse("2006-01-02", parts[0])
@@ -360,7 +476,11 @@ func (e *EmployeeData) UpdateLeaveRequest(request, field, value string) error {
 					if lv.LeaveDate.Equal(lvDate) {
 						found = true
 						lv.Code = code
-						lv.Hours = hours
+						if code == "" {
+							lv.Hours = 0.0
+						} else {
+							lv.Hours = hours
+						}
 						req.RequestedDays[j] = lv
 					}
 				}
@@ -393,6 +513,20 @@ func (e *EmployeeData) DeleteLeaveRequest(request string) error {
 		return errors.New("request not found")
 	}
 	e.Requests = append(e.Requests[:pos], e.Requests[pos+1:]...)
+	// delete all leaves associated with this leave request, except if the leave
+	// has a status of actual
+	sort.Sort(ByLeaveDay(e.Leaves))
+	var deletes []int
+	for i, lv := range e.Leaves {
+		if lv.RequestID == request && strings.ToLower(lv.Status) != "actual" {
+			deletes = append(deletes, i)
+		}
+	}
+	if len(deletes) > 0 {
+		for i := len(deletes) - 1; i >= 0; i-- {
+			e.Leaves = append(e.Leaves[:deletes[i]], e.Leaves[deletes[i]+1:]...)
+		}
+	}
 	return nil
 }
 

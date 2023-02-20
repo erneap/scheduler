@@ -41,7 +41,7 @@ func (c ByForecastReport) Less(i, j int) bool {
 }
 func (c ByForecastReport) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
-func (r *ForecastReport) ChargePeriodsStart(sDate time.Time) {
+func (r *ForecastReport) ChangePeriodsStart(sDate time.Time) {
 	end := time.Date(r.EndDate.Year(), r.EndDate.Month(), r.EndDate.Day(), 0, 0,
 		0, 0, time.UTC)
 	for end.Weekday() != sDate.Weekday() {

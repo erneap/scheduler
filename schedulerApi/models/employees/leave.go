@@ -71,7 +71,7 @@ func (lr *LeaveRequest) SetLeaveDay(date time.Time, code string, hours float64) 
 	}
 }
 
-func (lr *LeaveRequest) SetLeaveDays(emp *EmployeeData) {
+func (lr *LeaveRequest) SetLeaveDays(emp *Employee, offset float64) {
 	sDate := time.Date(lr.StartDate.Year(), lr.StartDate.Month(),
 		lr.StartDate.Day(), 0, 0, 0, 0, time.UTC)
 	sort.Sort(ByLeaveDay(lr.RequestedDays))
@@ -101,7 +101,7 @@ func (lr *LeaveRequest) SetLeaveDays(emp *EmployeeData) {
 			}
 		}
 		if !found {
-			wd := emp.GetWorkday(sDate)
+			wd := emp.GetWorkday(sDate, offset)
 			if wd.Code != "" {
 				hours := wd.Hours
 				if lr.PrimaryCode == "H" {

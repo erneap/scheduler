@@ -135,18 +135,20 @@ export class LeaveRequestComponent {
       this.empService.addNewLeaveRequest(this.employee.id, start, end, code)
         .subscribe({
           next: (data) => {
-            this.employee = data;
+            if (data.employee) {
+              this.employee = data.employee;
+            }
             this.setCurrent();
             const emp = this.empService.getEmployee();
-            if (emp && emp.id === data.id) {
-              this.empService.setEmployee(data);
+            if (data.employee && emp && emp.id === data.employee.id) {
+              this.empService.setEmployee(data.employee);
             }
             const site = this.siteService.getSite();
-            if (site && site.employees && site.employees.length) {
+            if (site && site.employees && site.employees.length && data.employee) {
               let found = false;
               for (let i=0; i < site.employees.length && !found; i++) {
-                if (site.employees[i].id === data.id) {
-                  site.employees[i] = new Employee(data);
+                if (site.employees[i].id === data.employee.id) {
+                  site.employees[i] = new Employee(data.employee);
                 }
               }
             }
@@ -164,8 +166,90 @@ export class LeaveRequestComponent {
         this.currentLeaveRequest = new LeaveRequest(lr);
         this.editorForm.controls["start"].setValue(this.currentLeaveRequest.startdate)
         this.editorForm.controls["end"].setValue(this.currentLeaveRequest.enddate);
-        this.editorForm.controls["code"].setValue(this.currentLeaveRequest.primarycode);
+        this.editorForm.controls["primarycode"].setValue(this.currentLeaveRequest.primarycode);
+        console.log(this.currentLeaveRequest.primarycode);
       }
     });
+  }
+
+  processChange(field: string) {
+    if (this._employee && this.currentLeaveRequest) {
+      switch (field.toLowerCase()) {
+        case "start":
+        case "end":
+          const start = this.editorForm.value.start;
+          const end = this.editorForm.value.end;
+          let sDate = `${start.getFullYear()}-`
+            + `${(start.getMonth() < 9) ? '0' : ''}${start.getMonth() + 1}-`
+            + `${(start.getDate() < 10) ? '0' : ''}${start.getDate()}|`
+            + `${end.getFullYear()}-`
+            + `${(end.getMonth() < 9)? '0' : ''}${end.getMonth() + 1}-`
+            + `${(end.getDate() < 10) ? '0' : ''}${end.getDate()}`;
+          this.empService.updateLeaveRequest(this.employee.id, 
+            this.currentLeaveRequest.id, 'dates', sDate)
+            .subscribe({
+              next: (data) => {
+                if (data.employee) {
+                  this.employee = data.employee;
+                  this.employee.data.requests.forEach(req => {
+                    if (this.currentLeaveRequest?.id === req.id) {
+                      this.currentLeaveRequest = new LeaveRequest(req)
+                    }
+                  });
+                }
+                this.setCurrent();
+                const emp = this.empService.getEmployee();
+                if (data.employee && emp && emp.id === data.employee.id) {
+                  this.empService.setEmployee(data.employee);
+                }
+                const site = this.siteService.getSite();
+                if (site && site.employees && site.employees.length && data.employee) {
+                  let found = false;
+                  for (let i=0; i < site.employees.length && !found; i++) {
+                    if (site.employees[i].id === data.employee.id) {
+                      site.employees[i] = new Employee(data.employee);
+                    }
+                  }
+                }
+              },
+              error: err => {
+                console.log(err)
+              }
+            });
+          break;
+        case "code":
+          this.empService.updateLeaveRequest(this.employee.id, 
+            this.currentLeaveRequest.id, 'code', this.editorForm.value.primarycode)
+            .subscribe({
+              next: (data) => {
+                if (data.employee) {
+                  this.employee = data.employee;
+                  this.employee.data.requests.forEach(req => {
+                    if (this.currentLeaveRequest?.id === req.id) {
+                      this.currentLeaveRequest = new LeaveRequest(req)
+                    }
+                  });
+                }
+                this.setCurrent();
+                const emp = this.empService.getEmployee();
+                if (data.employee && emp && emp.id === data.employee.id) {
+                  this.empService.setEmployee(data.employee);
+                }
+                const site = this.siteService.getSite();
+                if (site && site.employees && site.employees.length && data.employee) {
+                  let found = false;
+                  for (let i=0; i < site.employees.length && !found; i++) {
+                    if (site.employees[i].id === data.employee.id) {
+                      site.employees[i] = new Employee(data.employee);
+                    }
+                  }
+                }
+              },
+              error: err => {
+                console.log(err)
+              }
+            });
+      }
+    }
   }
 }

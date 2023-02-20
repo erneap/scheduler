@@ -245,6 +245,7 @@
     {
       "id": "dgsc",
       "name": "DGS-C",
+      "utcoffset": 9.0,
       "workcenters": [
         {
           "id": "leads",

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Employee, IEmployee } from '../models/employees/employee';
-import { EmployeeLeaveRequest } from '../models/web/employeeWeb';
+import { EmployeeLeaveRequest, EmployeeResponse, UpdateRequest } from '../models/web/employeeWeb';
 import { CacheService } from './cache.service';
 import { TeamService } from './team.service';
 
@@ -61,7 +61,7 @@ export class EmployeeService extends CacheService {
   }
 
   addNewLeaveRequest(empid: string, start: Date, end: Date, 
-    code: string): Observable<IEmployee> {
+    code: string): Observable<EmployeeResponse> {
     const data: EmployeeLeaveRequest = {
       employee: this.getEmployeeID(),
       code: code,
@@ -69,8 +69,18 @@ export class EmployeeService extends CacheService {
       enddate: end,
     };
     const url = '/scheduler/api/v1/employee/request';
-    return this.httpClient.post<IEmployee>(url, data);
+    return this.httpClient.post<EmployeeResponse>(url, data);
   }
 
-  updateLeaveRequest(empid: string)
+  updateLeaveRequest(empid: string, reqid: string, field: string, value: string): 
+    Observable<EmployeeResponse> {
+    const url = '/scheduler/api/v1/employee/request';
+    const data: UpdateRequest = {
+      id: empid,
+      optional: reqid,
+      field: field,
+      value: value,
+    }
+    return this.httpClient.put<EmployeeResponse>(url, data)
+  }
 }

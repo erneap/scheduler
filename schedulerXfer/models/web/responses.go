@@ -10,6 +10,8 @@ type AuthenticationResponse struct {
 	User      *users.User         `json:"user,omitempty"`
 	Token     string              `json:"token"`
 	Employee  *employees.Employee `json:"employee,omitempty"`
+	Site      *sites.Site         `json:"site,omitempty"`
+	Team      *sites.Team         `json:"team,omitempty"`
 	Exception string              `json:"exception"`
 }
 

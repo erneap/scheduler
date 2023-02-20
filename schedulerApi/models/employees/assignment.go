@@ -36,8 +36,9 @@ func (a *Assignment) UseAssignment(site string, date time.Time) bool {
 		(a.EndDate.Equal(date) || a.EndDate.After(date))
 }
 
-func (a *Assignment) GetWorkday(site string, date time.Time) *Workday {
-	days := int(math.Floor(date.Sub(a.StartDate).Hours() / 24))
+func (a *Assignment) GetWorkday(offset float64, date time.Time) *Workday {
+	// get the site utc offset
+	days := int(math.Floor((date.Sub(a.StartDate).Hours() - offset) / 24))
 	if len(a.Schedules) == 1 || a.RotationDays <= 0 {
 		iDay := days % len(a.Schedules[0].Workdays)
 		return a.Schedules[0].GetWorkday(uint(iDay))

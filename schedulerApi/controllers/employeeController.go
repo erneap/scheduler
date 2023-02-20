@@ -299,7 +299,7 @@ func DeleteEmployeeAssignment(c *gin.Context) {
 		}
 		return
 	}
-	emp.Data.RemoveAssignment(uint(asgmtID))
+	emp.RemoveAssignment(uint(asgmtID))
 
 	err = services.UpdateEmployee(emp)
 	if err != nil {
@@ -741,7 +741,7 @@ func CreateEmployeeLeaveRequest(c *gin.Context) {
 		return
 	}
 
-	emp.Data.NewLeaveRequest(data.EmployeeID, data.Code, data.StartDate,
+	emp.NewLeaveRequest(data.EmployeeID, data.Code, data.StartDate,
 		data.EndDate)
 
 	err = services.UpdateEmployee(emp)
@@ -775,9 +775,14 @@ func UpdateEmployeeLeaveRequest(c *gin.Context) {
 		}
 		return
 	}
+	site, _ := services.GetSite(emp.TeamID.Hex(), emp.SiteID)
+	offset := 0.0
+	if site != nil {
+		offset = site.UtcOffset
+	}
 
-	err = emp.Data.UpdateLeaveRequest(data.OptionalID, data.Field,
-		data.StringValue())
+	err = emp.UpdateLeaveRequest(data.OptionalID, data.Field,
+		data.StringValue(), offset)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
 			Exception: err.Error()})
@@ -812,7 +817,7 @@ func DeleteEmployeeLeaveRequest(c *gin.Context) {
 		return
 	}
 
-	err = emp.Data.DeleteLeaveRequest(reqID)
+	err = emp.DeleteLeaveRequest(reqID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
 			Exception: err.Error()})
@@ -851,7 +856,7 @@ func AddEmployeeLaborCode(c *gin.Context) {
 		return
 	}
 
-	emp.Data.AddLaborCode(data.ChargeNumber, data.Extension)
+	emp.AddLaborCode(data.ChargeNumber, data.Extension)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
 			Exception: err.Error()})
@@ -887,7 +892,7 @@ func DeleteEmployeeLaborCode(c *gin.Context) {
 		return
 	}
 
-	emp.Data.DeleteLaborCode(chgNo, ext)
+	emp.DeleteLaborCode(chgNo, ext)
 
 	err = services.UpdateEmployee(emp)
 	if err != nil {
