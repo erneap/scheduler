@@ -3,3 +3,5 @@ scheduler-client/node_modules/**/*
 DatabaseExport.zip
 **/*/.env
 **/.env
+schedulerXfer/.env
+schedulerApi/.env
