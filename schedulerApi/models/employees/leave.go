@@ -2,7 +2,6 @@ package employees
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"time"
 )
@@ -103,7 +102,6 @@ func (lr *LeaveRequest) SetLeaveDays(emp *Employee, offset float64) {
 		lr.RequestedDays = lr.RequestedDays[:endPos]
 	}
 	for sDate.Before(lr.EndDate) || sDate.Equal(lr.EndDate) {
-		log.Println(sDate)
 		found := false
 		for _, lv := range lr.RequestedDays {
 			if lv.LeaveDate.Equal(sDate) {

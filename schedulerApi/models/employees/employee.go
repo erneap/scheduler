@@ -437,6 +437,7 @@ func (e *Employee) UpdateLeaveRequest(request, field, value string,
 				}
 				sort.Sort(ByLeaveDay(e.Data.Leaves))
 			case "day", "requestday":
+				fmt.Println(value)
 				parts := strings.Split(value, "|")
 				lvDate, _ := time.Parse("2006-01-02", parts[0])
 				code := parts[1]

@@ -83,4 +83,9 @@ export class EmployeeService extends CacheService {
     }
     return this.httpClient.put<EmployeeResponse>(url, data)
   }
+
+  deleteLeaveRequest(empid: string, reqid: string): Observable<EmployeeResponse> {
+    const url = `/scheduler/api/v1/employee/request/${empid}/${reqid}`;
+    return this.httpClient.delete<EmployeeResponse>(url);
+  }
 }

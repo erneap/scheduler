@@ -12,7 +12,7 @@
     <div class="fxLayout-row-center">
       <app-leave-request-calendar-day *ngFor="let lv of week.leaves"
         [leave]="lv" [leaveCodes]="leaveCodes" [startDate]="startdate"
-        [endDate]="enddate"></app-leave-request-calendar-day>
+        [endDate]="enddate" (changed)="processChange($event)"></app-leave-request-calendar-day>
     </div>
   </ng-container>
 </div>

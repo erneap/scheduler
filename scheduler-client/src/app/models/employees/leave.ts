@@ -40,7 +40,7 @@ export class LeaveDay implements ILeaveDay {
 
   constructor(ld?: ILeaveDay) {
     this.leavedate = (ld) ? new Date(ld.leavedate) : new Date();
-    this.code = (ld) ? ld.code : 'V';
+    this.code = (ld) ? ld.code : '';
     this.hours = (ld) ? ld.hours : 0.0;
     this.status = (ld) ? ld.status : "REQUESTED";
     this.requestid = (ld) ? ld.requestid : '';

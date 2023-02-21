@@ -1,11 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { LeaveRequest } from 'src/app/models/employees/leave';
 import { Workcode } from 'src/app/models/teams/workcode';
+import { DialogService } from 'src/app/services/dialog-service.service';
 import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
 import { TeamService } from 'src/app/services/team.service';
+import { DeleteLeaveRequestDialogComponent } from './delete-leave-request-dialog/delete-leave-request-dialog.component';
 
 @Component({
   selector: 'app-leave-request',
@@ -41,7 +44,9 @@ export class LeaveRequestComponent {
     protected empService: EmployeeService,
     protected siteService: SiteService,
     protected teamService: TeamService,
-    private fb: FormBuilder
+    protected dialogService: DialogService,
+    private fb: FormBuilder,
+    protected dialog: MatDialog
   ) { 
     this.editorForm = this.fb.group({
       start: [new Date(), [Validators.required]],
@@ -115,7 +120,7 @@ export class LeaveRequestComponent {
       }
       return answer;
     }
-    return '';
+    return '-';
   }
 
   getApprovedDate(): string {
@@ -124,7 +129,7 @@ export class LeaveRequestComponent {
         + `${this.currentLeaveRequest.approvalDate.getDate()}/`
         + `${this.currentLeaveRequest.approvalDate.getFullYear()}`;
     }
-    return '';
+    return '-';
   }
 
   processNewRequest() {
@@ -253,5 +258,96 @@ export class LeaveRequestComponent {
             });
       }
     }
+  }
+
+  processDayChange(value: string) {
+    if (value !== '' && this.currentLeaveRequest) {
+      this.empService.updateLeaveRequest(this.employee.id, 
+        this.currentLeaveRequest.id, 'day', value)
+        .subscribe({
+          next: (data) => {
+            if (data.employee) {
+              this.employee = data.employee;
+              this.employee.data.requests.forEach(req => {
+                if (this.currentLeaveRequest?.id === req.id) {
+                  this.currentLeaveRequest = new LeaveRequest(req)
+                }
+              });
+            }
+            this.setCurrent();
+            const emp = this.empService.getEmployee();
+            if (data.employee && emp && emp.id === data.employee.id) {
+              this.empService.setEmployee(data.employee);
+            }
+            const site = this.siteService.getSite();
+            if (site && site.employees && site.employees.length && data.employee) {
+              let found = false;
+              for (let i=0; i < site.employees.length && !found; i++) {
+                if (site.employees[i].id === data.employee.id) {
+                  site.employees[i] = new Employee(data.employee);
+                }
+              }
+            }
+          },
+          error: err => {
+            console.log(err)
+          }
+        });
+    }
+  }
+
+  deleteRequest() {
+    const dialogRef = this.dialog.open(DeleteLeaveRequestDialogComponent, {
+      width: '250px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result.toLowerCase() === 'yes') {
+        this.dialogService.showSpinner();
+        const reqid = this.currentLeaveRequest?.id;
+        this.clearRequest();
+        if (reqid) {
+          this.empService.deleteLeaveRequest(this.employee.id, reqid)
+            .subscribe({
+              next: (data) => {
+                if (data.employee) {
+                  this.employee = data.employee;
+                  this.employee.data.requests.forEach(req => {
+                    if (this.currentLeaveRequest?.id === req.id) {
+                      this.currentLeaveRequest = new LeaveRequest(req)
+                    }
+                  });
+                }
+                this.setCurrent();
+                const emp = this.empService.getEmployee();
+                if (data.employee && emp && emp.id === data.employee.id) {
+                  this.empService.setEmployee(data.employee);
+                }
+                const site = this.siteService.getSite();
+                if (site && site.employees && site.employees.length && data.employee) {
+                  let found = false;
+                  for (let i=0; i < site.employees.length && !found; i++) {
+                    if (site.employees[i].id === data.employee.id) {
+                      site.employees[i] = new Employee(data.employee);
+                    }
+                  }
+                }
+                this.dialogService.closeSpinner();
+              },
+              error: err => {
+                this.dialogService.closeSpinner();
+                console.log(err)
+              }
+            });
+        }
+      }
+    });
+  }
+
+  clearRequest() {
+    this.currentLeaveRequest = undefined;
+    this.editorForm.controls["start"].setValue(new Date())
+    this.editorForm.controls["end"].setValue(new Date());
+    this.editorForm.controls["primarycode"].setValue('V');
   }
 }

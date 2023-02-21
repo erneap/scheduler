@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ILeaveDay, LeaveDay, LeaveGroup, LeaveMonth } from 'src/app/models/employees/leave';
 import { Workcode } from 'src/app/models/teams/workcode';
 
@@ -32,7 +32,6 @@ export class LeaveRequestCalendarComponent {
   public set leavedays(days: ILeaveDay[]) {
     this._leaveDays = [];
     days.forEach(day => {
-      console.log(JSON.stringify(day));
       this._leaveDays.push(new LeaveDay(day));
     });
     this._leaveDays.sort((a,b) => a.compareTo(b));
@@ -41,6 +40,8 @@ export class LeaveRequestCalendarComponent {
   get leavedays(): LeaveDay[] {
     return this._leaveDays;
   }
+  @Output() changed = new EventEmitter<string>();
+
   calendar: LeaveMonth = new LeaveMonth();
 
   setMonth() {
@@ -73,5 +74,9 @@ export class LeaveRequestCalendarComponent {
       week.addLeave(day);
       start = new Date(start.getTime() + (24 * 3600000));
     }
+  }
+
+  processChange(value: string) {
+    this.changed.emit(value);
   }
 }

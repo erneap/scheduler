@@ -3,6 +3,7 @@
     <div class="dayOfMonth weekday">{{leave.leavedate.getDate()}}</div>
     <div class="code">
       <select class="day-form-field" formControlName="code"
+      [style]="fontStyle"
         (change)="changeCode()">
         <option value=""></option>
         <ng-container *ngFor="let opt of leaveCodes">
@@ -11,7 +12,9 @@
       </select>
     </div>
     <div class="hours">
-      <input class="day-form-field" formControlName="hours">
+      <input class="day-form-field" formControlName="hours"
+        [style]="fontStyle"
+        (blur)="changeCode()">
     </div>
   </form>
 </div>

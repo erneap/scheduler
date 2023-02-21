@@ -745,7 +745,7 @@ func CreateEmployeeLeaveRequest(c *gin.Context) {
 	data.StartDate = data.StartDate.Add(time.Hour * time.Duration(site.UtcOffset))
 	data.EndDate = data.EndDate.Add(time.Hour * time.Duration(site.UtcOffset))
 	emp.NewLeaveRequest(data.EmployeeID, data.Code, data.StartDate,
-		data.EndDate)
+		data.EndDate, site.UtcOffset)
 
 	err = services.UpdateEmployee(emp)
 	if err != nil {

@@ -17,6 +17,8 @@ import { PtoMonthDatesDisplayComponent } from './pto-holiday/pto/pto-month/pto-m
 import { LeaveRequestComponent } from './leave-request/leave-request.component';
 import { LeaveRequestCalendarComponent } from './leave-request/leave-request-calendar/leave-request-calendar.component';
 import { LeaveRequestCalendarDayComponent } from './leave-request/leave-request-calendar-day/leave-request-calendar-day.component';
+import { DeleteLeaveRequestDialogComponent } from './leave-request/delete-leave-request-dialog/delete-leave-request-dialog.component';
+import { EmployeeLaborCodesComponent } from './employee-labor-codes/employee-labor-codes.component';
 
 
 @NgModule({
@@ -34,7 +36,9 @@ import { LeaveRequestCalendarDayComponent } from './leave-request/leave-request-
     PtoMonthDatesDisplayComponent,
     LeaveRequestComponent,
     LeaveRequestCalendarComponent,
-    LeaveRequestCalendarDayComponent
+    LeaveRequestCalendarDayComponent,
+    DeleteLeaveRequestDialogComponent,
+    EmployeeLaborCodesComponent
   ],
   imports: [
     CommonModule,

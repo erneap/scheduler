@@ -6,18 +6,20 @@
         <span class="flex-spacer"></span>
         <button mat-icon-button color="accent"
           *ngIf="this.currentLeaveRequest"
-          matTooltip="Delete Current Leave Request">
+          matTooltip="Delete Current Leave Request"
+          (click)="deleteRequest()">
           <mat-icon>delete</mat-icon>
         </button>
         <button mat-icon-button
-          matTooltip="Clear editor">
+          matTooltip="Clear editor"
+          (click)="clearRequest()">
           <mat-icon>deselect</mat-icon>
         </button>
       </div>
     </mat-card-header>
     <mat-card-content>
-      <div class="fxLayout-row-center">
-        <div class="fxLayout-column-center" style="width: 30%;height:100%;min-height: 150px;">
+      <div class="fxLayout-row-topcenter">
+        <div class="fxLayout-column-top" style="width: 30%;height:100%;min-height: 150px;">
           <h3>Current Leave Requests</h3>
           <div class="lrList">
             <ng-container *ngIf="currentLeaveRequests.length > 0">
@@ -70,27 +72,23 @@
               </button> 
             </div>
           </form>
-          <div *ngIf="this.currentLeaveRequest">
+          <div *ngIf="this.currentLeaveRequest" style="padding-bottom: 10px;">
             <div class="fxLayout-column-center">
               <div class="fxLayout-row-center">
-                <div>ID:</div>
-                <div>{{currentLeaveRequest.id}}</div>
+                <div class="label">Created On:</div>
+                <div class="label">{{getCurrentLeaveRequestDate()}}</div>
               </div>
               <div class="fxLayout-row-center">
-                <div>Request Date:</div>
-                <div>{{getCurrentLeaveRequestDate()}}</div>
+                <div class="label">Current Status:</div>
+                <div class="label">{{currentLeaveRequest.status.toUpperCase()}}</div>
               </div>
               <div class="fxLayout-row-center">
-                <div>Current Status:</div>
-                <div>{{currentLeaveRequest.status.toUpperCase()}}</div>
+                <div class="label">Approved By:</div>
+                <div class="label">{{getApprovedBy()}}</div>
               </div>
               <div class="fxLayout-row-center">
-                <div>Approved By:</div>
-                <div>{{getApprovedBy()}}</div>
-              </div>
-              <div class="fxLayout-row-center">
-                <div>Approval Date:</div>
-                <div>{{getApprovedDate()}}</div>
+                <div class="label">Approval Date:</div>
+                <div class="label">{{getApprovedDate()}}</div>
               </div>
             </div>
           </div>
@@ -98,7 +96,8 @@
             <app-leave-request-calendar [leaveCodes]="leaveList" 
               [startdate]="currentLeaveRequest.startdate"
               [enddate]="currentLeaveRequest.enddate"
-              [leavedays]="currentLeaveRequest.requesteddays">
+              [leavedays]="currentLeaveRequest.requesteddays"
+              (changed)="processDayChange($event)">
             </app-leave-request-calendar>
           </div>
         </div>

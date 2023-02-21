@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ILeaveDay, LeaveDay } from 'src/app/models/employees/leave';
 import { Workcode } from 'src/app/models/teams/workcode';
@@ -54,8 +54,11 @@ export class LeaveRequestCalendarDayComponent {
     }
     return new Date();
   }
+  @Output() changed = new EventEmitter<string>();
+
   dayForm: FormGroup;
   dayStyle: string = 'background-color: black; color: black;';
+  fontStyle: string = 'color: #000000 !important;';
 
   constructor(
     private fb: FormBuilder,
@@ -81,19 +84,30 @@ export class LeaveRequestCalendarDayComponent {
           this.leaveCodes.forEach(wc => {
             if (wc.id.toLowerCase() == this.leave.code.toLowerCase()) {
               this.dayStyle = `background-color: #${wc.backcolor};color: #${wc.textcolor};`;
+              this.fontStyle = `color: #${wc.textcolor} !important;`;
             }
           });
         } else {
           this.dayStyle = 'background-color: white;color: black;';
+          this.fontStyle = `color: #FFFFFF !important;`;
         }
       } else {
         this.dayStyle = `background-color: black;color: black;`;
+        this.fontStyle = `color: #000000 !important;`;
       }
     }
   }
 
   changeCode() {
     this.leave.code = this.dayForm.value.code;
+    this.leave.hours = Number(this.dayForm.value.hours);
+    let data: string = `${this.leave.leavedate.getFullYear()}-`
+      + ((this.leave.leavedate.getMonth() < 9) ? '0' : '') 
+      + `${this.leave.leavedate.getMonth() + 1}-`
+      + ((this.leave.leavedate.getDate() < 10) ? '0' : '') 
+      + `${this.leave.leavedate.getDate()}`
+      + `|${this.leave.code}|${this.leave.hours}`;
+    this.changed.emit(data);
     this.setLeave();
   }
 }
