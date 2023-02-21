@@ -2,4 +2,4 @@ scheduler-client/node_modules/**/*
 .DS_Store
 DatabaseExport.zip
 **/*/.env
-schedulerApi/.env
+**/.env

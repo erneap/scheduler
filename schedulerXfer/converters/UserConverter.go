@@ -8,6 +8,7 @@ import (
 	"github.com/erneap/scheduler/schedulerXfer/models/users"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // The user converter will process the users from the already present metrics
@@ -34,6 +35,19 @@ func (u *UserConverter) ReadUsers() {
 func (u *UserConverter) WriteUsers() {
 	// delete all users currently in database
 	newCol := config.GetCollection(config.DB, "authenticate", "users")
+	if len(u.Users) == 0 {
+		user := users.User{
+			ID:           primitive.NewObjectID(),
+			EmailAddress: "antonerne@yahoo.com",
+			FirstName:    "Anton",
+			MiddleName:   "Peter",
+			LastName:     "Erne",
+			Workgroups: []string{"scheduler-employee", "scheduler-admin",
+				"scheduler-scheduler"},
+		}
+		user.SetPassword("mko09IJNbhu8")
+		u.Users = append(u.Users, user)
+	}
 	newCol.DeleteMany(context.TODO(), bson.M{})
 
 	for _, usr := range u.Users {
