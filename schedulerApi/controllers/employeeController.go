@@ -741,6 +741,9 @@ func CreateEmployeeLeaveRequest(c *gin.Context) {
 		return
 	}
 
+	site, _ := services.GetSite(emp.TeamID.Hex(), emp.SiteID)
+	data.StartDate = data.StartDate.Add(time.Hour * time.Duration(site.UtcOffset))
+	data.EndDate = data.EndDate.Add(time.Hour * time.Duration(site.UtcOffset))
 	emp.NewLeaveRequest(data.EmployeeID, data.Code, data.StartDate,
 		data.EndDate)
 

@@ -32,6 +32,7 @@ export class LeaveRequestCalendarComponent {
   public set leavedays(days: ILeaveDay[]) {
     this._leaveDays = [];
     days.forEach(day => {
+      console.log(JSON.stringify(day));
       this._leaveDays.push(new LeaveDay(day));
     });
     this._leaveDays.sort((a,b) => a.compareTo(b));

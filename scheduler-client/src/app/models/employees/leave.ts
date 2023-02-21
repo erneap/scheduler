@@ -98,7 +98,7 @@ export class LeaveRequest implements ILeaveRequest {
     this.requesteddays = [];
     if (lr && lr.requesteddays && lr.requesteddays.length > 0) {
       lr.requesteddays.forEach(rd => {
-        lr.requesteddays.push(new LeaveDay(rd))
+        this.requesteddays.push(new LeaveDay(rd))
       });
       this.requesteddays.sort((a,b) => a.compareTo(b))
     }

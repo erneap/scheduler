@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -184,7 +185,7 @@ func (e *Employee) GetWorkday(date time.Time, offset float64) *Workday {
 		if (asgmt.StartDate.Before(date) || asgmt.StartDate.Equal(date)) &&
 			(asgmt.EndDate.After(date) || asgmt.EndDate.Equal(date)) {
 			siteid = asgmt.Site
-			wkday = asgmt.GetWorkday(offset, date)
+			wkday = asgmt.GetWorkday(date, offset)
 		}
 	}
 	for _, vari := range e.Data.Variations {
@@ -213,6 +214,7 @@ func (e *Employee) GetStandardWorkday(date time.Time) float64 {
 		if wd.Code != "" {
 			count++
 		}
+		start = start.AddDate(0, 0, 1)
 	}
 	if count < 5 {
 		answer = 10.0
@@ -299,7 +301,8 @@ func (e *Employee) UpdateLeave(date time.Time, code, status string,
 	}
 }
 
-func (e *Employee) NewLeaveRequest(empID, code string, start, end time.Time) {
+func (e *Employee) NewLeaveRequest(empID, code string, start, end time.Time,
+	offset float64) {
 	lr := LeaveRequest{
 		ID:          primitive.NewObjectID().Hex(),
 		EmployeeID:  empID,
@@ -309,11 +312,18 @@ func (e *Employee) NewLeaveRequest(empID, code string, start, end time.Time) {
 		EndDate:     end,
 		Status:      "REQUESTED",
 	}
+	zoneID := "UTC"
+	if offset > 0 {
+		zoneID += "+" + fmt.Sprintf("%0.1f", offset)
+	} else if offset < 0 {
+		zoneID += fmt.Sprintf("%0.1f", offset)
+	}
+	timeZone := time.FixedZone(zoneID, int(offset*60*60))
 	sDate := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0,
-		time.UTC)
+		timeZone)
 	std := e.GetStandardWorkday(sDate)
 	for sDate.Before(end) || sDate.Equal(end) {
-		wd := e.GetWorkday(sDate, 0.0)
+		wd := e.GetWorkday(sDate, offset)
 		if wd.Code != "" {
 			hours := wd.Hours
 			if hours == 0.0 {

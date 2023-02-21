@@ -2,6 +2,7 @@ package employees
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sort"
 	"strings"
@@ -36,16 +37,28 @@ func (a *Assignment) UseAssignment(site string, date time.Time) bool {
 		(a.EndDate.Equal(date) || a.EndDate.After(date))
 }
 
-func (a *Assignment) GetWorkday(offset float64, date time.Time) *Workday {
+func (a *Assignment) GetWorkday(date time.Time, offset float64) *Workday {
 	// get the site utc offset
-	days := int(math.Floor((date.Sub(a.StartDate).Hours() - offset) / 24))
+	zoneID := "UTC"
+	if offset > 0 {
+		zoneID += "+" + fmt.Sprintf("%0.1f", offset)
+	} else if offset < 0 {
+		zoneID += fmt.Sprintf("%0.1f", offset)
+	}
+	timeZone := time.FixedZone(zoneID, int(offset*60*60))
+	start := time.Date(a.StartDate.Year(), a.StartDate.Month(), a.StartDate.Day(),
+		0, 0, 0, 0, timeZone)
+	for start.Weekday() != time.Sunday {
+		start = start.AddDate(0, 0, -1)
+	}
+	days := int(math.Floor((date.Sub(start).Hours()) / 24))
 	if len(a.Schedules) == 1 || a.RotationDays <= 0 {
 		iDay := days % len(a.Schedules[0].Workdays)
 		return a.Schedules[0].GetWorkday(uint(iDay))
 	} else if len(a.Schedules) > 1 {
 		schID := (days / a.RotationDays) % len(a.Schedules)
 		iDay := days % len(a.Schedules[schID].Workdays)
-		return &a.Schedules[schID].Workdays[iDay]
+		return a.Schedules[schID].GetWorkday(uint(iDay))
 	}
 	return nil
 }
@@ -155,12 +168,13 @@ func (sc *Schedule) GetWorkday(id uint) *Workday {
 
 func (sc *Schedule) UpdateWorkday(id uint, wkctr, code string, hours float64) {
 	found := false
-	for _, day := range sc.Workdays {
+	for i, day := range sc.Workdays {
 		if day.ID == id {
 			found = true
 			day.Hours = hours
 			day.Code = code
 			day.Workcenter = wkctr
+			sc.Workdays[i] = day
 		}
 	}
 	if !found {

@@ -154,12 +154,13 @@ func (sc *Schedule) GetWorkday(id uint) *Workday {
 
 func (sc *Schedule) UpdateWorkday(id uint, wkctr, code string, hours float64) {
 	found := false
-	for _, day := range sc.Workdays {
+	for i, day := range sc.Workdays {
 		if day.ID == id {
 			found = true
 			day.Hours = hours
 			day.Code = code
 			day.Workcenter = wkctr
+			sc.Workdays[i] = day
 		}
 	}
 	if !found {

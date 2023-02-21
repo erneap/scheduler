@@ -307,7 +307,6 @@ func (e *EmployeeConverter) ReadEmployeeSchedules() {
 					if len(emp.Data.Assignments) > 0 {
 						asgmt := emp.Data.Assignments[0]
 						for k, ltr := range schedule {
-
 							if k == 0 {
 								if ltr != "" {
 									asgmt.UpdateWorkday(sortID, uint(6), asgmt.Workcenter, ltr, hours)

@@ -131,7 +131,7 @@ export class LeaveRequestComponent {
     if (this.editorForm.valid && this.employee) {
       const start = this.editorForm.value.start;
       const end = this.editorForm.value.end;
-      const code = this.editorForm.value.code;
+      const code = this.editorForm.value.primarycode;
       this.empService.addNewLeaveRequest(this.employee.id, start, end, code)
         .subscribe({
           next: (data) => {
@@ -152,6 +152,9 @@ export class LeaveRequestComponent {
                 }
               }
             }
+            if (this.currentLeaveRequests.length > 0) {
+              this.currentLeaveRequest = this.currentLeaveRequests[0];
+            }
           },
           error: err => {
             console.log(err.error);
@@ -167,7 +170,6 @@ export class LeaveRequestComponent {
         this.editorForm.controls["start"].setValue(this.currentLeaveRequest.startdate)
         this.editorForm.controls["end"].setValue(this.currentLeaveRequest.enddate);
         this.editorForm.controls["primarycode"].setValue(this.currentLeaveRequest.primarycode);
-        console.log(this.currentLeaveRequest.primarycode);
       }
     });
   }

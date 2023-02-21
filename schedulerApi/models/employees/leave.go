@@ -1,6 +1,8 @@
 package employees
 
 import (
+	"fmt"
+	"log"
 	"sort"
 	"time"
 )
@@ -72,8 +74,15 @@ func (lr *LeaveRequest) SetLeaveDay(date time.Time, code string, hours float64) 
 }
 
 func (lr *LeaveRequest) SetLeaveDays(emp *Employee, offset float64) {
+	zoneID := "UTC"
+	if offset > 0 {
+		zoneID += "+" + fmt.Sprintf("%0.1f", offset)
+	} else if offset < 0 {
+		zoneID += fmt.Sprintf("%0.1f", offset)
+	}
+	timeZone := time.FixedZone(zoneID, int(offset*60*60))
 	sDate := time.Date(lr.StartDate.Year(), lr.StartDate.Month(),
-		lr.StartDate.Day(), 0, 0, 0, 0, time.UTC)
+		lr.StartDate.Day(), 0, 0, 0, 0, timeZone)
 	sort.Sort(ByLeaveDay(lr.RequestedDays))
 	endPos := -1
 	for i, lv := range lr.RequestedDays {
@@ -94,6 +103,7 @@ func (lr *LeaveRequest) SetLeaveDays(emp *Employee, offset float64) {
 		lr.RequestedDays = lr.RequestedDays[:endPos]
 	}
 	for sDate.Before(lr.EndDate) || sDate.Equal(lr.EndDate) {
+		log.Println(sDate)
 		found := false
 		for _, lv := range lr.RequestedDays {
 			if lv.LeaveDate.Equal(sDate) {
