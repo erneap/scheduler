@@ -12,7 +12,7 @@ func main() {
 
 	config.ConnectDB()
 
-	baseLoc := "/Users/antonerne/Projects/scheduler/DatabaseExport"
+	baseLoc := "D:/Projects/scheduler/DatabaseExport"
 
 	fmt.Println("Copying Users")
 	userConvert := converters.UserConverter{}

@@ -42,8 +42,7 @@ func (u *UserConverter) WriteUsers() {
 			FirstName:    "Anton",
 			MiddleName:   "Peter",
 			LastName:     "Erne",
-			Workgroups: []string{"scheduler-employee", "scheduler-admin",
-				"scheduler-scheduler"},
+			Workgroups:   []string{"ADMIN", "GEOINT"},
 		}
 		user.SetPassword("mko09IJNbhu8")
 		u.Users = append(u.Users, user)

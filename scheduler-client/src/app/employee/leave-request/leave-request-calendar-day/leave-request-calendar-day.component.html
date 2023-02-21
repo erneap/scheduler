@@ -7,7 +7,7 @@
         (change)="changeCode()">
         <option value=""></option>
         <ng-container *ngFor="let opt of leaveCodes">
-          <option [value]="opt.id">{{opt.id.toUpperCase()}}</option>
+          <option [value]="opt.id" class="options">{{opt.title.toUpperCase()}}</option>
         </ng-container>
       </select>
     </div>

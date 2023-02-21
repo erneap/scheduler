@@ -58,7 +58,8 @@ export class LeaveRequestCalendarDayComponent {
 
   dayForm: FormGroup;
   dayStyle: string = 'background-color: black; color: black;';
-  fontStyle: string = 'color: #000000 !important;';
+  fontStyle: string = 'background-color: white !important;'
+    + 'color: #000000 !important;';
 
   constructor(
     private fb: FormBuilder,
