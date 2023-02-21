@@ -71,7 +71,6 @@ export class LeaveRequestCalendarDayComponent {
       const end = new Date(this.endDate.getTime() + (24 * 3600000));
       this.dayForm.controls["code"].setValue(this.leave.code);
       if (this.leave.code !== '') {
-        console.log(JSON.stringify(this.leave));
         this.dayForm.controls["hours"].setValue(this.leave.hours);
       } else {
         this.dayForm.controls["hours"].setValue('');
