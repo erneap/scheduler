@@ -1,0 +1,27 @@
+<div class="fxLayout-column-center">
+  <div class="fxLayout-row-center">
+    <div class="direction" (click)="changeMonth('down', 'year')">&lt;&lt;</div>
+    <div class="direction" (click)="changeMonth('down', 'month')">&lt;</div>
+    <div class="month" [style]="monthStyle">{{monthLabel}}</div>
+    <div class="direction" (click)="changeMonth('up', 'month')">&gt;</div>
+    <div class="direction" (click)="changeMonth('up', 'year')">&gt;&gt;</div>
+  </div>
+  <div class="fxLayout-row-center">
+    <div class="name">&nbsp;</div>
+    <div *ngFor="let dt of dates" class="day" [style]="getDateSyyle(dt)">
+      {{dt.getDate()}}
+    </div> 
+  </div>
+  <div class="fxLayout-row-center">
+    <div class="name">Name</div>
+    <div *ngFor="let dt of dates" class="day" [style]="getDateSyyle(dt)">
+      {{weekdays[dt.getDay()]}}
+    </div> 
+  </div>
+  <ng-container *ngFor="let wkctr of workcenters">
+    <div class="workcenter" [style]="wkctrStyle">{{wkctr.name.toUpperCase()}}</div>
+    <app-site-availability-shift *ngFor="let shft of wkctr.shifts" 
+      [shift]="shft" [workcenter]="wkctr.id" [month]="month">
+    </app-site-availability-shift>
+  </ng-container>
+</div>

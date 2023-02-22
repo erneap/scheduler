@@ -6,6 +6,7 @@ import { IWorkcenter, Workcenter } from "./workcenter";
 export interface ISite {
   id: string;
   name: string;
+  showMids: boolean;
   workcenters?: IWorkcenter[];
   laborCodes?: ILaborCode[];
   forecasts?: IForecastReport[];
@@ -15,6 +16,7 @@ export interface ISite {
 export class Site implements ISite {
   id: string;
   name: string;
+  showMids: boolean;
   workcenters?: Workcenter[];
   laborCodes?: LaborCode[];
   forecasts?: ForecastReport[];
@@ -23,6 +25,7 @@ export class Site implements ISite {
   constructor(site?: ISite) {
     this.id = (site) ? site.id : '';
     this.name = (site) ? site.name : '';
+    this.showMids = (site) ? site.showMids : true;
     this.workcenters = [];
     if (site && site.workcenters && site.workcenters.length > 0) {
       site.workcenters.forEach(wc => {

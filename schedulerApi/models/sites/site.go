@@ -6,6 +6,7 @@ type Site struct {
 	ID              string               `json:"id" bson:"id"`
 	Name            string               `json:"name" bson:"name"`
 	UtcOffset       float64              `json:"utcoffset" bson:"utcoffset"`
+	ShowMids        bool                 `json:"showMids" bson:"showMids"`
 	Workcenters     []Workcenter         `json:"workcenters,omitempty" bson:"workcenters,omitempty"`
 	LaborCodes      []LaborCode          `json:"laborCodes,omitempty" bson:"laborCodes,omitempty"`
 	ForecastReports []ForecastReport     `json:"forecasts,omitempty" bson:"forecasts,omitempty"`

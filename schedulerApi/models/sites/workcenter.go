@@ -6,6 +6,7 @@ type Shift struct {
 	SortID          uint     `json:"sort" bson:"sort"`
 	AssociatedCodes []string `json:"associatedCodes,omitempty" bson:"associatedCodes,omitempty"`
 	PayCode         uint     `json:"payCode" bson:"payCode"`
+	Minimums        uint     `json:"minimums" bson:"minimums"`
 }
 
 type ByShift []Shift

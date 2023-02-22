@@ -5,6 +5,7 @@ import "github.com/erneap/scheduler/schedulerApi/models/employees"
 type Site struct {
 	ID              string               `json:"id" bson:"id"`
 	Name            string               `json:"name" bson:"name"`
+	ShowMids        bool                 `json:"showMids" bson:"showMids"`
 	Workcenters     []Workcenter         `json:"workcenters,omitempty" bson:"workcenters,omitempty"`
 	LaborCodes      []LaborCode          `json:"laborCodes,omitempty" bson:"laborCodes,omitempty"`
 	ForecastReports []ForecastReport     `json:"forecasts,omitempty" bson:"forecasts,omitempty"`

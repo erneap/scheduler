@@ -18,6 +18,7 @@ import { NotFoundComponent } from './home/not-found/not-found.component';
 import { EmployeeService } from './services/employee.service';
 import { SiteService } from './services/site.service';
 import { TeamService } from './services/team.service';
+import { SiteModule } from './site/site.module';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { TeamService } from './services/team.service';
     MaterialModule,
     FormsModule,
     ReactiveFormsModule,
-    EmployeeModule
+    EmployeeModule,
+    SiteModule
   ],
   providers: [AuthService, DialogService, EmployeeService, SiteService, 
     TeamService,

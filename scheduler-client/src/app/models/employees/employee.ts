@@ -184,6 +184,29 @@ export class EmployeeData implements IEmployeeData {
     return answer;
   }
 
+  getWorkdayWOLeaves(site: string, date: Date): Workday {
+    let answer: Workday = new Workday();
+    let stdHours: number = 8.0;
+    this.assignments.sort((a,b) => a.compareTo(b));
+    this.variations.sort((a,b) => a.compareTo(b));
+    this.assignments.forEach(asgmt => {
+      let wd = asgmt.getWorkday(site, date);
+      if (wd) {
+        answer = new Workday(wd);
+      }
+      if (asgmt.useAssignment(site, date)) {
+        stdHours = asgmt.getStandardWorkHours();
+      }
+    });
+    this.variations.forEach(vari => {
+      let wd = vari.getWorkday(site, date);
+      if (wd) {
+        answer = new Workday(wd);
+      }
+    });
+    return answer;
+  }
+
   getStandardWorkday(site: string, date: Date): number {
     let answer = 8;
     this.assignments.forEach(asgmt => {

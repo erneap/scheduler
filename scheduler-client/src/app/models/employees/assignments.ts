@@ -145,7 +145,7 @@ export class Assignment implements IAssignment {
         let iDay = days % this.schedules[0].workdays.length;
         return this.schedules[0].getWorkday(iDay);
       } else if (this.schedules.length > 1) {
-        let schID = (days / this.rotationdays) % this.schedules.length
+        let schID = (Math.floor(days / this.rotationdays)) % this.schedules.length;
         let iDay = days % this.schedules[schID].workdays.length
         return this.schedules[schID].getWorkday(iDay)
       }

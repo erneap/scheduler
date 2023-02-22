@@ -1,0 +1,39 @@
+<div class="fxLayout-column-center">
+  <div class="fxLayout-row-center">
+    <div class="direction" (click)="changeMonth('down', 'year')">&lt;&lt;</div>
+    <div class="direction" (click)="changeMonth('down', 'month')">&lt;</div>
+    <div class="month" [style]="monthStyle">{{monthLabel}}</div>
+    <div class="direction" (click)="changeMonth('up', 'month')">&gt;</div>
+    <div class="direction" (click)="changeMonth('up', 'year')">&gt;&gt;</div>
+  </div>
+  <div class="fxLayout-row-center">
+    <div class="name">&nbsp;</div>
+    <div *ngFor="let dt of dates" class="day" [style]="getDateSyyle(dt)">
+      {{dt.getDate()}}
+    </div> 
+  </div>
+  <div class="fxLayout-row-center">
+    <div class="name">Name</div>
+    <div *ngFor="let dt of dates" class="day" [style]="getDateSyyle(dt)">
+      {{weekdays[dt.getDay()]}}
+    </div> 
+  </div>
+  <ng-container *ngFor="let wkctr of workcenters">
+    <div class="workcenter" [style]="wkctrStyle">{{wkctr.name.toUpperCase()}}</div>
+    <ng-container *ngFor="let pos of wkctr.positions; let i = index">
+      <app-site-schedule-row *ngFor="let emp of pos.employees"
+        [employee]="emp" [index]="i" [month]="month"
+      ></app-site-schedule-row>
+    </ng-container>
+    <ng-container *ngFor="let sft of wkctr.shifts">
+      <ng-container *ngIf="showShift(sft.id)">
+        <app-site-schedule-row *ngFor="let emp of sft.employees; let i = index"
+          [employee]="emp" [index]="i" [month]="month"></app-site-schedule-row>
+      </ng-container>
+    </ng-container>
+    <ng-container *ngIf="wkctr.employees && wkctr.employees.length > 0">
+      <app-site-schedule-row *ngFor="let emp of wkctr.employees; let i = index"
+      [employee]="emp" [index]="i" [month]="month"></app-site-schedule-row>
+    </ng-container>
+  </ng-container>
+</div>

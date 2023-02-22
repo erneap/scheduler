@@ -18,8 +18,6 @@ import { LeaveRequestComponent } from './leave-request/leave-request.component';
 import { LeaveRequestCalendarComponent } from './leave-request/leave-request-calendar/leave-request-calendar.component';
 import { LeaveRequestCalendarDayComponent } from './leave-request/leave-request-calendar-day/leave-request-calendar-day.component';
 import { DeleteLeaveRequestDialogComponent } from './leave-request/delete-leave-request-dialog/delete-leave-request-dialog.component';
-import { EmployeeLaborCodesComponent } from './employee-labor-codes/employee-labor-codes.component';
-
 
 @NgModule({
   declarations: [
@@ -37,8 +35,7 @@ import { EmployeeLaborCodesComponent } from './employee-labor-codes/employee-lab
     LeaveRequestComponent,
     LeaveRequestCalendarComponent,
     LeaveRequestCalendarDayComponent,
-    DeleteLeaveRequestDialogComponent,
-    EmployeeLaborCodesComponent
+    DeleteLeaveRequestDialogComponent
   ],
   imports: [
     CommonModule,

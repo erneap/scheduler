@@ -246,6 +246,7 @@
       "id": "dgsc",
       "name": "DGS-C",
       "utcoffset": 9.0,
+      "showMids": false,
       "workcenters": [
         {
           "id": "leads",
@@ -288,21 +289,24 @@
               "name": "Day Shift",
               "sort": 1,
               "associatedCodes": [ "E", "D", "A"],
-              "payCode": 1
+              "payCode": 1,
+              "minimums": 2
             },
             {
               "id": "swings",
               "name": "Swing Shift",
               "sort": 2,
               "associatedCodes": [ "S", "L"],
-              "payCode": 6
+              "payCode": 6,
+              "minimums": 2
             },
             {
               "id": "mids",
               "name": "Midnight Shift",
               "sort": 3,
               "associatedCodes": [ "M"],
-              "payCode": 4
+              "payCode": 4,
+              "minimums": 1
             }
           ]
         },
@@ -316,14 +320,16 @@
               "name": "Day Shift",
               "sort": 1,
               "associatedCodes": [ "E", "D", "A"],
-              "payCode": 1
+              "payCode": 1,
+              "minimums": 2
             },
             {
               "id": "swings",
               "name": "Swing Shift",
               "sort": 2,
               "associatedCodes": [ "S", "L"],
-              "payCode": 6
+              "payCode": 6,
+              "minimums": 2
             }
           ]
         }

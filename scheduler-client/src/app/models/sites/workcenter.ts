@@ -1,9 +1,12 @@
+import { Employee, IEmployee } from "../employees/employee";
+
 export interface IShift {
   id: string;
   name: string;
   sort: number;
   associatedCodes?: string[];
   payCode: number;
+  minimums?: number;
 }
 
 export class Shift implements IShift {
@@ -12,12 +15,15 @@ export class Shift implements IShift {
   sort: number;
   associatedCodes?: string[];
   payCode: number;
+  minimums: number;
+  employees?: Employee[];
 
   constructor(shft?: IShift) {
     this.id = (shft) ? shft.id : '';
     this.name = (shft) ? shft.name : '';
     this.sort = (shft) ? shft.sort : 0;
     this.payCode = (shft) ? shft.payCode : 1;
+    this.minimums = (shft && shft.minimums) ? shft.minimums : 0;
     this.associatedCodes = [];
     if (shft && shft.associatedCodes) {
       shft.associatedCodes.forEach(ac => {
@@ -31,6 +37,14 @@ export class Shift implements IShift {
       return (this.sort < other.sort) ? -1 : 1;
     }
     return -1;
+  }
+
+  addEmployee(emp: IEmployee) {
+    if (!this.employees) {
+      this.employees = [];
+    }
+    this.employees.push(new Employee(emp));
+    this.employees.sort((a,b) => a.compareTo(b));
   }
 }
 
@@ -46,6 +60,7 @@ export class Position implements IPosition {
   name: string;
   sort: number;
   assigned: string[];
+  employees?: Employee[];
 
   constructor(pos?: IPosition) {
     this.id = (pos) ? pos.id : '';
@@ -65,6 +80,14 @@ export class Position implements IPosition {
     }
     return -1;
   }
+
+  addEmployee(emp: IEmployee) {
+    if (!this.employees) {
+      this.employees = [];
+    }
+    this.employees.push(new Employee(emp));
+    this.employees.sort((a,b) => a.compareTo(b));
+  }
 }
 
 export interface IWorkcenter {
@@ -81,6 +104,7 @@ export class Workcenter implements IWorkcenter {
   sort: number;
   shifts?: Shift[];
   positions?: Position[];
+  employees?: Employee[];
 
   constructor(wc?: IWorkcenter) {
     this.id = (wc) ? wc.id : '';
@@ -107,5 +131,76 @@ export class Workcenter implements IWorkcenter {
       return (this.sort < other.sort) ? -1 : 1;
     }
     return -1;
+  }
+
+  addEmployee(iEmp: IEmployee, bMids?: boolean, month?: Date) {
+    const emp = new Employee(iEmp);
+    let found = false;
+    if (this.positions  && this.positions.length > 0) {
+      this.positions.forEach(pos => {
+        pos.assigned.forEach(asgn => {
+          if (asgn === emp.id) {
+            pos.addEmployee(emp);
+            found = true;
+          }
+        })
+      });
+    }
+    if (!found) {
+      if (!month) {
+        month = new Date();
+        month = new Date(month.getFullYear(), month.getMonth(), 1);
+      }
+      const shiftMap = new Map<string, number>();
+      let start = new Date(month.getFullYear(), month.getMonth(), 1)
+      while (start.getMonth() === month.getMonth()) {
+        const wd = emp.data.getWorkdayWOLeaves(emp.site, start);
+        if (this.shifts && this.shifts.length > 0) {
+          this.shifts.forEach(sft => {
+            if (sft.associatedCodes) {
+              sft.associatedCodes.forEach(ac => {
+                if (ac.toLowerCase() === wd.code.toLowerCase()) {
+                  let cnt = shiftMap.get(sft.id);
+                  if (cnt) {
+                    cnt++;
+                    shiftMap.set(sft.id, cnt);
+                  } else {
+                    shiftMap.set(sft.id, 1);
+                  }
+                }
+              });
+            }
+          });
+        }
+        start = new Date(start.getTime() + (24 * 3600000));
+      }
+      let shftID = '';
+      let count = 0;
+      for (let key of shiftMap.keys()) {
+        let cnt = shiftMap.get(key);
+        if (cnt) {
+          if (cnt > count) {
+            if (!bMids && key.toLowerCase() !== 'mids') {
+              count = cnt;
+              shftID = key;
+            }
+          }
+        }
+      }
+      if (this.shifts) {
+        this.shifts.forEach(sft => {
+          if (sft.id.toLowerCase() === shftID.toLowerCase()) {
+            sft.addEmployee(emp);
+            found = true;
+          }
+        })
+      }
+    }
+    if (!found) {
+      if (!this.employees) {
+        this.employees = [];
+      }
+      this.employees.push(emp)
+    }
   }
 }
