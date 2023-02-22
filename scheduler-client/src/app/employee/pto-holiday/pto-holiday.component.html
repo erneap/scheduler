@@ -6,24 +6,7 @@
               </mat-card-title>
       </mat-card-header>
       <mat-card-content class="fxLayout-column-center">
-          <div class="fxLayout-column-center">
-            <div class="fxLayout-row-center year">
-              <button mat-button color="warning" (click)="updateYear('down')">
-                &lt;&lt;
-              </button>
-              <span class="flex-spacer"></span>
-              {{year}}
-              <span class="flex-spacer"></span>
-              <button mat-button color="warning" (click)="updateYear('up')">
-                &gt;&gt;
-              </button>
-            </div>
-            <div class="fxLayout-row-topcenter">
-              <app-pto-holiday-holiday *ngIf="showHolidays"
-                [year]="year"></app-pto-holiday-holiday>
-              <app-pto-overall [year]="year"></app-pto-overall>
-            </div>
-          </div>
+          <app-pto-holiday-chart></app-pto-holiday-chart>
       </mat-card-content>
   </mat-card>
 </div>

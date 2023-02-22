@@ -1,0 +1,18 @@
+<div class="fxLayout-column-center">
+  <div class="fxLayout-row-center year">
+    <button mat-button color="warning" (click)="updateYear('down')">
+      &lt;&lt;
+    </button>
+    <span class="flex-spacer"></span>
+    {{year}}
+    <span class="flex-spacer"></span>
+    <button mat-button color="warning" (click)="updateYear('up')">
+      &gt;&gt;
+    </button>
+  </div>
+  <div class="fxLayout-row-topcenter">
+    <app-pto-holiday-holiday *ngIf="showHolidays" [employee]="employee"
+      [year]="year"></app-pto-holiday-holiday>
+    <app-pto-overall [year]="year" [employee]="employee"></app-pto-overall>
+  </div>
+</div>

@@ -253,4 +253,9 @@ export class Employee implements IEmployee {
     }
     return -1;
   }
+
+  isActive(): boolean {
+    const now = new Date();
+    return this.data.atSite(this.site, now, now);
+  }
 }

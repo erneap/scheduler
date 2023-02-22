@@ -1,0 +1,15 @@
+<div class="app-container">
+  <div class="employeeNav">
+    <app-generic-button-list [items]="items" [selected]="selected"
+      (select)="onSelect($event)"
+      [width]="260" [minheight]="500"
+      ></app-generic-button-list>
+    <div class="activeOnly">
+      <mat-checkbox [checked]="activeOnly"
+        (change)="setActiveOnly($event.checked)">
+        <span style="color: white;">Show Active Only</span>
+      </mat-checkbox>
+    </div>
+  </div>
+  <router-outlet></router-outlet>
+</div>

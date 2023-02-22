@@ -15,6 +15,10 @@ const routes: Routes = [
     loadChildren: () => import('./site-scheduler/site-scheduler.module')
       .then(m => m.SiteSchedulerModule)
   },
+  { path: 'siteemployees',
+    loadChildren: () => import('./site-employee/site-employee.module')
+      .then(m => m.SiteEmployeeModule)
+  },
   { path: '**', component: NotFoundComponent}
 ];
 

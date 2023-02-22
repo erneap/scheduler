@@ -19,6 +19,9 @@ import { EmployeeService } from './services/employee.service';
 import { SiteService } from './services/site.service';
 import { TeamService } from './services/team.service';
 import { SiteModule } from './site/site.module';
+import { SiteSchedulerModule } from './site-scheduler/site-scheduler.module';
+import { SiteEmployeeModule } from './site-employee/site-employee.module';
+import { GenericModule } from './generic/generic.module';
 
 @NgModule({
   declarations: [
@@ -38,7 +41,10 @@ import { SiteModule } from './site/site.module';
     FormsModule,
     ReactiveFormsModule,
     EmployeeModule,
-    SiteModule
+    SiteModule,
+    SiteSchedulerModule,
+    SiteEmployeeModule,
+    GenericModule
   ],
   providers: [AuthService, DialogService, EmployeeService, SiteService, 
     TeamService,
