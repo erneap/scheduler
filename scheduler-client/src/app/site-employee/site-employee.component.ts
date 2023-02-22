@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ListItem } from '../generic/button-list/listitem';
 import { Employee } from '../models/employees/employee';
+import { EmployeeService } from '../services/employee.service';
 import { SiteService } from '../services/site.service';
 
 @Component({
@@ -14,9 +15,19 @@ export class SiteEmployeeComponent {
   selected: string = '';
 
   constructor(
-    protected siteService: SiteService
+    protected siteService: SiteService,
+    protected empService: EmployeeService
   ) {
     this.setEmployees();
+    let iEmp = this.siteService.getSelectedEmployee();
+    if (iEmp) {
+      this.selected = iEmp.id;
+    } else {
+      iEmp = this.empService.getEmployee()
+      if (iEmp) {
+        this.selected = iEmp.id;
+      }
+    }
   }
 
   setEmployees() {
@@ -39,5 +50,22 @@ export class SiteEmployeeComponent {
 
   onSelect(eid: string) {
     this.selected = eid;
+    const site = this.siteService.getSite();
+    if (site) {
+      if (site.employees) {
+        site.employees.forEach(iEmp => {
+          if (iEmp.id === eid) {
+            this.siteService.setSelectedEmployee(iEmp);
+          }
+        });
+      }
+    }
+  }
+
+  getButtonStyle(id: string): string {
+    if (id.toLowerCase() === this.selected.toLowerCase()) {
+      return "employee active";
+    }
+    return "employee";
   }
 }

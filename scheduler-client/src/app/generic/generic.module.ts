@@ -14,7 +14,8 @@ import { ButtonDivComponent } from './button-list/button-div/button-div.componen
     CommonModule
   ],
   exports: [
-    ButtonListComponent
+    ButtonListComponent,
+    ButtonDivComponent
   ]
 })
 export class GenericModule { }

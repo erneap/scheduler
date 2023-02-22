@@ -9,8 +9,10 @@
 }
 
 .employeeNav {
-  vertical-align: top;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   padding: 0;
   margin: 0;
   width: 270px;
@@ -52,7 +54,7 @@
   border: solid 1px black;
 }
 
-.employee:hover {
+.employee:hover, .active:hover {
   display: flex;
   width: 243px;
   min-height: 30px !important;
@@ -63,4 +65,9 @@
   background-color: lightblue;
   color: black;
   border: solid 1px black;
+}
+
+.active {
+  background-color: #3f51b5;
+  color: white;
 }

@@ -1,9 +1,11 @@
 <div class="app-container">
   <div class="employeeNav">
-    <app-generic-button-list [items]="items" [selected]="selected"
-      (select)="onSelect($event)"
-      [width]="260" [minheight]="500"
-      ></app-generic-button-list>
+    <div class="list">
+      <div *ngFor="let item of items"
+      [class]="getButtonStyle(item.id)"
+      (click)="onSelect(item.id)"
+      >{{item.label}}</div>
+    </div>
     <div class="activeOnly">
       <mat-checkbox [checked]="activeOnly"
         (change)="setActiveOnly($event.checked)">
