@@ -7,12 +7,14 @@ import { MaterialModule } from '../material.module';
 import { GenericModule } from '../generic/generic.module';
 import { SitePtoHolidayComponent } from './site-pto-holiday/site-pto-holiday.component';
 import { EmployeeModule } from '../employee/employee.module';
+import { SiteEmployeeBasicComponent } from './site-employee-basic/site-employee-basic.component';
 
 
 @NgModule({
   declarations: [
     SiteEmployeeComponent,
-    SitePtoHolidayComponent
+    SitePtoHolidayComponent,
+    SiteEmployeeBasicComponent
   ],
   imports: [
     CommonModule,

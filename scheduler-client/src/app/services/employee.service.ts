@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Employee, IEmployee } from '../models/employees/employee';
@@ -61,7 +61,7 @@ export class EmployeeService extends CacheService {
   }
 
   addNewLeaveRequest(empid: string, start: Date, end: Date, 
-    code: string): Observable<EmployeeResponse> {
+    code: string): Observable<HttpResponse<EmployeeResponse>> {
     const data: EmployeeLeaveRequest = {
       employee: this.getEmployeeID(),
       code: code,
@@ -69,11 +69,11 @@ export class EmployeeService extends CacheService {
       enddate: end,
     };
     const url = '/scheduler/api/v1/employee/request';
-    return this.httpClient.post<EmployeeResponse>(url, data);
+    return this.httpClient.post<HttpResponse<EmployeeResponse>>(url, data);
   }
 
   updateLeaveRequest(empid: string, reqid: string, field: string, value: string): 
-    Observable<EmployeeResponse> {
+    Observable<HttpResponse<EmployeeResponse>> {
     const url = '/scheduler/api/v1/employee/request';
     const data: UpdateRequest = {
       id: empid,
@@ -81,11 +81,12 @@ export class EmployeeService extends CacheService {
       field: field,
       value: value,
     }
-    return this.httpClient.put<EmployeeResponse>(url, data)
+    return this.httpClient.put<HttpResponse<EmployeeResponse>>(url, data)
   }
 
-  deleteLeaveRequest(empid: string, reqid: string): Observable<EmployeeResponse> {
+  deleteLeaveRequest(empid: string, reqid: string): 
+    Observable<HttpResponse<EmployeeResponse>> {
     const url = `/scheduler/api/v1/employee/request/${empid}/${reqid}`;
-    return this.httpClient.delete<EmployeeResponse>(url);
+    return this.httpClient.delete<HttpResponse<EmployeeResponse>>(url);
   }
 }

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -7,9 +8,12 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./navigation-menu.component.scss']
 })
 export class NavigationMenuComponent {
+  section: string = 'employee';
   constructor(
-    public authService: AuthService
-  ) {}
+    public authService: AuthService,
+  ) {
+    
+  }
 
   isInGroup(role: string): boolean {
     return this.authService.hasRole(role);

@@ -4,6 +4,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { LeaveRequest } from 'src/app/models/employees/leave';
 import { Workcode } from 'src/app/models/teams/workcode';
+import { EmployeeResponse } from 'src/app/models/web/employeeWeb';
+import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
 import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
@@ -41,6 +43,7 @@ export class LeaveRequestComponent {
   leaveList: Workcode[];
 
   constructor(
+    protected authService: AuthService,
     protected empService: EmployeeService,
     protected siteService: SiteService,
     protected teamService: TeamService,
@@ -137,31 +140,40 @@ export class LeaveRequestComponent {
       const start = this.editorForm.value.start;
       const end = this.editorForm.value.end;
       const code = this.editorForm.value.primarycode;
+      this.dialogService.showSpinner()
       this.empService.addNewLeaveRequest(this.employee.id, start, end, code)
         .subscribe({
-          next: (data) => {
-            if (data.employee) {
-              this.employee = data.employee;
+          next: (resp) => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
             }
-            this.setCurrent();
-            const emp = this.empService.getEmployee();
-            if (data.employee && emp && emp.id === data.employee.id) {
-              this.empService.setEmployee(data.employee);
-            }
-            const site = this.siteService.getSite();
-            if (site && site.employees && site.employees.length && data.employee) {
-              let found = false;
-              for (let i=0; i < site.employees.length && !found; i++) {
-                if (site.employees[i].id === data.employee.id) {
-                  site.employees[i] = new Employee(data.employee);
+            const data: EmployeeResponse | null = resp.body;
+            if (data && data !== null) {
+              if (data.employee) {
+                this.employee = data.employee;
+              }
+              this.setCurrent();
+              const emp = this.empService.getEmployee();
+              if (data.employee && emp && emp.id === data.employee.id) {
+                this.empService.setEmployee(data.employee);
+              }
+              const site = this.siteService.getSite();
+              if (site && site.employees && site.employees.length && data.employee) {
+                let found = false;
+                for (let i=0; i < site.employees.length && !found; i++) {
+                  if (site.employees[i].id === data.employee.id) {
+                    site.employees[i] = new Employee(data.employee);
+                  }
                 }
               }
-            }
-            if (this.currentLeaveRequests.length > 0) {
-              this.currentLeaveRequest = this.currentLeaveRequests[0];
+              if (this.currentLeaveRequests.length > 0) {
+                this.currentLeaveRequest = this.currentLeaveRequests[0];
+              }
             }
           },
           error: err => {
+            this.dialogService.closeSpinner();
             console.log(err.error);
           }
         });
@@ -192,34 +204,43 @@ export class LeaveRequestComponent {
             + `${end.getFullYear()}-`
             + `${(end.getMonth() < 9)? '0' : ''}${end.getMonth() + 1}-`
             + `${(end.getDate() < 10) ? '0' : ''}${end.getDate()}`;
+          this.dialogService.showSpinner();
           this.empService.updateLeaveRequest(this.employee.id, 
             this.currentLeaveRequest.id, 'dates', sDate)
             .subscribe({
-              next: (data) => {
-                if (data.employee) {
-                  this.employee = data.employee;
-                  this.employee.data.requests.forEach(req => {
-                    if (this.currentLeaveRequest?.id === req.id) {
-                      this.currentLeaveRequest = new LeaveRequest(req)
-                    }
-                  });
+              next: (resp) => {
+                this.dialogService.closeSpinner();
+                if (resp.headers.get('token') !== null) {
+                  this.authService.setToken(resp.headers.get('token') as string);
                 }
-                this.setCurrent();
-                const emp = this.empService.getEmployee();
-                if (data.employee && emp && emp.id === data.employee.id) {
-                  this.empService.setEmployee(data.employee);
-                }
-                const site = this.siteService.getSite();
-                if (site && site.employees && site.employees.length && data.employee) {
-                  let found = false;
-                  for (let i=0; i < site.employees.length && !found; i++) {
-                    if (site.employees[i].id === data.employee.id) {
-                      site.employees[i] = new Employee(data.employee);
+                const data: EmployeeResponse | null = resp.body;
+                  if (data && data !== null) {
+                  if (data.employee) {
+                    this.employee = data.employee;
+                    this.employee.data.requests.forEach(req => {
+                      if (this.currentLeaveRequest?.id === req.id) {
+                        this.currentLeaveRequest = new LeaveRequest(req)
+                      }
+                    });
+                  }
+                  this.setCurrent();
+                  const emp = this.empService.getEmployee();
+                  if (data.employee && emp && emp.id === data.employee.id) {
+                    this.empService.setEmployee(data.employee);
+                  }
+                  const site = this.siteService.getSite();
+                  if (site && site.employees && site.employees.length && data.employee) {
+                    let found = false;
+                    for (let i=0; i < site.employees.length && !found; i++) {
+                      if (site.employees[i].id === data.employee.id) {
+                        site.employees[i] = new Employee(data.employee);
+                      }
                     }
                   }
                 }
               },
               error: err => {
+                this.dialogService.closeSpinner();
                 console.log(err)
               }
             });
@@ -228,34 +249,43 @@ export class LeaveRequestComponent {
           this.empService.updateLeaveRequest(this.employee.id, 
             this.currentLeaveRequest.id, 'code', this.editorForm.value.primarycode)
             .subscribe({
-              next: (data) => {
-                if (data.employee) {
-                  this.employee = data.employee;
-                  this.employee.data.requests.forEach(req => {
-                    if (this.currentLeaveRequest?.id === req.id) {
-                      this.currentLeaveRequest = new LeaveRequest(req)
-                    }
-                  });
+              next: (resp) => {
+                this.dialogService.closeSpinner();
+                if (resp.headers.get('token') !== null) {
+                  this.authService.setToken(resp.headers.get('token') as string);
                 }
-                this.setCurrent();
-                const emp = this.empService.getEmployee();
-                if (data.employee && emp && emp.id === data.employee.id) {
-                  this.empService.setEmployee(data.employee);
-                }
-                const site = this.siteService.getSite();
-                if (site && site.employees && site.employees.length && data.employee) {
-                  let found = false;
-                  for (let i=0; i < site.employees.length && !found; i++) {
-                    if (site.employees[i].id === data.employee.id) {
-                      site.employees[i] = new Employee(data.employee);
+                const data: EmployeeResponse | null = resp.body;
+                  if (data && data !== null) {
+                  if (data.employee) {
+                    this.employee = data.employee;
+                    this.employee.data.requests.forEach(req => {
+                      if (this.currentLeaveRequest?.id === req.id) {
+                        this.currentLeaveRequest = new LeaveRequest(req)
+                      }
+                    });
+                  }
+                  this.setCurrent();
+                  const emp = this.empService.getEmployee();
+                  if (data.employee && emp && emp.id === data.employee.id) {
+                    this.empService.setEmployee(data.employee);
+                  }
+                  const site = this.siteService.getSite();
+                  if (site && site.employees && site.employees.length && data.employee) {
+                    let found = false;
+                    for (let i=0; i < site.employees.length && !found; i++) {
+                      if (site.employees[i].id === data.employee.id) {
+                        site.employees[i] = new Employee(data.employee);
+                      }
                     }
                   }
                 }
               },
               error: err => {
+                this.dialogService.closeSpinner();
                 console.log(err)
               }
             });
+          break;
       }
     }
   }
@@ -265,31 +295,39 @@ export class LeaveRequestComponent {
       this.empService.updateLeaveRequest(this.employee.id, 
         this.currentLeaveRequest.id, 'day', value)
         .subscribe({
-          next: (data) => {
-            if (data.employee) {
-              this.employee = data.employee;
-              this.employee.data.requests.forEach(req => {
-                if (this.currentLeaveRequest?.id === req.id) {
-                  this.currentLeaveRequest = new LeaveRequest(req)
-                }
-              });
+          next: (resp) => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
             }
-            this.setCurrent();
-            const emp = this.empService.getEmployee();
-            if (data.employee && emp && emp.id === data.employee.id) {
-              this.empService.setEmployee(data.employee);
-            }
-            const site = this.siteService.getSite();
-            if (site && site.employees && site.employees.length && data.employee) {
-              let found = false;
-              for (let i=0; i < site.employees.length && !found; i++) {
-                if (site.employees[i].id === data.employee.id) {
-                  site.employees[i] = new Employee(data.employee);
+            const data: EmployeeResponse | null = resp.body;
+              if (data && data !== null) {
+              if (data.employee) {
+                this.employee = data.employee;
+                this.employee.data.requests.forEach(req => {
+                  if (this.currentLeaveRequest?.id === req.id) {
+                    this.currentLeaveRequest = new LeaveRequest(req)
+                  }
+                });
+              }
+              this.setCurrent();
+              const emp = this.empService.getEmployee();
+              if (data.employee && emp && emp.id === data.employee.id) {
+                this.empService.setEmployee(data.employee);
+              }
+              const site = this.siteService.getSite();
+              if (site && site.employees && site.employees.length && data.employee) {
+                let found = false;
+                for (let i=0; i < site.employees.length && !found; i++) {
+                  if (site.employees[i].id === data.employee.id) {
+                    site.employees[i] = new Employee(data.employee);
+                  }
                 }
               }
             }
           },
           error: err => {
+            this.dialogService.closeSpinner();
             console.log(err)
           }
         });
@@ -309,30 +347,36 @@ export class LeaveRequestComponent {
         if (reqid) {
           this.empService.deleteLeaveRequest(this.employee.id, reqid)
             .subscribe({
-              next: (data) => {
-                if (data.employee) {
-                  this.employee = data.employee;
-                  this.employee.data.requests.forEach(req => {
-                    if (this.currentLeaveRequest?.id === req.id) {
-                      this.currentLeaveRequest = new LeaveRequest(req)
-                    }
-                  });
+              next: (resp) => {
+                this.dialogService.closeSpinner();
+                if (resp.headers.get('token') !== null) {
+                  this.authService.setToken(resp.headers.get('token') as string);
                 }
-                this.setCurrent();
-                const emp = this.empService.getEmployee();
-                if (data.employee && emp && emp.id === data.employee.id) {
-                  this.empService.setEmployee(data.employee);
-                }
-                const site = this.siteService.getSite();
-                if (site && site.employees && site.employees.length && data.employee) {
-                  let found = false;
-                  for (let i=0; i < site.employees.length && !found; i++) {
-                    if (site.employees[i].id === data.employee.id) {
-                      site.employees[i] = new Employee(data.employee);
+                const data: EmployeeResponse | null = resp.body;
+                  if (data && data !== null) {
+                  if (data.employee) {
+                    this.employee = data.employee;
+                    this.employee.data.requests.forEach(req => {
+                      if (this.currentLeaveRequest?.id === req.id) {
+                        this.currentLeaveRequest = new LeaveRequest(req)
+                      }
+                    });
+                  }
+                  this.setCurrent();
+                  const emp = this.empService.getEmployee();
+                  if (data.employee && emp && emp.id === data.employee.id) {
+                    this.empService.setEmployee(data.employee);
+                  }
+                  const site = this.siteService.getSite();
+                  if (site && site.employees && site.employees.length && data.employee) {
+                    let found = false;
+                    for (let i=0; i < site.employees.length && !found; i++) {
+                      if (site.employees[i].id === data.employee.id) {
+                        site.employees[i] = new Employee(data.employee);
+                      }
                     }
                   }
                 }
-                this.dialogService.closeSpinner();
               },
               error: err => {
                 this.dialogService.closeSpinner();

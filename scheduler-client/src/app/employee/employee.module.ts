@@ -19,6 +19,8 @@ import { LeaveRequestCalendarComponent } from './leave-request/leave-request-cal
 import { LeaveRequestCalendarDayComponent } from './leave-request/leave-request-calendar-day/leave-request-calendar-day.component';
 import { DeleteLeaveRequestDialogComponent } from './leave-request/delete-leave-request-dialog/delete-leave-request-dialog.component';
 import { PtoHolidayChartComponent } from './pto-holiday/pto-holiday-chart/pto-holiday-chart.component';
+import { EmployeeProfileComponent } from './employee-profile/employee-profile.component';
+import { EmployeeProfileFormComponent } from './employee-profile/employee-profile-form/employee-profile-form.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +39,9 @@ import { PtoHolidayChartComponent } from './pto-holiday/pto-holiday-chart/pto-ho
     LeaveRequestCalendarComponent,
     LeaveRequestCalendarDayComponent,
     DeleteLeaveRequestDialogComponent,
-    PtoHolidayChartComponent
+    PtoHolidayChartComponent,
+    EmployeeProfileComponent,
+    EmployeeProfileFormComponent
   ],
   imports: [
     CommonModule,
@@ -47,7 +51,8 @@ import { PtoHolidayChartComponent } from './pto-holiday/pto-holiday-chart/pto-ho
     ReactiveFormsModule
   ],
   exports: [
-    PtoHolidayChartComponent
+    PtoHolidayChartComponent,
+    EmployeeProfileFormComponent
   ]
 })
 export class EmployeeModule { }

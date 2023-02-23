@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { NotFoundComponent } from '../home/not-found/not-found.component';
+import { SiteEmployeeBasicComponent } from './site-employee-basic/site-employee-basic.component';
 import { SiteEmployeeComponent } from './site-employee.component';
 import { SitePtoHolidayComponent } from './site-pto-holiday/site-pto-holiday.component';
 
@@ -10,6 +11,7 @@ const routes: Routes = [
     component: SiteEmployeeComponent,
     children: [
       { path: '', redirectTo: '/siteemployees/ptoholidays', pathMatch: 'full'},
+      { path: 'profile', component: SiteEmployeeBasicComponent },
       { path: 'ptoholidays', component: SitePtoHolidayComponent },
       { path: '**', component: NotFoundComponent },
     ]

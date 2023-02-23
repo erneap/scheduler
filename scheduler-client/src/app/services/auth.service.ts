@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { CacheService } from './cache.service';
 import { IUser, User } from '../models/users/user';
-import { AuthenticationResponse }
+import { AuthenticationResponse, ChangePasswordRequest, Message, UpdateRequest }
   from '../models/web/employeeWeb';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
 
@@ -20,6 +20,7 @@ export class AuthService extends CacheService {
   isAdmin = false;
   isCompanyLead = false;
   schedulerLabel = "Scheduler";
+  section: string = 'employee';
 
   authStatus = new BehaviorSubject<IAuthStatus>( 
     this.getItem('authStatus') || defaultAuthStatus);
@@ -133,6 +134,26 @@ export class AuthService extends CacheService {
     } else {
       this.schedulerLabel = `${team.toUpperCase()} - ${site.toUpperCase()} Scheduler`;
     }
+  }
+
+  changeUser(id: string, field: string, value: string): 
+    Observable<HttpResponse<AuthenticationResponse>> {
+    const url = '/scheduler/api/v1/user/changes';
+    const data: UpdateRequest = {
+      id: id,
+      field: field,
+      value: value,
+    };
+    return this.httpClient.put<HttpResponse<AuthenticationResponse>>(url, data);
+  }
+
+  changePassword(id: string, passwd: string): Observable<HttpResponse<Message>> {
+    const url = '/scheduler/api/v1/user/password';
+    const data: ChangePasswordRequest = {
+      id: id,
+      password: passwd,
+    }
+    return this.httpClient.put<HttpResponse<Message>>(url, data);
   }
 }
 

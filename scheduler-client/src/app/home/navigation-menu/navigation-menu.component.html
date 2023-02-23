@@ -1,13 +1,17 @@
-<mat-accordion>
+<mat-accordion multi>
   <mat-expansion-panel expanded="true">
     <mat-expansion-panel-header>
       <mat-panel-title>Employee</mat-panel-title>
     </mat-expansion-panel-header>
     <mat-nav-list>
-      <a mat-list-item routerLink="/employee/schedule">Schedule</a>
-      <a mat-list-item routerLink="/employee/ptoholidays">PTO/Holiday Listing</a>
-      <a mat-list-item>Profile</a>
-      <a mat-list-item routerLink="/employee/leaverequest">Leave Requests</a>
+      <a mat-list-item routerLink="/employee/schedule"
+        style="height: 20px;">Schedule</a>
+      <a mat-list-item routerLink="/employee/ptoholidays"
+      style="height: 20px;">PTO/Holiday Listing</a>
+      <a mat-list-item routerLink="/employee/profile"
+      style="height: 20px;">Profile</a>
+      <a mat-list-item routerLink="/employee/leaverequest"
+      style="height: 20px;">Leave Requests</a>
     </mat-nav-list>
   </mat-expansion-panel>
   <mat-expansion-panel>
@@ -15,24 +19,34 @@
       <mat-panel-title>Site Schedule</mat-panel-title>
     </mat-expansion-panel-header>
     <mat-nav-list>
-      <a mat-list-item routerLink="/siteschedule/schedule">Schedule</a>
+      <a mat-list-item routerLink="/siteschedule/schedule"
+      style="height: 20px;">Schedule</a>
       <a mat-list-item 
         *ngIf="this.authService.isScheduler || this.authService.isLeader"
-        routerLink="/siteschedule/coverage">Coverage</a>
+        routerLink="/siteschedule/coverage"
+        style="height: 20px;">Coverage</a>
     </mat-nav-list>
   </mat-expansion-panel>
-  <mat-expansion-panel 
+  <mat-expansion-panel  expanded="true"
     *ngIf="this.authService.isScheduler || this.authService.isLeader">
     <mat-expansion-panel-header>
       <mat-panel-title>Site Employees</mat-panel-title>
     </mat-expansion-panel-header>
     <mat-nav-list>
-      <a mat-list-item routerLink="/siteemployees/ptoholidays">PTO/Holiday Listing</a>
-      <a mat-list-item>Assignments</a>
-      <a mat-list-item>Variations</a>
-      <a mat-list-item>Leaves</a>
-      <a mat-list-item>Leave Requests</a>
-      <a mat-list-item>Labor Codes</a>
+      <a mat-list-item routerLink="/siteemployees/profile"
+      style="height: 20px;">Profile</a>
+      <a mat-list-item routerLink="/siteemployees/ptoholidays"
+      style="height: 20px;">PTO/Holiday Listing</a>
+      <a mat-list-item
+      style="height: 20px;">Assignments</a>
+      <a mat-list-item
+      style="height: 20px;">Variations</a>
+      <a mat-list-item
+      style="height: 20px;">Leaves</a>
+      <a mat-list-item
+      style="height: 20px;">Leave Requests</a>
+      <a mat-list-item
+      style="height: 20px;">Labor Codes</a>
     </mat-nav-list>
   </mat-expansion-panel>
   <mat-expansion-panel 
@@ -41,9 +55,12 @@
       <mat-panel-title>Site Setup</mat-panel-title>
     </mat-expansion-panel-header>
     <mat-nav-list>
-      <a mat-list-item>Workcenters</a>
-      <a mat-list-item>Labor Codes Maintenance</a>
-      <a mat-list-item>Forecast Report Maintenance</a>
+      <a mat-list-item
+      style="height: 20px;">Workcenters</a>
+      <a mat-list-item
+      style="height: 20px;">Labor Codes Maintenance</a>
+      <a mat-list-item
+      style="height: 20px;">Forecast Report Maintenance</a>
     </mat-nav-list>
   </mat-expansion-panel>
   <mat-expansion-panel 
@@ -53,8 +70,10 @@
       <mat-panel-title>Data Ingest</mat-panel-title>
     </mat-expansion-panel-header>
     <mat-nav-list>
-      <a mat-list-item>Upload Ingest</a>
-      <a mat-list-item>Manual Work/Leave Entry</a>
+      <a mat-list-item
+      style="height: 20px;">Upload Ingest</a>
+      <a mat-list-item
+      style="height: 20px;">Manual Work/Leave Entry</a>
     </mat-nav-list>
   </mat-expansion-panel>
 </mat-accordion>

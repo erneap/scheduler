@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ListItem } from '../generic/button-list/listitem';
 import { Employee } from '../models/employees/employee';
+import { AuthService } from '../services/auth.service';
 import { EmployeeService } from '../services/employee.service';
 import { SiteService } from '../services/site.service';
 
@@ -15,8 +17,11 @@ export class SiteEmployeeComponent {
   selected: string = '';
 
   constructor(
+    protected authService: AuthService,
     protected siteService: SiteService,
-    protected empService: EmployeeService
+    protected empService: EmployeeService,
+    protected router: Router,
+    protected activeRouter: ActivatedRoute
   ) {
     this.setEmployees();
     let iEmp = this.siteService.getSelectedEmployee();
@@ -28,6 +33,7 @@ export class SiteEmployeeComponent {
         this.selected = iEmp.id;
       }
     }
+    this.authService.section = 'siteemployees';
   }
 
   setEmployees() {

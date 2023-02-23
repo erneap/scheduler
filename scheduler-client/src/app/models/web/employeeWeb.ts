@@ -94,3 +94,7 @@ export interface EmployeeResponse {
   employee?: IEmployee;
   exception: string;
 }
+
+export interface Message {
+  message: string;
+}

@@ -222,6 +222,7 @@ export interface IEmployee {
   id: string;
   team: string;
   site: string;
+  email: string;
   name: IEmployeeName;
   data: IEmployeeData;
 }
@@ -230,6 +231,7 @@ export class Employee implements IEmployee {
   id: string;
   team: string;
   site: string;
+  email: string;
   name: EmployeeName;
   data: EmployeeData;
 
@@ -237,6 +239,7 @@ export class Employee implements IEmployee {
     this.id = (emp) ? emp.id : '';
     this.team = (emp) ? emp.team : '';
     this.site = (emp) ? emp.site : '';
+    this.email = (emp) ? emp.email : '';
     this.name = (emp) ? new EmployeeName(emp.name) : new EmployeeName();
     this.data = (emp) ? new EmployeeData(emp.data) : new EmployeeData();
   }

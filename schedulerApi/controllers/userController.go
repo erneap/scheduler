@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/erneap/scheduler/schedulerApi/middleware"
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
 	"github.com/erneap/scheduler/schedulerApi/models/users"
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
@@ -81,6 +80,7 @@ func Login(c *gin.Context) {
 					Token: "", Exception: err.Error()})
 		}
 	}
+	emp.Email = user.EmailAddress
 
 	team, err := services.GetTeam(emp.TeamID.Hex())
 	if err != nil {
@@ -96,9 +96,19 @@ func Login(c *gin.Context) {
 				Token: "", Exception: err.Error()})
 	}
 
+	users := services.GetUsers()
+
 	emps, _ := services.GetEmployees(team.ID.Hex(), emp.SiteID)
+	site.Employees = site.Employees[:0]
 	if len(emps) > 0 {
-		site.Employees = append([]employees.Employee{}, emps...)
+		for _, emp := range emps {
+			for _, usr := range users {
+				if usr.ID == emp.ID {
+					emp.Email = usr.EmailAddress
+				}
+			}
+			site.Employees = append(site.Employees, emp)
+		}
 	}
 
 	answer := web.AuthenticationResponse{
