@@ -9,18 +9,20 @@
     <div class="requested">Project</div>
   </div>
   <app-pto-month *ngFor="let lm of leaveMonths" [leaveMonth]="lm"></app-pto-month>
-  <div class="fxLayout-row-center">
-    <div class="bottomlabel">Annual</div>
-    <div class="bottomlabel">Carryover</div>
-    <div class="bottomlabel">Taken</div>
-    <div class="bottomlabel">Projected</div>
-    <div class="bottomlabel">Balance</div>
-  </div>
-  <div class="fxLayout-row-center">
-    <div class="bottomdata">{{annual.toFixed(1)}}</div>
-    <div class="bottomdata">{{carryover.toFixed(1)}}</div>
-    <div class="bottomdata">{{actual.toFixed(1)}}</div>
-    <div class="bottomdata">{{requested.toFixed(1)}}</div>
-    <div [class]="balanceStyle">{{balance.toFixed(1)}}</div>
-  </div>
+  <ng-container *ngIf="annual > 0.0">
+    <div class="fxLayout-row-center">
+      <div class="bottomlabel">Annual</div>
+      <div class="bottomlabel">Carryover</div>
+      <div class="bottomlabel">Taken</div>
+      <div class="bottomlabel">Projected</div>
+      <div class="bottomlabel">Balance</div>
+    </div>
+    <div class="fxLayout-row-center">
+      <div class="bottomdata">{{annual.toFixed(1)}}</div>
+      <div class="bottomdata">{{carryover.toFixed(1)}}</div>
+      <div class="bottomdata">{{actual.toFixed(1)}}</div>
+      <div class="bottomdata">{{requested.toFixed(1)}}</div>
+      <div [class]="balanceStyle">{{balance.toFixed(1)}}</div>
+    </div>
+  </ng-container>
 </div>

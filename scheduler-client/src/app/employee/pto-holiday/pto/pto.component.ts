@@ -23,6 +23,7 @@ export class PtoComponent {
   @Input()
   public set employee(emp: IEmployee) {
     this._employee = new Employee(emp);
+    this.setYear();
   }
   get employee(): Employee {
     if (this._employee) {

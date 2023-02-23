@@ -45,6 +45,9 @@ import { PtoHolidayChartComponent } from './pto-holiday/pto-holiday-chart/pto-ho
     MaterialModule,
     FormsModule,
     ReactiveFormsModule
+  ],
+  exports: [
+    PtoHolidayChartComponent
   ]
 })
 export class EmployeeModule { }

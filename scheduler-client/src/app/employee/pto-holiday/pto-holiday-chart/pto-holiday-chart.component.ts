@@ -14,6 +14,7 @@ export class PtoHolidayChartComponent {
   @Input()
   public set employee(iEmp: IEmployee) {
     this._employee = new Employee(iEmp);
+    this.setShowHolidays();
   }
   get employee(): Employee {
     if (!this._employee) {
@@ -25,13 +26,25 @@ export class PtoHolidayChartComponent {
     }
     return this._employee;
   }
-  year: number;
-  showHolidays: boolean;
+  year: number = (new Date()).getFullYear();
+  showHolidays: boolean = false;
 
   constructor(
     protected empService: EmployeeService,
     protected teamService: TeamService
   ) {
+    this.setShowHolidays();
+  }
+
+  updateYear(direction: string) {
+    if (direction.substring(0,1).toLowerCase() === 'u') {
+      this.year++;
+    } else if (direction.substring(0,1).toLowerCase() === 'd') {
+      this.year--;
+    }
+  }
+
+  setShowHolidays() {
     this.showHolidays = false;
     this.year = (new Date()).getFullYear();
     const iTeam = this.teamService.getTeam();
@@ -42,14 +55,6 @@ export class PtoHolidayChartComponent {
           this.showHolidays = co.holidays.length > 0;
         }
       });
-    }
-  }
-
-  updateYear(direction: string) {
-    if (direction.substring(0,1).toLowerCase() === 'u') {
-      this.year++;
-    } else if (direction.substring(0,1).toLowerCase() === 'd') {
-      this.year--;
     }
   }
 }

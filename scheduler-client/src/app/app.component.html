@@ -7,11 +7,6 @@
     <mat-icon svgIcon="calendar"></mat-icon>
     <a mat-button routerLink="home"><h1>{{this.authService.schedulerLabel}}</h1></a>
     <span class="flex-spacer"></span>
-    <button mat-icon-button *ngIf="this.authService.isAuthenticated"
-      matTooltip="Show User's Profile/set password"
-      routerLink="/profile">
-      <mat-icon>account_circle</mat-icon>
-    </button>
     <span class="user" *ngIf="this.authService.isAuthenticated">
       {{this.authService.getUser()?.firstName}}</span>
     <button mat-icon-button *ngIf="!this.authService.isAuthenticated"

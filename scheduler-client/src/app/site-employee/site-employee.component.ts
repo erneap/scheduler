@@ -56,6 +56,7 @@ export class SiteEmployeeComponent {
         site.employees.forEach(iEmp => {
           if (iEmp.id === eid) {
             this.siteService.setSelectedEmployee(iEmp);
+            window.location.reload();
           }
         });
       }
