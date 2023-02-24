@@ -46,6 +46,7 @@ export class Schedule implements ISchedule {
       sch.workdays.forEach(wd => {
         this.workdays.push(new Workday(wd));
       });
+      this.workdays.sort((a,b) => a.compareTo(b));
     }
   }
 
@@ -59,6 +60,18 @@ export class Schedule implements ISchedule {
       return this.workdays[id]
     }
     return undefined;
+  }
+
+  setScheduleDays(days: number) {
+    if (days < this.workdays.length) {
+      this.workdays = this.workdays.slice(0, days);
+    } else {
+      for (let i = this.workdays.length; i < days; i++) {
+        const newWorkday = new Workday();
+        newWorkday.id = i;
+        this.workdays.push(newWorkday);
+      }
+    }
   }
 }
 

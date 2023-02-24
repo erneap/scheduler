@@ -1,0 +1,105 @@
+<div class="fxLayout fxLayout-column-center">
+  <mat-card style="background-color: #3f51b5; color: white;">
+      <mat-card-header>
+          <mat-card-title>
+            <div class="mat-headline">Employee's Assignments</div>
+            <span class="flex-spacer"></span>
+            <div class="mat-headline">{{employee.name.getFullName()}}</div>
+          </mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="fxLayout-column-center">
+        <form [formGroup]="asgmtForm">
+          <div class="fxLayout-column-center" style="width: 99%;">
+            <mat-form-field class="fieldWidthWide">
+              <mat-label>Select Assignment</mat-label>
+              <mat-select formControlName="assignment"
+                (selectionChange)="selectAssignment()">
+                <mat-option value="0">New Assignment</mat-option>
+                <mat-option *ngFor="let asgt of assignmentList"
+                  [value]="asgmtID(asgt)">({{siteID.toUpperCase()}}) 
+                  {{getDateString(asgt.startDate)}}-{{getDateString(asgt.endDate)}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <div class="fxLayout-row-center">
+              <div class="formField">
+                <mat-form-field class="fieldWidth">
+                  <mat-label>Assignment Workcenter</mat-label>
+                  <mat-select formControlName="workcenter">
+                    <mat-option *ngFor="let wkctr of workcenters"
+                      [value]="wkctr.id">{{wkctr.name.toUpperCase()}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="formField">
+                <mat-form-field class="fieldWidth">
+                  <mat-label>Assignment Start</mat-label>
+                  <input matInput [matDatepicker]="startpicker"
+                    formControlName="startdate">
+                  <mat-datepicker-toggle matIconSuffix [for]="startpicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startpicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div class="formField">
+                <mat-form-field class="fieldWidth">
+                  <mat-label>Assignment End Date</mat-label>
+                  <input matInput [matDatepicker]="endpicker"
+                    formControlName="enddate">
+                  <mat-datepicker-toggle matIconSuffix [for]="endpicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endpicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </div>
+            <ng-container *ngIf="!showSchedule">
+              <div class="fxLayout-row-center">
+                <button mat-raised-button color="accent">Add</button>
+                <button mat-raised-button color="warn">Clear</button>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="showSchedule">
+              <div class="fxLayout-row-center" *ngIf="showSchedule">
+                <div class="formField">
+                  <mat-form-field class="fieldWidth">
+                    <mat-label>Select Schedule</mat-label>
+                    <mat-select formControlName="schedule">
+                      <mat-option *ngFor="let sch of assignment.schedules"
+                        [value]="schedID(sch)">
+                        Schedule {{sch.id}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <button mat-mini-fab color="accent" style="margin-right: 5px;"
+                  matTooltip="Add new schedule">
+                  <mat-icon>add</mat-icon>
+                </button>
+                <ng-container *ngIf="assignment.schedules.length > 1">
+                  <div class="formField">
+                    <mat-form-field class="fieldWidth">
+                      <mat-label>Rotation Date</mat-label>
+                      <input matInput [matDatepicker]="rotatepicker"
+                        formControlName="rotationdate">
+                      <mat-hint>Date Base for rotation</mat-hint>
+                      <mat-datepicker-toggle matIconSuffix [for]="rotatepicker"></mat-datepicker-toggle>
+                      <mat-datepicker #rotatepicker></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                  <div class="formField">
+                    <mat-form-field class="fieldWidth">
+                      <mat-label>Select Schedule</mat-label>
+                      <mat-select formControlName="rotationdays">
+                        <mat-option *ngFor="let days of rotatePeriods"
+                          [value]="days">{{days}}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+              </div>
+              <app-site-employee-assignment-schedule [schedule]="schedule">
+              </app-site-employee-assignment-schedule>
+            </ng-container>
+          </div>
+        </form>
+      </mat-card-content>
+  </mat-card>
+</div>

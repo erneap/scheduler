@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { Workday } from 'src/app/models/employees/assignments';
-import { Employee } from 'src/app/models/employees/employee';
 import { WorkWeek } from 'src/app/models/web/internalWeb';
 import { EmployeeService } from 'src/app/services/employee.service';
 

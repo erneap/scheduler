@@ -8,20 +8,29 @@ import { GenericModule } from '../generic/generic.module';
 import { SitePtoHolidayComponent } from './site-pto-holiday/site-pto-holiday.component';
 import { EmployeeModule } from '../employee/employee.module';
 import { SiteEmployeeBasicComponent } from './site-employee-basic/site-employee-basic.component';
+import { SiteEmployeeAssignmentComponent } from './site-employee-assignment/site-employee-assignment.component';
+import { SiteEmployeeAssignmentScheduleComponent } from './site-employee-assignment/site-employee-assignment-schedule/site-employee-assignment-schedule.component';
+import { SiteEmployeeAssignmentScheduleDayComponent } from './site-employee-assignment/site-employee-assignment-schedule-day/site-employee-assignment-schedule-day.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
   declarations: [
     SiteEmployeeComponent,
     SitePtoHolidayComponent,
-    SiteEmployeeBasicComponent
+    SiteEmployeeBasicComponent,
+    SiteEmployeeAssignmentComponent,
+    SiteEmployeeAssignmentScheduleComponent,
+    SiteEmployeeAssignmentScheduleDayComponent
   ],
   imports: [
     CommonModule,
     SiteEmployeeRoutingModule,
     MaterialModule,
     GenericModule,
-    EmployeeModule
+    EmployeeModule,
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class SiteEmployeeModule { }
