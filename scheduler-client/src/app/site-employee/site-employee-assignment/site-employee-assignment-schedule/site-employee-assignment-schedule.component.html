@@ -10,6 +10,7 @@
     <div class="movement">
       <form [formGroup]="scheduleForm">
       <select class="day-form-field" formControlName="days"
+        (change)="changeDays()"
       style="color: white;">
         <ng-container *ngFor="let opt of days">
           <option [value]="opt" class="options">{{opt}}</option>

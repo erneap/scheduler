@@ -27,9 +27,8 @@ export interface Message {
 export interface NewEmployeeRequest {
   team: string;
   site: string;
-  first: string;
-  middle: string;
-  last: string;
+  employee: IEmployee;
+  password: string;
 }
 
 export interface NewEmployeeAssignment {

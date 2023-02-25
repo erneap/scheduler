@@ -42,7 +42,7 @@ func CreateEmployee(c *gin.Context) {
 
 	// The service checks for the employee and updates if present in the database,
 	// but if not present, creates a new employee.
-	emp, err := services.CreateEmployee(data.First, data.Middle, data.Last,
+	emp, err := services.CreateEmployee(data.Employee, data.Password,
 		data.TeamID, data.SiteID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,

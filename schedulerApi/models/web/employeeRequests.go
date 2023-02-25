@@ -3,6 +3,8 @@ package web
 import (
 	"log"
 	"time"
+
+	"github.com/erneap/scheduler/schedulerApi/models/employees"
 )
 
 type AuthenticationRequest struct {
@@ -39,11 +41,10 @@ type Message struct {
 }
 
 type NewEmployeeRequest struct {
-	TeamID string `json:"team"`
-	SiteID string `json:"site"`
-	First  string `json:"first"`
-	Middle string `json:"middle"`
-	Last   string `json:"last"`
+	TeamID   string             `json:"team"`
+	SiteID   string             `json:"site"`
+	Employee employees.Employee `json:"employee"`
+	Password string             `json:"password"`
 }
 
 type NewEmployeeAssignment struct {

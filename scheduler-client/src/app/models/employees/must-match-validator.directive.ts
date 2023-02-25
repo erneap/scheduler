@@ -13,7 +13,10 @@ export class MustMatchValidator implements Validator {
   validate(control: AbstractControl) : {[key: string]: any} | null {
     const formGroup = control.parent;
     if (formGroup) {
-        const passwd1 = formGroup.get('password');
+        let passwd1 = formGroup.get('password');
+        if (!passwd1) {
+          passwd1 = formGroup.get('newpassword')
+        }
         const passwd2 = formGroup.get('password2');
         if (passwd1 && passwd2){
             return passwd1.value === passwd2.value 

@@ -15,10 +15,13 @@ export class WorkWeek {
     }
   }
 
-  setWorkday(wd: IWorkday, date: Date) {
+  setWorkday(wd: IWorkday, date?: Date) {
     const wDay = new Workday(wd);
-    wDay.date = new Date(date);
-    this.week[wDay.id] = wDay;
+    if (date) {
+      wDay.date = new Date(date);
+    }
+    const id = wDay.id % 7;
+    this.week[id] = wDay;
     this.week.sort((a,b) => a.compareTo(b));
   }
 

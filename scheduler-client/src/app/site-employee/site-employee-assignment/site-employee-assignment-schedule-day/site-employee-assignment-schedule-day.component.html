@@ -6,7 +6,8 @@
       [style]="fontStyle" (change)="changeField('code')">
         <option value=""></option>
         <ng-container *ngFor="let opt of workCodes">
-          <option [value]="opt.id" class="options">{{opt.title.toUpperCase()}}</option>
+          <option [value]="opt.id" class="options"
+            >{{opt.id.toUpperCase()}}</option>
         </ng-container>
       </select>
     </div>

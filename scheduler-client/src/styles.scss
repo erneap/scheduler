@@ -102,7 +102,6 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     margin: 0;
     padding: 0;
     margin-right: 5px;
-    border-left: solid 1px #3f51b3;
 }
 
 .fieldWidth {
@@ -115,4 +114,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 ::ng-deep .spinner-dialog > mat-dialog-container {
     background-color: var(--background);
+}
+
+.error {
+    color: red;
 }

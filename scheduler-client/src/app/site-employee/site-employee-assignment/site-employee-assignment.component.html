@@ -1,11 +1,19 @@
 <div class="fxLayout fxLayout-column-center">
   <mat-card style="background-color: #3f51b5; color: white;">
       <mat-card-header>
-          <mat-card-title>
-            <div class="mat-headline">Employee's Assignments</div>
-            <span class="flex-spacer"></span>
-            <div class="mat-headline">{{employee.name.getFullName()}}</div>
-          </mat-card-title>
+        <div class="fxLayout-row-center">
+          <div class="fxLayout-column-topleft">
+            <div class="headline">Employee's Assignments</div>
+            <div class="subheadline">{{employee.name.getFullName()}}</div>
+          </div>
+          <span class="flex-spacer"></span>
+          <button mat-icon-button color="accent"
+            *ngIf="this.assignment.id !== 0"
+            matTooltip="Delete Current Assignment"
+            >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </mat-card-header>
       <mat-card-content class="fxLayout-column-center">
         <form [formGroup]="asgmtForm">

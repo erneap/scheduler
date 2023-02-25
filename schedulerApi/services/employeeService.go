@@ -22,7 +22,8 @@ import (
 // Most employees will have a log in account to allow them to view the
 // schedule data.  So a comparison of their possible authentication account is
 // made to ensure their object ID is the same.
-func CreateEmployee(first, middle, last, teamID, siteid string) (*employees.Employee, error) {
+func CreateEmployee(emp employees.Employee, passwd, teamID,
+	siteid string) (*employees.Employee, error) {
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 	teamid, err := primitive.ObjectIDFromHex(teamID)
@@ -31,25 +32,25 @@ func CreateEmployee(first, middle, last, teamID, siteid string) (*employees.Empl
 	}
 
 	filter := bson.M{
-		"name.firstName": first,
-		"name.lastName":  last,
+		"name.firstName": emp.Name.FirstName,
+		"name.lastName":  emp.Name.LastName,
 		"team":           teamid,
 	}
 
 	// first check to see of an employee already exists for this first and last
 	// name.  If present, change filter to include middle if not blank, but if
 	// middle is blank, return old employee record
-	var emp employees.Employee
-	err = empCol.FindOne(context.TODO(), filter).Decode(&emp)
+	var tEmp employees.Employee
+	err = empCol.FindOne(context.TODO(), filter).Decode(&tEmp)
 	if err == nil || err != mongo.ErrNoDocuments {
-		if middle == "" {
+		if emp.Name.MiddleName == "" {
 			emp.Decrypt()
 			return &emp, nil
 		}
 		filter = bson.M{
-			"name.firstName":  first,
-			"name.middleName": middle,
-			"name.lastName":   last,
+			"name.firstName":  emp.Name.FirstName,
+			"name.middleName": emp.Name.MiddleName,
+			"name.lastName":   emp.Name.LastName,
 			"team":            teamid,
 		}
 
@@ -60,16 +61,10 @@ func CreateEmployee(first, middle, last, teamID, siteid string) (*employees.Empl
 		}
 	}
 
-	emp.TeamID = teamid
-	emp.SiteID = siteid
-	emp.Name = employees.EmployeeName{
-		FirstName:  first,
-		MiddleName: middle,
-		LastName:   last,
-	}
+	// check user collection for new employee
 	filter = bson.M{
-		"firstName": first,
-		"lastName":  last,
+		"firstName": emp.Name.FirstName,
+		"lastName":  emp.Name.LastName,
 	}
 
 	var user users.User
@@ -77,9 +72,25 @@ func CreateEmployee(first, middle, last, teamID, siteid string) (*employees.Empl
 	err = userCol.FindOne(context.TODO(), filter).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		emp.ID = primitive.NewObjectID()
+		// create user record with provided password.
+		user = users.User{
+			ID:           emp.ID,
+			EmailAddress: emp.Email,
+			FirstName:    emp.Name.FirstName,
+			MiddleName:   emp.Name.MiddleName,
+			LastName:     emp.Name.LastName,
+			Workgroups: []string{
+				"scheduler-employee",
+			},
+		}
+		user.SetPassword(passwd)
+		userCol.InsertOne(context.TODO(), user)
 	} else {
 		emp.ID = user.ID
 	}
+
+	emp.TeamID = teamid
+	emp.SiteID = siteid
 
 	_, err = empCol.InsertOne(context.TODO(), emp)
 	if err != nil {
