@@ -2,7 +2,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Employee, IEmployee } from '../models/employees/employee';
-import { EmployeeLeaveRequest, EmployeeResponse, UpdateRequest } from '../models/web/employeeWeb';
+import { EmployeeLeaveRequest, EmployeeResponse, NewEmployeeRequest, UpdateRequest } from '../models/web/employeeWeb';
 import { CacheService } from './cache.service';
 import { TeamService } from './team.service';
 
@@ -88,5 +88,17 @@ export class EmployeeService extends CacheService {
     Observable<HttpResponse<EmployeeResponse>> {
     const url = `/scheduler/api/v1/employee/request/${empid}/${reqid}`;
     return this.httpClient.delete<HttpResponse<EmployeeResponse>>(url);
+  }
+
+  addEmployee(employee: Employee, passwd: string, teamid: string, siteid: string): 
+  Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee';
+    const empRequest: NewEmployeeRequest = {
+      employee: employee,
+      password: passwd,
+      team: teamid,
+      site: siteid,
+    }
+    return this.httpClient.post<HttpResponse<EmployeeResponse>>(url, empRequest);
   }
 }

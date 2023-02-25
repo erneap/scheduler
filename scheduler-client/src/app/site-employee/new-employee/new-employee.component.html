@@ -22,7 +22,7 @@
                 <div class="fxLayout-row-center">
                   <mat-form-field>
                     <mat-label>E-mail Address</mat-label>
-                    <input matInput formControlName="newemail">
+                    <input matInput formControlName="email">
                     <mat-error *ngIf="this.employeeForm.get('newemail')?.hasError('required')"
                       class="error">Required</mat-error>
                   </mat-form-field>
@@ -56,7 +56,7 @@
                   <div class="formFieldWide">
                     <mat-form-field class="fieldWidthWide">
                       <mat-label>New Password</mat-label>
-                      <input matInput type="password" formControlName="newpassword">
+                      <input matInput type="password" formControlName="password">
                       <mat-error *ngIf="this.employeeForm.get('newpassword')?.invalid"
                         class="error">
                         {{getPasswordError()}}
