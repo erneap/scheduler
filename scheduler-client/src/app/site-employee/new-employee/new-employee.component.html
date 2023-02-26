@@ -190,9 +190,20 @@
                 </app-site-employee-assignment-schedule>
               </div>
             </mat-expansion-panel>
+            <mat-expansion-panel style="background-color: lightblue;"
+              *ngIf="newError !== ''" [expanded]="newError !== ''">
+              <mat-expansion-panel-header style="background-color: #3691b0;">
+                <mat-panel-title style="color: white;">Add Problem (Error Message)</mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="error">
+                <span style="color: black;">Error: </span>
+                {{newError}}
+              </div>
+            </mat-expansion-panel>
           </mat-accordion>
           <div class="fxLayout-row-center" *ngIf="employeeForm.valid">
-            <button mat-raised-button color="accent">Add</button>
+            <button mat-raised-button color="accent"
+            (click)="addEmployee()">Add</button>
           </div>
         </form>
       </mat-card-content>

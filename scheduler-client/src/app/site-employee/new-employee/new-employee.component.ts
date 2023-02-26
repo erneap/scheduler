@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Assignment, Schedule } from 'src/app/models/employees/assignments';
 import { Employee, EmployeeLaborCode } from 'src/app/models/employees/employee';
 import { LaborCode } from 'src/app/models/sites/laborcode';
@@ -28,6 +29,7 @@ export class NewEmployeeComponent {
   schedule: Schedule;
   teamid: string = '';
   siteid: string = '';
+  newError: string = '';
 
   constructor(
     protected teamService: TeamService,
@@ -35,6 +37,7 @@ export class NewEmployeeComponent {
     protected empService: EmployeeService,
     protected dialogService: DialogService,
     protected authService: AuthService,
+    protected router: Router,
     private fb: FormBuilder
   ) {
     this.companies = [];
@@ -218,6 +221,7 @@ export class NewEmployeeComponent {
     this.employee.data.assignments[0].schedules[0] = this.schedule;
 
     this.dialogService.showSpinner();
+    this.newError = '';
     this.empService.addEmployee(this.employee, passwd, this.teamid, this.siteid)
       .subscribe({
         next: (resp) => {
@@ -249,11 +253,13 @@ export class NewEmployeeComponent {
               site.employees.sort((a,b) => a.compareTo(b));
               this.siteService.setSite(site);
               this.siteService.setSelectedEmployee(data.employee);
+              this.router.navigate(['/siteemployees/profile']);
             }
           }
         },
         error: err => {
-
+          this.dialogService.closeSpinner();
+          this.newError = err.Error();
         }
       });
   }

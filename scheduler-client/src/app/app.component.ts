@@ -27,6 +27,9 @@ export class AppComponent {
       sanitizer.bypassSecurityTrustResourceUrl(
         'assets/images/icons/calendar.svg'));
     this.authService.getUser();
+    if (this.authService.isTokenExpired()) {
+      this.router.navigate(['/home']);
+    }
     const site = this.siteService.getSite();
     const team = this.teamService.getTeam();
     let sitename = "";
