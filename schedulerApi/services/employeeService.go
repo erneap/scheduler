@@ -92,7 +92,16 @@ func CreateEmployee(emp employees.Employee, passwd, teamID,
 	emp.TeamID = teamid
 	emp.SiteID = siteid
 
+	err = emp.Encrypt()
+	if err != nil {
+		return nil, err
+	}
+
 	_, err = empCol.InsertOne(context.TODO(), emp)
+	if err != nil {
+		return nil, err
+	}
+	emp.Decrypt()
 	if err != nil {
 		return nil, err
 	}

@@ -15,6 +15,7 @@ export class SiteEmployeeComponent {
   items: ListItem[] = [];
   activeOnly: boolean = true;
   selected: string = '';
+  employee: Employee = new Employee();
 
   constructor(
     protected authService: AuthService,
@@ -27,10 +28,12 @@ export class SiteEmployeeComponent {
     let iEmp = this.siteService.getSelectedEmployee();
     if (iEmp) {
       this.selected = iEmp.id;
+      this.employee = new Employee(iEmp);
     } else {
       iEmp = this.empService.getEmployee()
       if (iEmp) {
         this.selected = iEmp.id;
+        this.employee = new Employee(iEmp);
       }
     }
     this.authService.section = 'siteemployees';
@@ -61,8 +64,8 @@ export class SiteEmployeeComponent {
       if (site.employees) {
         site.employees.forEach(iEmp => {
           if (iEmp.id === eid) {
-            this.siteService.setSelectedEmployee(iEmp);
-            window.location.reload();
+            console.log(iEmp.id);
+            this.employee = new Employee(iEmp);
           }
         });
       }

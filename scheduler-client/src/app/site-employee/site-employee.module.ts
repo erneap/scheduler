@@ -13,6 +13,7 @@ import { SiteEmployeeAssignmentScheduleComponent } from './site-employee-assignm
 import { SiteEmployeeAssignmentScheduleDayComponent } from './site-employee-assignment/site-employee-assignment-schedule-day/site-employee-assignment-schedule-day.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NewEmployeeComponent } from './new-employee/new-employee.component';
+import { SiteEmployeeEditorComponent } from './site-employee-editor/site-employee-editor.component';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { NewEmployeeComponent } from './new-employee/new-employee.component';
     SiteEmployeeAssignmentComponent,
     SiteEmployeeAssignmentScheduleComponent,
     SiteEmployeeAssignmentScheduleDayComponent,
-    NewEmployeeComponent
+    NewEmployeeComponent,
+    SiteEmployeeEditorComponent
   ],
   imports: [
     CommonModule,

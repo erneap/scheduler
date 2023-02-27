@@ -4,6 +4,7 @@ import { NotFoundComponent } from '../home/not-found/not-found.component';
 import { NewEmployeeComponent } from './new-employee/new-employee.component';
 import { SiteEmployeeAssignmentComponent } from './site-employee-assignment/site-employee-assignment.component';
 import { SiteEmployeeBasicComponent } from './site-employee-basic/site-employee-basic.component';
+import { SiteEmployeeEditorComponent } from './site-employee-editor/site-employee-editor.component';
 import { SiteEmployeeComponent } from './site-employee.component';
 import { SitePtoHolidayComponent } from './site-pto-holiday/site-pto-holiday.component';
 
@@ -14,7 +15,7 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: '/siteemployees/ptoholidays', pathMatch: 'full'},
       { path: 'newemployee', component: NewEmployeeComponent },
-      { path: 'profile', component: SiteEmployeeBasicComponent },
+      { path: 'editor', component: SiteEmployeeEditorComponent },
       { path: 'ptoholidays', component: SitePtoHolidayComponent },
       { path: 'assignments', component: SiteEmployeeAssignmentComponent },
       { path: '**', component: NotFoundComponent },

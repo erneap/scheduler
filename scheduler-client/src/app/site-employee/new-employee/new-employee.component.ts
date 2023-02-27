@@ -195,6 +195,8 @@ export class NewEmployeeComponent {
   }
 
   addEmployee() {
+    this.employee.team = this.teamid;
+    this.employee.site = this.siteid;
     this.employee.name.first = this.employeeForm.value.first;
     this.employee.name.middle = this.employeeForm.value.middle;
     this.employee.name.last = this.employeeForm.value.last;
@@ -215,9 +217,17 @@ export class NewEmployeeComponent {
       chargeNumber: laborParts[0],
       extension: laborParts[1],
     });
-    this.employee.data.laborCodes.push(laborcode);
+    if (this.employee.data.laborCodes.length === 0) {
+      this.employee.data.laborCodes.push(laborcode);
+    } else {
+      this.employee.data.laborCodes[0] = laborcode;
+    }  
+    this.employee.data.assignments[0].site = this.siteid;  
     this.employee.data.assignments[0].workcenter = this.employeeForm.value.workcenter;
-    this.employee.data.assignments[0].startDate = new Date(this.employeeForm.value.startdate);
+    const start:Date = new Date(this.employeeForm.value.startDate);
+    this.employee.data.assignments[0].startDate = new Date(start.getFullYear(),
+      start.getMonth(), start.getDate());
+    this.employee.data.assignments[0].endDate = new Date(9999, 11, 30);
     this.employee.data.assignments[0].schedules[0] = this.schedule;
 
     this.dialogService.showSpinner();
@@ -253,12 +263,13 @@ export class NewEmployeeComponent {
               site.employees.sort((a,b) => a.compareTo(b));
               this.siteService.setSite(site);
               this.siteService.setSelectedEmployee(data.employee);
-              this.router.navigate(['/siteemployees/profile']);
             }
+            this.router.navigateByUrl('/siteemployees/editor');
           }
         },
         error: err => {
           this.dialogService.closeSpinner();
+          console.log(err);
           this.newError = err.Error();
         }
       });

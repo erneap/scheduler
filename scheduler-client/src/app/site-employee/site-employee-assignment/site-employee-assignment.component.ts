@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Assignment, Schedule } from 'src/app/models/employees/assignments';
-import { Employee } from 'src/app/models/employees/employee';
+import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { Workcenter } from 'src/app/models/sites/workcenter';
 import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
@@ -12,7 +12,27 @@ import { SiteService } from 'src/app/services/site.service';
   styleUrls: ['./site-employee-assignment.component.scss']
 })
 export class SiteEmployeeAssignmentComponent {
-  employee: Employee;
+  private _employee: Employee | undefined;
+  @Input()
+  public set employee(iEmp: IEmployee) {
+    this._employee = new Employee(iEmp);
+    this.setAssignments();
+  }
+  get employee(): Employee {
+    if (this._employee) {
+      return this._employee;
+    } else {
+      const iEmp = this.siteService.getSelectedEmployee();
+      if (iEmp) {
+        this._employee = new Employee(iEmp)
+        this.setAssignments();
+        return new Employee(iEmp);
+      }
+      this._employee = new Employee();
+      this.setAssignments();
+      return new Employee();
+    }
+  }
   siteID: string = '';
   assignment: Assignment = new Assignment();
   schedule: Schedule = new Schedule();
@@ -35,17 +55,6 @@ export class SiteEmployeeAssignmentComponent {
         site.workcenters.forEach(wc => {
           this.workcenters.push(new Workcenter(wc));
         });
-      }
-    }
-    let iEmp = this.siteService.getSelectedEmployee();
-    if (iEmp) {
-      this.employee = new Employee(iEmp);
-    } else {
-      iEmp = this.empService.getEmployee();
-      if (iEmp) {
-        this.employee = new Employee(iEmp);
-      } else {
-        this.employee = new Employee();
       }
     }
     this.asgmtForm = this.fb.group({
