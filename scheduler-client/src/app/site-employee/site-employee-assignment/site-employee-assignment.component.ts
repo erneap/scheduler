@@ -12,26 +12,14 @@ import { SiteService } from 'src/app/services/site.service';
   styleUrls: ['./site-employee-assignment.component.scss']
 })
 export class SiteEmployeeAssignmentComponent {
-  private _employee: Employee | undefined;
+  private _employee: Employee = new Employee();
   @Input()
   public set employee(iEmp: IEmployee) {
     this._employee = new Employee(iEmp);
     this.setAssignments();
   }
   get employee(): Employee {
-    if (this._employee) {
-      return this._employee;
-    } else {
-      const iEmp = this.siteService.getSelectedEmployee();
-      if (iEmp) {
-        this._employee = new Employee(iEmp)
-        this.setAssignments();
-        return new Employee(iEmp);
-      }
-      this._employee = new Employee();
-      this.setAssignments();
-      return new Employee();
-    }
+    return this._employee;
   }
   siteID: string = '';
   assignment: Assignment = new Assignment();

@@ -224,7 +224,8 @@ export class NewEmployeeComponent {
     }  
     this.employee.data.assignments[0].site = this.siteid;  
     this.employee.data.assignments[0].workcenter = this.employeeForm.value.workcenter;
-    const start:Date = new Date(this.employeeForm.value.startDate);
+    const start:Date = new Date(this.employeeForm.value.startdate);
+    console.log(start);
     this.employee.data.assignments[0].startDate = new Date(start.getFullYear(),
       start.getMonth(), start.getDate());
     this.employee.data.assignments[0].endDate = new Date(9999, 11, 30);
