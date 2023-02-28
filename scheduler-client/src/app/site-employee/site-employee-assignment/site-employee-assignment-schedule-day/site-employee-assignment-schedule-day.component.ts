@@ -22,7 +22,7 @@ export class SiteEmployeeAssignmentScheduleDayComponent {
   get workday(): Workday {
     return this._workday;
   }
-  @Output() changed = new EventEmitter<ChangeAssignmentRequest>();
+  @Output() changedate = new EventEmitter<string>();
   workCodes: Workcode[] = [];
   workcenters: Workcenter[] = [];
   workHours: string[] = new Array("", "2", "3", "4", "6", "8", "10", "12");
@@ -85,14 +85,7 @@ export class SiteEmployeeAssignmentScheduleDayComponent {
         value = this.dayForm.value.hours;
         break;
     }
-    const data: ChangeAssignmentRequest = {
-      employee: '',
-      asgmt: 0,
-      schedule: 0,
-      workday: this.workday.id,
-      field: field,
-      value: value,
-    }
-    this.changed.emit(data);
+    const data = `${this.workday.id}|${field}|${value}`;
+    this.changedate.emit(data);
   }
 }

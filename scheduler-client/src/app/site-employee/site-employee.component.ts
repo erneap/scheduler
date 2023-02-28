@@ -65,6 +65,7 @@ export class SiteEmployeeComponent {
         site.employees.forEach(iEmp => {
           if (iEmp.id === eid) {
             this.employee = new Employee(iEmp);
+            this.siteService.setSelectedEmployee(iEmp);
           }
         });
       }

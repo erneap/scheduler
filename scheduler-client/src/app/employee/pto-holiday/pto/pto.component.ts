@@ -143,7 +143,6 @@ export class PtoComponent {
       }
 
       emp.data.balance.forEach(bal => {
-        console.log(JSON.stringify(bal));
         if (bal.year === this._year) {
           this.annual = bal.annual;
           this.carryover = bal.carryover;

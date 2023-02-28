@@ -33,7 +33,8 @@
               <div class="formField">
                 <mat-form-field class="fieldWidth">
                   <mat-label>Assignment Workcenter</mat-label>
-                  <mat-select formControlName="workcenter">
+                  <mat-select formControlName="workcenter" 
+                    (selectionChange)="updateField('workcenter')">
                     <mat-option *ngFor="let wkctr of workcenters"
                       [value]="wkctr.id">{{wkctr.name.toUpperCase()}}</mat-option>
                   </mat-select>
@@ -43,16 +44,18 @@
                 <mat-form-field class="fieldWidth">
                   <mat-label>Assignment Start</mat-label>
                   <input matInput [matDatepicker]="startpicker"
-                    formControlName="startdate">
+                    formControlName="startdate" 
+                    (dateChange)="updateField('startdate')">
                   <mat-datepicker-toggle matIconSuffix [for]="startpicker"></mat-datepicker-toggle>
                   <mat-datepicker #startpicker></mat-datepicker>
                 </mat-form-field>
               </div>
-              <div class="formField">
+              <div class="formField" *ngIf="showSchedule">
                 <mat-form-field class="fieldWidth">
                   <mat-label>Assignment End Date</mat-label>
                   <input matInput [matDatepicker]="endpicker"
-                    formControlName="enddate">
+                    formControlName="enddate" 
+                    (dateChange)="updateField('enddate')">
                   <mat-datepicker-toggle matIconSuffix [for]="endpicker"></mat-datepicker-toggle>
                   <mat-datepicker #endpicker></mat-datepicker>
                 </mat-form-field>
@@ -78,7 +81,8 @@
                   </mat-form-field>
                 </div>
                 <button mat-mini-fab color="accent" style="margin-right: 5px;"
-                  matTooltip="Add new schedule">
+                  matTooltip="Add new schedule"
+                  (click)="updateField('addschedule')">
                   <mat-icon>add</mat-icon>
                 </button>
                 <ng-container *ngIf="assignment.schedules.length > 1">
@@ -86,7 +90,8 @@
                     <mat-form-field class="fieldWidth">
                       <mat-label>Rotation Date</mat-label>
                       <input matInput [matDatepicker]="rotatepicker"
-                        formControlName="rotationdate">
+                        formControlName="rotationdate" 
+                        (dateChange)="updateField('rotationdate')">
                       <mat-hint>Date Base for rotation</mat-hint>
                       <mat-datepicker-toggle matIconSuffix [for]="rotatepicker"></mat-datepicker-toggle>
                       <mat-datepicker #rotatepicker></mat-datepicker>
@@ -95,7 +100,8 @@
                   <div class="formField">
                     <mat-form-field class="fieldWidth">
                       <mat-label>Select Schedule</mat-label>
-                      <mat-select formControlName="rotationdays">
+                      <mat-select formControlName="rotationdays" 
+                        (selectionChange)="updateField('rotationdays')">
                         <mat-option *ngFor="let days of rotatePeriods"
                           [value]="days">{{days}}</mat-option>
                       </mat-select>
@@ -103,7 +109,8 @@
                   </div>
                 </ng-container>
               </div>
-              <app-site-employee-assignment-schedule [schedule]="schedule">
+              <app-site-employee-assignment-schedule [schedule]="schedule"
+              (change)="updateSchedule($event)">
               </app-site-employee-assignment-schedule>
             </ng-container>
           </div>

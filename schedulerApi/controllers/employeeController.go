@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -254,6 +255,7 @@ func UpdateEmployeeAssignmentWorkday(c *gin.Context) {
 							case "hours":
 								wd.Hours = data.FloatValue()
 							}
+							fmt.Println(wd.Code)
 							sch.Workdays[k] = wd
 							asgmt.Schedules[j] = sch
 							emp.Data.Assignments[i] = asgmt

@@ -36,13 +36,15 @@ export class EmployeeScheduleMonthComponent {
     // calculate the display's start and end date, where start date is always
     // the sunday before the 1st of the month and end date is the saturday after
     // the end of the month.
-    this.startDate = new Date(this.month);
+    this.startDate = new Date(Date.UTC(this.month.getFullYear(), 
+      this.month.getMonth(), 1));
     while (this.startDate.getDay() !== 0) {
       this.startDate = new Date(this.startDate.getTime() - (24 * 3600000));
     }
-    this.endDate = new Date(this.month.getFullYear(), this.month.getMonth() + 1, 1);
+    this.endDate = new Date(Date.UTC(this.month.getFullYear(), 
+      this.month.getMonth() + 1, 1));
     this.endDate = new Date(this.endDate.getTime() - 1000);
-    while (this.endDate.getDay() !== 6) {
+    while (this.endDate.getDay() !== 0) {
       this.endDate = new Date(this.endDate.getTime() + (24 * 3600000));
     }
 
@@ -50,7 +52,7 @@ export class EmployeeScheduleMonthComponent {
     let start = new Date(this.startDate);
     const emp = this.employeeService.getEmployee();
     var workweek: WorkWeek | undefined;
-    while (start.getTime() <= this.endDate.getTime()) {
+    while (start.getTime() < this.endDate.getTime()) {
       if (!workweek || start.getDay() === 0) {
         count++;
         workweek = new WorkWeek(count);

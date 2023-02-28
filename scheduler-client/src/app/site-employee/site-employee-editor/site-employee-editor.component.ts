@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Employee } from 'src/app/models/employees/employee';
+import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
 
 @Component({
@@ -21,6 +22,8 @@ export class SiteEmployeeEditorComponent {
   }
 
   constructor(
+    protected empService: EmployeeService,
     protected siteService: SiteService
-  ) {}
+  ) {
+  }
 }

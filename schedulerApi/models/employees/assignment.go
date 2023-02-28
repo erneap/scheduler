@@ -84,7 +84,7 @@ func (a *Assignment) ChangeScheduleDays(schedID uint, days int) {
 			if len(sch.Workdays) > days {
 				sch.Workdays = sch.Workdays[:days]
 			} else if len(sch.Workdays) < days {
-				for j := len(sch.Workdays); j <= days; j++ {
+				for j := len(sch.Workdays); j < days; j++ {
 					wd := Workday{
 						ID:    uint(j),
 						Hours: 0.0,

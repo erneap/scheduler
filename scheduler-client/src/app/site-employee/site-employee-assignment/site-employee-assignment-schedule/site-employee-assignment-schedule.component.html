@@ -30,8 +30,9 @@
   </div>
   <ng-container *ngFor="let week of workweeks">
     <div class="fxLayout-row-center">
-      <app-site-employee-assignment-schedule-day *ngFor="let wd of week.getWorkdays()"
-        [workday]="wd" (changed)="updateDate($event)">
+      <app-site-employee-assignment-schedule-day 
+        *ngFor="let wd of week.getWorkdays()"
+        [workday]="wd" (changedate)="updateDate($event)">
       </app-site-employee-assignment-schedule-day>
     </div>
   </ng-container>

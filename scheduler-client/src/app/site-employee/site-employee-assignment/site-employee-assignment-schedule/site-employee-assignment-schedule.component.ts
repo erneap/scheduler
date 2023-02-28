@@ -19,8 +19,7 @@ export class SiteEmployeeAssignmentScheduleComponent {
   get schedule(): Schedule {
     return this._schedule;
   }
-  @Output() changeDate = new EventEmitter<ChangeAssignmentRequest>();
-  @Output() change = new EventEmitter<ChangeAssignmentRequest>();
+  @Output() change = new EventEmitter<string>();
 
   days: string[] = [];
   scheduleForm: FormGroup;
@@ -41,6 +40,7 @@ export class SiteEmployeeAssignmentScheduleComponent {
 
   setSchedule() {
     this.label = `SCHEDULE ${this.schedule.id}`;
+    this.scheduleForm.controls['days'].setValue(`${this.schedule.workdays.length}`)
     this.workweeks = [];
     this.schedule.workdays.sort((a,b) => a.compareTo(b));
     var workweek: WorkWeek | undefined;
@@ -57,30 +57,19 @@ export class SiteEmployeeAssignmentScheduleComponent {
     this.workweeks.sort((a,b) => a.compareTo(b));
   }
 
-  updateDate(data: ChangeAssignmentRequest) {
-    data.schedule = this.schedule.id;
-    this.changeDate.emit(data);
+  updateDate(data: string) {
+    data = `workday|${this.schedule.id}|${data}`;
+    this.change.emit(data);
   }
 
   removeSchedule() {
-    const data: ChangeAssignmentRequest = {
-      employee: '',
-      asgmt: 0,
-      schedule: this.schedule.id,
-      field: 'removeschedule',
-      value: '',
-    }
+    const data = `schedule|${this.schedule.id}|0|removeschedule|`;
     this.change.emit(data);
   }
 
   changeDays() {
-    const data: ChangeAssignmentRequest = {
-      employee: '',
-      asgmt: 0,
-      schedule: this.schedule.id,
-      field: 'changeschedule',
-      value: this.scheduleForm.value.days,
-    }
+    const data = `schedule|${this.schedule.id}|0|changeschedule|`
+      + `${this.scheduleForm.value.days}`;
     this.change.emit(data)
   }
 }

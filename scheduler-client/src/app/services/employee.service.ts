@@ -134,4 +134,18 @@ export class EmployeeService extends CacheService {
       return this.httpClient.put<EmployeeResponse>(url, data, 
         { observe: 'response'});
   }
+
+  updateAssignmentSchedule(data: ChangeAssignmentRequest): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/assignment';
+    return this.httpClient.put<EmployeeResponse>(url, data, 
+      { observe: 'response'});
+  }
+
+  updateAssignmentWorkday(data: ChangeAssignmentRequest): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/assignment/workday';
+    return this.httpClient.put<EmployeeResponse>(url, data, 
+      { observe: 'response'});
+  }
 }

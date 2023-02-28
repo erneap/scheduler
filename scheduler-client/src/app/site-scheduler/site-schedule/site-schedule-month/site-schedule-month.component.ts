@@ -40,7 +40,8 @@ export class SiteScheduleMonthComponent {
     this.monthStyle = `width: ${monthWidth}px;`;
     this.monthLabel = `${this.months[this.month.getMonth()]} ${this.month.getFullYear()}`;
     this.dates = [];
-    let start = new Date(this.month.getFullYear(), this.month.getMonth(), 1);
+    let start = new Date(Date.UTC(this.month.getFullYear(), 
+      this.month.getMonth(), 1));
     while (start.getMonth() === this.month.getMonth()) {
       this.dates.push(new Date(start));
       start = new Date(start.getTime() + (24 * 3600000));
@@ -60,7 +61,8 @@ export class SiteScheduleMonthComponent {
           // figure workcenter to include this employee, based on workcenter
           // individual works the most
           wkctrMap.clear();
-          let start = new Date(this.month.getFullYear(), this.month.getMonth(), 1);
+          let start = new Date(Date.UTC(this.month.getFullYear(), 
+            this.month.getMonth(), 1));
           this.dates.forEach(dt => {
             const wd = emp.data.getWorkday(site.id, dt);
             if (wd.workcenter !== '') {

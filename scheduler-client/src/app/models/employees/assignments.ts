@@ -148,12 +148,15 @@ export class Assignment implements IAssignment {
     if (date.getTime() <= this.endDate.getTime() 
       && date.getTime() >= this.startDate.getTime()
       && this.site.toLowerCase() === site.toLowerCase()) {
-      let start = new Date(this.startDate);
-      while (start.getDay() != 6) {
+      let start = new Date(Date.UTC(this.startDate.getFullYear(), 
+        this.startDate.getMonth(), this.startDate.getDate()));
+      while (start.getDay() != 0) {
         start = new Date(start.getTime() - (24 * 3600000));
       }
-      let mSecs = date.getTime() - start.getTime();
-      let days = Math.floor(mSecs / (24 * 3600000));
+      let dateDays = Math.floor(date.getTime() / (24 * 3600000));
+      let startDays = Math.floor(start.getTime() / (24 * 3600000));
+
+      let days = dateDays - startDays;
       if (this.schedules.length === 1 || this.rotationdays <= 0) {
         let iDay = days % this.schedules[0].workdays.length;
         return this.schedules[0].getWorkday(iDay);

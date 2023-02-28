@@ -161,23 +161,27 @@ export class NewEmployeeComponent {
     return answer;
   }
 
-  changeAssignmentScheduleDate(data: ChangeAssignmentRequest) {
-    if (data.workday) {
-      let found = false;
-      for (let i=0; 
-        i < this.employee.data.assignments[0].schedules[0].workdays.length 
-        && !found; i++) {
+  changeAssignmentSchedule(data: string) {
+    const chgParts = data.split('|');
+    const field = chgParts[3];
+    if (chgParts[0].toLowerCase() === 'workday') {
+      if (chgParts[2] !== '') {
+        const workday = Number(chgParts[2]);
+        let found = false;
+        for (let i=0; 
+          i < this.employee.data.assignments[0].schedules[0].workdays.length 
+          && !found; i++) {
           const wd = this.employee.data.assignments[0].schedules[0].workdays[i];
-          if (wd.id === data.workday) {
-            switch (data.field.toLowerCase()) {
+          if (wd.id === workday) {
+            switch (field.toLowerCase()) {
               case "code":
-                wd.code = data.value;
+                wd.code = chgParts[4];
                 break;
               case "workcenter":
-                wd.workcenter = data.value;
+                wd.workcenter = chgParts[4];
                 break;
               case "hours":
-                const hrs = Number(data.value);
+                const hrs = Number(chgParts[4]);
                 wd.hours = hrs;
                 break;
             }
@@ -185,14 +189,13 @@ export class NewEmployeeComponent {
             this.employee.data.assignments[0].schedules[0].workdays[i] = wd;
           }
         }
-    }
-  }
-
-  changeAssignmentSchedule(data: ChangeAssignmentRequest) {
-    if (data.field === 'changeschedule') {
-      const days = Number(data.value);
-      this.schedule.setScheduleDays(days);
-      this.schedule = new Schedule(this.schedule);
+      }
+    } else {
+      if (field.toLowerCase() === 'changeschedule') {
+        const days = Number(chgParts[4]);
+        this.schedule.setScheduleDays(days);
+        this.schedule = new Schedule(this.schedule);
+      }
     }
   }
 

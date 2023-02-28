@@ -2,6 +2,7 @@ package web
 
 import (
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/erneap/scheduler/schedulerApi/models/employees"
@@ -61,32 +62,48 @@ type ChangeAssignmentRequest struct {
 	ScheduleID   uint   `json:"schedule,omitempty"`
 	WorkdayID    uint   `json:"workday,omitempty"`
 	Field        string `json:"field"`
-	Value        any    `json:"value"`
+	Value        string `json:"value"`
 }
 
 func (ur *ChangeAssignmentRequest) StringValue() string {
-	return ur.Value.(string)
+	return ur.Value
 }
 
 func (ur *ChangeAssignmentRequest) NumberValue() uint {
-	return ur.Value.(uint)
+	val, err := strconv.ParseUint(ur.Value, 10, 32)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	return uint(val)
 }
 
 func (ur *ChangeAssignmentRequest) IntValue() int {
-	return ur.Value.(int)
+	val, err := strconv.ParseInt(ur.Value, 10, 32)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	return int(val)
 }
 
 func (ur *ChangeAssignmentRequest) FloatValue() float64 {
-	return ur.Value.(float64)
+	val, err := strconv.ParseFloat(ur.Value, 64)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	return val
 }
 
 func (ur *ChangeAssignmentRequest) BooleanValue() bool {
-	return ur.Value.(bool)
+	val, err := strconv.ParseBool(ur.Value)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	return val
 }
 
 func (ur *ChangeAssignmentRequest) DateValue() time.Time {
 	dateValue, err := time.ParseInLocation("2006-01-02",
-		ur.Value.(string), time.UTC)
+		ur.Value, time.UTC)
 	if err != nil {
 		log.Println(err.Error())
 	}
