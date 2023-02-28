@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/erneap/scheduler/schedulerApi/models/employees"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -142,16 +143,61 @@ func (e *Employee) GetStandardWorkday(date time.Time) float64 {
 	return answer
 }
 
-func (e *Employee) RemoveAssignment(id uint) {
-	pos := -1
-	for i, asgmt := range e.Data.Assignments {
-		if asgmt.ID == id {
-			pos = i
+func (e *Employee) AddAssignment(site, wkctr string, start time.Time) {
+	// get next assignment id as one plus the highest in employee data
+	max := 0
+	for _, asgmt := range e.Data.Assignments {
+		if int(asgmt.ID) > max {
+			max = int(asgmt.ID)
 		}
 	}
-	if pos >= 0 {
-		e.Data.Assignments = append(e.Data.Assignments[:pos],
-			e.Data.Assignments[pos+1:]...)
+
+	// set the current highest or last end date to one day before
+	// this assignment start date
+	sort.Sort(ByAssignment(e.Data.Assignments))
+	lastAsgmt := e.Data.Assignments[len(e.Data.Assignments)-1]
+	lastAsgmt.EndDate = start.AddDate(0, 0, -1)
+	e.Data.Assignments[len(e.Data.Assignments)-1] = lastAsgmt
+
+	// create the new assignment
+	newAsgmt := employees.Assignment{
+		ID:           uint(max + 1),
+		Site:         site,
+		Workcenter:   wkctr,
+		StartDate:    start,
+		EndDate:      time.Date(9999, 12, 30, 0, 0, 0, 0, time.UTC),
+		RotationDate: time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
+		RotationDays: 0,
+	}
+	// add a single schedule, plus it's seven workdays, set schedule
+	// automatically to M-F/workcenter/8 hours/day shift.
+	newAsgmt.AddSchedule(7)
+	for i, wd := range newAsgmt.Schedules[0].Workdays {
+		if i != 0 && i != 6 {
+			wd.Code = "D"
+			wd.Workcenter = wkctr
+			wd.Hours = 8.0
+			newAsgmt.Schedules[0].Workdays[i] = wd
+		}
+	}
+
+	// add it employees assignment list and sort them
+	e.Data.Assignments = append(e.Data.Assignments, newAsgmt)
+	sort.Sort(ByAssignment(e.Data.Assignments))
+}
+
+func (e *Employee) RemoveAssignment(id uint) {
+	pos := -1
+	if id > 1 {
+		for i, asgmt := range e.Data.Assignments {
+			if asgmt.ID == id {
+				pos = i
+			}
+		}
+		if pos >= 0 {
+			e.Data.Assignments = append(e.Data.Assignments[:pos],
+				e.Data.Assignments[pos+1:]...)
+		}
 	}
 }
 

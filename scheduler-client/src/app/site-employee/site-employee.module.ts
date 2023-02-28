@@ -14,7 +14,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NewEmployeeComponent } from './new-employee/new-employee.component';
 import { SiteEmployeeEditorComponent } from './site-employee-editor/site-employee-editor.component';
 
-
 @NgModule({
   declarations: [
     SiteEmployeeComponent,

@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { ISchedule, Schedule } from 'src/app/models/employees/assignments';
 import { ChangeAssignmentRequest } from 'src/app/models/web/employeeWeb';
 import { WorkWeek } from 'src/app/models/web/internalWeb';
@@ -25,9 +27,11 @@ export class SiteEmployeeAssignmentScheduleComponent {
   scheduleForm: FormGroup;
   workweeks: WorkWeek[] = [];
   label: string = 'SCHEDULE 0';
+  deletable: boolean;
   
   constructor(
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    protected dialog: MatDialog
   ) {
     this.days = []
     for (let i = 7; i < 30; i += 7) {
@@ -36,10 +40,12 @@ export class SiteEmployeeAssignmentScheduleComponent {
     this.scheduleForm = this.fb.group({
       days: '7',
     });
+    this.deletable = true;
   }
 
   setSchedule() {
     this.label = `SCHEDULE ${this.schedule.id}`;
+    this.deletable = (this.schedule.id > 0);
     this.scheduleForm.controls['days'].setValue(`${this.schedule.workdays.length}`)
     this.workweeks = [];
     this.schedule.workdays.sort((a,b) => a.compareTo(b));
@@ -71,5 +77,19 @@ export class SiteEmployeeAssignmentScheduleComponent {
     const data = `schedule|${this.schedule.id}|0|changeschedule|`
       + `${this.scheduleForm.value.days}`;
     this.change.emit(data)
+  }
+
+  deleteSchedule() {
+    const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+      data: {title: 'Confirm Schedule Deletion', 
+      message: 'Are you sure you want to delete this schedule?'},
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(result);
+      if (result === 'yes') {
+        this.removeSchedule();
+      }
+    })
   }
 }

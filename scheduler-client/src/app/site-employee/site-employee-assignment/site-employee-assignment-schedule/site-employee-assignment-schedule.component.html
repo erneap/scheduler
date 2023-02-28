@@ -2,7 +2,9 @@
   <div class="fxLayout-row-center">
     <div class="movement">
       <button mat-icon-button color="warn"
-        matTooltip="Delete this schedule">
+        matTooltip="Delete this schedule"
+        *ngIf="deletable"
+        (click)="deleteSchedule()">
         <mat-icon>delete</mat-icon>
       </button>
     </div>

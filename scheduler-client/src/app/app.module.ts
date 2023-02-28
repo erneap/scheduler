@@ -22,6 +22,7 @@ import { SiteModule } from './site/site.module';
 import { SiteSchedulerModule } from './site-scheduler/site-scheduler.module';
 import { SiteEmployeeModule } from './site-employee/site-employee.module';
 import { GenericModule } from './generic/generic.module';
+import { DeletionConfirmationComponent } from './generic/deletion-confirmation/deletion-confirmation.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { GenericModule } from './generic/generic.module';
     WaitDialogComponent,
     PasswordExpireDialogComponent,
     NavigationMenuComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    DeletionConfirmationComponent
   ],
   imports: [
     BrowserModule,
@@ -45,6 +47,9 @@ import { GenericModule } from './generic/generic.module';
     SiteSchedulerModule,
     SiteEmployeeModule,
     GenericModule
+  ],
+  exports: [
+    DeletionConfirmationComponent
   ],
   providers: [AuthService, DialogService, EmployeeService, SiteService, 
     TeamService,

@@ -199,6 +199,7 @@ func UpdateEmployeeAssignment(c *gin.Context) {
 			case "rotationdays":
 				asgmt.RotationDays = data.IntValue()
 			case "addschedule":
+				fmt.Println(data.IntValue())
 				asgmt.AddSchedule(data.IntValue())
 			case "changeschedule":
 				asgmt.ChangeScheduleDays(data.ScheduleID, data.IntValue())

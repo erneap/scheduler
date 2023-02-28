@@ -8,7 +8,7 @@
           </div>
           <span class="flex-spacer"></span>
           <button mat-icon-button color="accent"
-            *ngIf="this.assignment.id !== 0"
+            *ngIf="this.assignment.id > 1"
             matTooltip="Delete Current Assignment"
             >
             <mat-icon>delete</mat-icon>
@@ -72,7 +72,8 @@
                 <div class="formField">
                   <mat-form-field class="fieldWidth">
                     <mat-label>Select Schedule</mat-label>
-                    <mat-select formControlName="schedule">
+                    <mat-select formControlName="schedule"
+                    (selectionChange)="changeSchedule()">
                       <mat-option *ngFor="let sch of assignment.schedules"
                         [value]="schedID(sch)">
                         Schedule {{sch.id}}

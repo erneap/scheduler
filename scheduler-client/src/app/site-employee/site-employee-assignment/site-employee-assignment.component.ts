@@ -111,6 +111,15 @@ export class SiteEmployeeAssignmentComponent {
     this.setAssignment();
   }
 
+  changeSchedule() {
+    let schedID = Number(this.asgmtForm.value.schedule);
+    this.assignment.schedules.forEach(sch => {
+      if (sch.id === schedID) {
+        this.schedule = new Schedule(sch);
+      }
+    });
+  }
+
   getDateString(date: Date) {
     if (date.getFullYear() !== 9999) {
       return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
@@ -154,7 +163,7 @@ export class SiteEmployeeAssignmentComponent {
           value = this.getYearFirstDate(this.asgmtForm.value.enddate);
           break;
         case "addschedule":
-          value = 7;
+          value = '7';
           break;
         case "rotationdate":
           value = this.getYearFirstDate(this.asgmtForm.value.rotationdate);
@@ -174,6 +183,7 @@ export class SiteEmployeeAssignmentComponent {
               this.authService.setToken(resp.headers.get('token') as string);
             }
             const data: EmployeeResponse | null = resp.body;
+            let schID = this.schedule.id;
             if (data && data !== null) {
               if (data.employee) {
                 this.employee = new Employee(data.employee);
@@ -185,6 +195,13 @@ export class SiteEmployeeAssignmentComponent {
                       this.assignment.schedules.sort((a,b) => a.compareTo(b));
                       this.schedule = this.assignment.schedules[
                         this.assignment.schedules.length - 1];
+                    } else {
+                      this.assignment.schedules.forEach(sch => {
+                        if (sch.id === schID) {
+                          this.schedule = new Schedule(sch);
+                          this.asgmtForm.controls['schedule'].setValue(`${sch.id}`);
+                        }
+                      });
                     }
                   }
                 });
@@ -233,65 +250,73 @@ export class SiteEmployeeAssignmentComponent {
         field: chgParts[3],
         value: chgParts[4],
       }
+      let schID = this.schedule.id;
       if (chgParts[0].toLowerCase() === 'schedule') {
         if (change.field.toLowerCase() === 'removeschedule') {
-
+          this.authService.statusMessage = "Removing Employee Assignment "
+            + 'Schedule';
         } else {
-          this.dialogService.showSpinner();
           this.authService.statusMessage = `Updating Employee Assignment -`
             + `Schedule Days`;
-          this.empService.updateAssignmentSchedule(change)
-            .subscribe({
-              next: resp => {
-                this.dialogService.closeSpinner();
-                if (resp.headers.get('token') !== null) {
-                  this.authService.setToken(resp.headers.get('token') as string);
-                }
-                const data: EmployeeResponse | null = resp.body;
-                if (data && data !== null) {
-                  if (data.employee) {
-                    this.employee = new Employee(data.employee);
-                    this.employee.data.assignments.forEach(agmt => {
-                      if (agmt.id === this.assignment.id) {
-                        this.assignment = new Assignment(agmt);
-                        this.setAssignment();
-                        this.assignment.schedules.forEach(sch => {
-                          if (sch.id === this.schedule.id) {
-                            this.schedule = new Schedule(sch);
-                          }
-                        });
-                      }
-                    });
-                  }
-                  const emp = this.empService.getEmployee();
-                  if (data.employee && emp && emp.id === data.employee.id) {
-                    this.empService.setEmployee(data.employee);
-                  }
-                  const site = this.siteService.getSite();
-                  if (site && site.employees && site.employees.length && data.employee) {
-                    let found = false;
-                    for (let i=0; i < site.employees.length && !found; i++) {
-                      if (site.employees[i].id === data.employee.id) {
-                        site.employees[i] = new Employee(data.employee);
-                        found = true;
-                      }
-                    }
-                    if (!found) {
-                      site.employees.push(new Employee(data.employee));
-                    }
-                    site.employees.sort((a,b) => a.compareTo(b));
-                    this.siteService.setSite(site);
-                    this.siteService.setSelectedEmployee(data.employee);
-                  }
-                }
-                this.authService.statusMessage = "Update complete";
-              },
-              error: err => {
-                this.dialogService.closeSpinner();
-                this.authService.statusMessage = err.error.exception;
-              }
-            });
         }
+        this.dialogService.showSpinner();
+        this.empService.updateAssignmentSchedule(change)
+          .subscribe({
+            next: resp => {
+              this.dialogService.closeSpinner();
+              if (resp.headers.get('token') !== null) {
+                this.authService.setToken(resp.headers.get('token') as string);
+              }
+              const data: EmployeeResponse | null = resp.body;
+              if (data && data !== null) {
+                if (data.employee) {
+                  this.employee = new Employee(data.employee);
+                  this.employee.data.assignments.forEach(agmt => {
+                    if (agmt.id === this.assignment.id) {
+                      this.assignment = new Assignment(agmt);
+                      this.setAssignment();
+                      let found = false;
+                      this.assignment.schedules.forEach(sch => {
+                        if (sch.id === schID) {
+                          this.schedule = new Schedule(sch);
+                          found = true;
+                        }
+                      });
+                      if (!found) {
+                        this.schedule = this.assignment.schedules[0];
+                        this.asgmtForm.controls['schedule'].setValue('0');
+                      }
+                    }
+                  });
+                }
+                const emp = this.empService.getEmployee();
+                if (data.employee && emp && emp.id === data.employee.id) {
+                  this.empService.setEmployee(data.employee);
+                }
+                const site = this.siteService.getSite();
+                if (site && site.employees && site.employees.length && data.employee) {
+                  let found = false;
+                  for (let i=0; i < site.employees.length && !found; i++) {
+                    if (site.employees[i].id === data.employee.id) {
+                      site.employees[i] = new Employee(data.employee);
+                      found = true;
+                    }
+                  }
+                  if (!found) {
+                    site.employees.push(new Employee(data.employee));
+                  }
+                  site.employees.sort((a,b) => a.compareTo(b));
+                  this.siteService.setSite(site);
+                  this.siteService.setSelectedEmployee(data.employee);
+                }
+              }
+              this.authService.statusMessage = "Update complete";
+            },
+            error: err => {
+              this.dialogService.closeSpinner();
+              this.authService.statusMessage = err.error.exception;
+            }
+          });
       } else {
         change.workday = Number(chgParts[2]);
         this.dialogService.showSpinner();
@@ -313,7 +338,7 @@ export class SiteEmployeeAssignmentComponent {
                       this.assignment = new Assignment(agmt);
                       this.setAssignment();
                       this.assignment.schedules.forEach(sch => {
-                        if (sch.id === this.schedule.id) {
+                        if (sch.id === schID) {
                           this.schedule = new Schedule(sch);
                         }
                       });

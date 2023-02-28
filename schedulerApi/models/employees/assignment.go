@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -73,6 +74,7 @@ func (a *Assignment) AddSchedule(days int) {
 			Hours: 0.0,
 		}
 		sch.Workdays = append(sch.Workdays, wd)
+		fmt.Println("Added: " + strconv.FormatInt(int64(wd.ID), 10))
 	}
 	a.Schedules = append(a.Schedules, sch)
 }
@@ -120,6 +122,8 @@ func (a *Assignment) RemoveSchedule(schID uint) {
 		for i, sch := range a.Schedules {
 			sch.ID = uint(i)
 		}
+		a.RotationDate = time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
+		a.RotationDays = 0
 	} else {
 		for _, wd := range a.Schedules[0].Workdays {
 			wd.Workcenter = ""
