@@ -77,60 +77,73 @@ export class PtoComponent {
 
   setYear() {
     this.leaveMonths = [];
+    
     this.actual = 0.0;
     this.requested = 0.0;
     this.annual = 0.0;
     this.carryover = 0.0;
     this.balance = 0.0;
+    this.employee.data.assignments.sort((a,b) => a.compareTo(b));
+    const startAsgmt = this.employee.data.assignments[0];
+    const endAsgmt = this.employee.data.assignments[this.employee.data.assignments.length - 1];
     this.balanceStyle = "balancepos";
     for (let i=0; i < 12; i++) {
       let month = new LeaveMonth();
       month.month = new Date(Date.UTC(this._year, i, 1));
+      let endMonth = new Date(Date.UTC(this._year, i+1, 1));
+      endMonth = new Date(endMonth.getTime() - 3600000);
+      let active = (startAsgmt.startDate.getTime() > endMonth.getTime() 
+        || (endAsgmt.endDate.getTime() < month.month.getTime()));
+      month.active = !active;
       this.leaveMonths.push(month);
     }
     const emp = this.employee;
-    if (emp && emp.data && emp.data.leaves.length > 0) {
-      emp.data.leaves.sort((a,b) => a.compareTo(b));
-      emp.data.leaves.forEach(lv => {
-        if (lv.code.toLowerCase() !== 'h' 
-        && lv.leavedate.getFullYear() === this.year) {
-          // first get the leave month for to display in:
-          this.leaveMonths.forEach(lm => {
-            if (lm.month.getMonth() === lv.leavedate.getMonth()) {
-              if (lm.leaveGroups.length > 0) {
-                const lg = lm.leaveGroups[lm.leaveGroups.length - 1];
-                lg.leaves.sort((a,b) => a.compareTo(b));
-                const ld = lg.leaves[lg.leaves.length - 1];
-                if (ld.code.toLowerCase() === lv.code.toLowerCase() 
-                  && ld.status.toLowerCase() === lv.status.toLowerCase() 
-                  && lv.leavedate.getDate() === ld.leavedate.getDate() + 1) {
-                  lg.addLeave(lv);
-                  lm.leaveGroups[lm.leaveGroups.length - 1] = lg;
+    if (emp && emp.data) {
+      if (emp.data.leaves.length > 0) {
+        emp.data.leaves.sort((a,b) => a.compareTo(b));
+        emp.data.leaves.forEach(lv => {
+          if (lv.code.toLowerCase() !== 'h' 
+          && lv.leavedate.getFullYear() === this.year) {
+            // first get the leave month for to display in:
+            this.leaveMonths.forEach(lm => {
+              if (lm.month.getMonth() === lv.leavedate.getMonth()) {
+                if (lm.leaveGroups.length > 0) {
+                  const lg = lm.leaveGroups[lm.leaveGroups.length - 1];
+                  lg.leaves.sort((a,b) => a.compareTo(b));
+                  const ld = lg.leaves[lg.leaves.length - 1];
+                  if (ld.code.toLowerCase() === lv.code.toLowerCase() 
+                    && ld.status.toLowerCase() === lv.status.toLowerCase() 
+                    && lv.leavedate.getDate() === ld.leavedate.getDate() + 1) {
+                    lg.addLeave(lv);
+                    lm.leaveGroups[lm.leaveGroups.length - 1] = lg;
+                  } else {
+                    const lg = new LeaveGroup();
+                    lg.addLeave(lv);
+                    lm.leaveGroups.push(lg);
+                    lm.leaveGroups.sort((a,b) => a.compareTo(b));
+                  }
                 } else {
                   const lg = new LeaveGroup();
                   lg.addLeave(lv);
                   lm.leaveGroups.push(lg);
                   lm.leaveGroups.sort((a,b) => a.compareTo(b));
                 }
+              } 
+            });
+            // next add PTO/Vacation to actuals and requested totals
+            if (lv.code.toLowerCase() === 'v') {
+              if (lv.status.toLowerCase() === 'actual') {
+                this.actual += lv.hours;
               } else {
-                const lg = new LeaveGroup();
-                lg.addLeave(lv);
-                lm.leaveGroups.push(lg);
-                lm.leaveGroups.sort((a,b) => a.compareTo(b));
+                this.requested += lv.hours;
               }
-            } 
-          });
-          // next add PTO/Vacation to actuals and requested totals
-          if (lv.code.toLowerCase() === 'v') {
-            if (lv.status.toLowerCase() === 'actual') {
-              this.actual += lv.hours;
-            } else {
-              this.requested += lv.hours;
             }
           }
-        }
-      });
+        });
+      }
+
       emp.data.balance.forEach(bal => {
+        console.log(JSON.stringify(bal));
         if (bal.year === this._year) {
           this.annual = bal.annual;
           this.carryover = bal.carryover;

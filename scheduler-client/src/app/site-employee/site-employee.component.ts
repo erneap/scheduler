@@ -64,7 +64,6 @@ export class SiteEmployeeComponent {
       if (site.employees) {
         site.employees.forEach(iEmp => {
           if (iEmp.id === eid) {
-            console.log(iEmp.id);
             this.employee = new Employee(iEmp);
           }
         });

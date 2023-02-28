@@ -85,7 +85,8 @@ func (ur *ChangeAssignmentRequest) BooleanValue() bool {
 }
 
 func (ur *ChangeAssignmentRequest) DateValue() time.Time {
-	dateValue, err := time.ParseInLocation("2006-01-02", ur.Value.(string), time.UTC)
+	dateValue, err := time.ParseInLocation("2006-01-02",
+		ur.Value.(string), time.UTC)
 	if err != nil {
 		log.Println(err.Error())
 	}

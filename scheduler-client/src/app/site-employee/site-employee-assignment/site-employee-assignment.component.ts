@@ -3,6 +3,9 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Assignment, Schedule } from 'src/app/models/employees/assignments';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { Workcenter } from 'src/app/models/sites/workcenter';
+import { EmployeeResponse } from 'src/app/models/web/employeeWeb';
+import { AuthService } from 'src/app/services/auth.service';
+import { DialogService } from 'src/app/services/dialog-service.service';
 import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
 
@@ -33,6 +36,8 @@ export class SiteEmployeeAssignmentComponent {
   constructor(
     protected siteService: SiteService,
     protected empService: EmployeeService,
+    protected authService: AuthService,
+    protected dialogService: DialogService,
     private fb: FormBuilder
   ) {
     const site = this.siteService.getSite();
@@ -62,7 +67,7 @@ export class SiteEmployeeAssignmentComponent {
     this.showSchedule = false;
     this.assignment = new Assignment();
     this.employee.data.assignments.forEach(asgmt => {
-      if (asgmt.site === this.siteID) {
+      if (asgmt.site.toLowerCase() === this.siteID.toLowerCase()) {
         this.assignmentList.push(new Assignment(asgmt));
       }
     });
@@ -74,7 +79,7 @@ export class SiteEmployeeAssignmentComponent {
   }
 
   setAssignment() {
-    this.showSchedule = (this.assignment.id > 0);
+    this.showSchedule = (this.assignment.schedules.length > 0);
     if (this.assignment.schedules.length > 0) {
       this.schedule = this.assignment.schedules[0];
     } 
@@ -113,12 +118,108 @@ export class SiteEmployeeAssignmentComponent {
     return '';
   }
 
+  getYearFirstDate(date: Date): string {
+    let answer =  `${date.getFullYear()}-`;
+    if (date.getMonth() + 1 < 10) {
+      answer += '0';
+    }
+    answer += `${date.getMonth() + 1}-`;
+    if (date.getDate() < 10) {
+      answer += '0';
+    }
+    answer += `${date.getDate()}`;
+    return answer;
+  }
+
   asgmtID(asgmt: Assignment): string {
     return `${asgmt.id}`;
   }
 
   schedID(sch: Schedule): string {
     return `${sch.id}`;
+  }
+
+  updateField(field: string) {
+    let asgmtid = Number(this.asgmtForm.value.assignment);
+    if (asgmtid > 0) {
+      var value: any;
+      switch (field.toLowerCase()) {
+        case "workcenter":
+          value = this.asgmtForm.value.workcenter;
+          break;
+        case "startdate":
+          value = this.getYearFirstDate(this.asgmtForm.value.startdate);
+          break;
+        case "enddate":
+          value = this.getYearFirstDate(this.asgmtForm.value.enddate);
+          break;
+        case "addschedule":
+          value = 7;
+          break;
+        case "rotationdate":
+          value = this.getYearFirstDate(this.asgmtForm.value.rotationdate);
+          break;
+        case "rotationdays":
+          value = this.asgmtForm.value.rotationdays;
+          break;
+      }
+      this.dialogService.showSpinner();
+      this.authService.statusMessage = `Updating Employee Assignment -`
+        + `${field.toUpperCase()}`;
+      this.empService.updateAssignment(this.employee.id, asgmtid, field, value)
+        .subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: EmployeeResponse | null = resp.body;
+            if (data && data !== null) {
+              if (data.employee) {
+                this.employee = new Employee(data.employee);
+                this.employee.data.assignments.forEach(agmt => {
+                  if (agmt.id === this.assignment.id) {
+                    this.assignment = new Assignment(agmt);
+                    this.setAssignment();
+                    if (field.toLowerCase() === "addschedule") {
+                      this.assignment.schedules.sort((a,b) => a.compareTo(b));
+                      this.schedule = this.assignment.schedules[
+                        this.assignment.schedules.length - 1];
+                    }
+                  }
+                });
+              }
+              const emp = this.empService.getEmployee();
+              if (data.employee && emp && emp.id === data.employee.id) {
+                this.empService.setEmployee(data.employee);
+              }
+              const site = this.siteService.getSite();
+              if (site && site.employees && site.employees.length && data.employee) {
+                let found = false;
+                for (let i=0; i < site.employees.length && !found; i++) {
+                  if (site.employees[i].id === data.employee.id) {
+                    site.employees[i] = new Employee(data.employee);
+                  }
+                }
+                if (!found) {
+                  site.employees.push(new Employee(data.employee));
+                }
+                site.employees.sort((a,b) => a.compareTo(b));
+                this.siteService.setSite(site);
+                this.siteService.setSelectedEmployee(data.employee);
+              }
+              if (field.toLowerCase() === "addschedule") {
+
+              }
+            }
+            this.authService.statusMessage = "Update complete";
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.error.exception;
+          }
+        })
+    }
   }
 
 }

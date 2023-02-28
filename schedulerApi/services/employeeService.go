@@ -44,7 +44,6 @@ func CreateEmployee(emp employees.Employee, passwd, teamID,
 	err = empCol.FindOne(context.TODO(), filter).Decode(&tEmp)
 	if err == nil || err != mongo.ErrNoDocuments {
 		if emp.Name.MiddleName == "" {
-			emp.Decrypt()
 			return &emp, nil
 		}
 		filter = bson.M{
@@ -56,7 +55,6 @@ func CreateEmployee(emp employees.Employee, passwd, teamID,
 
 		err = empCol.FindOne(context.TODO(), filter).Decode(&emp)
 		if err == nil || err != mongo.ErrNoDocuments {
-			emp.Decrypt()
 			return &emp, nil
 		}
 	}
@@ -92,19 +90,7 @@ func CreateEmployee(emp employees.Employee, passwd, teamID,
 	emp.TeamID = teamid
 	emp.SiteID = siteid
 
-	err = emp.Encrypt()
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = empCol.InsertOne(context.TODO(), emp)
-	if err != nil {
-		return nil, err
-	}
-	emp.Decrypt()
-	if err != nil {
-		return nil, err
-	}
+	empCol.InsertOne(context.TODO(), emp)
 	return &emp, nil
 }
 
@@ -126,7 +112,6 @@ func GetEmployee(id string) (*employees.Employee, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	err = emp.Decrypt()
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +144,6 @@ func GetEmployeeByName(first, middle, last string) (*employees.Employee, error) 
 			return nil, err
 		}
 	}
-	err = emp.Decrypt()
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +171,6 @@ func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 	}
 
 	for i, emp := range employees {
-		emp.Decrypt()
 		employees[i] = emp
 	}
 
@@ -200,8 +183,6 @@ func UpdateEmployee(emp *employees.Employee) error {
 	filter := bson.M{
 		"_id": emp.ID,
 	}
-
-	emp.Encrypt()
 
 	_, err := empCol.ReplaceOne(context.TODO(), filter, emp)
 	return err

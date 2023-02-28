@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { NotFoundComponent } from './home/not-found/not-found.component';
-import { EmployeeHomeComponent } from './employee/employee-home/employee-home.component';
 import { NewEmployeeComponent } from './site-employee/new-employee/new-employee.component';
+import { SiteEmployeeComponent } from './site-employee/site-employee.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -17,10 +17,7 @@ const routes: Routes = [
       .then(m => m.SiteSchedulerModule)
   },
   { path: 'newemployee', component: NewEmployeeComponent },
-  { path: 'siteemployees',
-    loadChildren: () => import('./site-employee/site-employee.module')
-      .then(m => m.SiteEmployeeModule)
-  },
+  { path: 'siteemployees', component: SiteEmployeeComponent},
   { path: '**', component: NotFoundComponent}
 ];
 

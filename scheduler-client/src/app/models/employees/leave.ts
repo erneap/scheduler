@@ -185,10 +185,12 @@ export class LeaveGroup {
 
 export class LeaveMonth {
   month: Date;
+  active: Boolean;
   leaveGroups: LeaveGroup[];
 
   constructor(lm?: LeaveMonth) {
     this.month = (lm) ? new Date(lm.month) : new Date();
+    this.active = (lm) ? lm.active : true;
     this.leaveGroups = [];
     if (lm && lm.leaveGroups.length > 0) {
       lm.leaveGroups.forEach(lg => {

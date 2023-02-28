@@ -56,7 +56,6 @@ func GetEmployeeWork(id string, year uint) (*employees.EmployeeWorkRecord, error
 	if err != nil {
 		return nil, err
 	}
-	eWork.Decrypt()
 	return &eWork, nil
 }
 

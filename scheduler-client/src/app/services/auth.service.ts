@@ -21,6 +21,7 @@ export class AuthService extends CacheService {
   isCompanyLead = false;
   schedulerLabel = "Scheduler";
   section: string = 'employee';
+  statusMessage: string = 'test message';
 
   authStatus = new BehaviorSubject<IAuthStatus>( 
     this.getItem('authStatus') || defaultAuthStatus);
@@ -144,7 +145,8 @@ export class AuthService extends CacheService {
       field: field,
       value: value,
     };
-    return this.httpClient.put<HttpResponse<AuthenticationResponse>>(url, data);
+    return this.httpClient.put<AuthenticationResponse>(url, data, 
+      { observe: 'response'});
   }
 
   changePassword(id: string, passwd: string): Observable<HttpResponse<Message>> {
@@ -153,7 +155,7 @@ export class AuthService extends CacheService {
       id: id,
       password: passwd,
     }
-    return this.httpClient.put<HttpResponse<Message>>(url, data);
+    return this.httpClient.put<Message>(url, data, { observe: 'response'});
   }
 }
 

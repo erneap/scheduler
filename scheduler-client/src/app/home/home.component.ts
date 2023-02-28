@@ -80,6 +80,7 @@ export class HomeComponent {
     this.dialogService.showSpinner();
     this.authService.loginError = "";
     
+    this.authService.statusMessage = "User Login in Progress";
     this.httpClient.post<AuthenticationResponse>(
       '/scheduler/api/v1/user/login', data
     ).subscribe({
@@ -121,10 +122,12 @@ export class HomeComponent {
         if (this.authService.isAuthenticated) {
           this.router.navigate(['/employee/schedule']);
         }
+        this.authService.statusMessage = "User Login Complete";
       },
       error: (err) => {
         this.dialogService.closeSpinner();
         this.loginError = err.error.exception
+        this.authService.statusMessage = err.error.exception;
         this.authService.isAuthenticated = false;
       }
     });

@@ -116,29 +116,36 @@ export class HolidayComponent {
 
   getHolidaysRemaining(): string {
     let total = 0;
+    let holidays = 0;
     this.holidays.forEach(hol => {
-      let holTotal = 0.0;
-      hol.leaveDays.forEach(lv => {
-        if (lv.status.toLowerCase() === 'actual') {
-          holTotal += lv.hours;
+      if (this.isActive(hol)) {
+        holidays++;
+        let holTotal = 0.0;
+        hol.leaveDays.forEach(lv => {
+          if (lv.status.toLowerCase() === 'actual') {
+            holTotal += lv.hours;
+          }
+        });
+        if (holTotal >= 8.0) {
+          total++;
         }
-      });
-      if (holTotal >= 8.0) {
-        total++;
       }
     });
-    total = this.holidays.length - total;
+    total = holidays - total;
     return total.toFixed(0);
   }
 
   getHolidaysHoursRemaining(): string {
-    let total = this.holidays.length * 8.0;
+    let total = 0.0;
     this.holidays.forEach(hol => {
-      hol.leaveDays.forEach(lv => {
-        if (lv.status.toLowerCase() === 'actual') {
-          total -= lv.hours;
-        }
-      });
+      if (this.isActive(hol)) {
+        total += 8.0;
+        hol.leaveDays.forEach(lv => {
+          if (lv.status.toLowerCase() === 'actual') {
+            total -= lv.hours;
+          }
+        });
+      }
     });
     return total.toFixed(1);
   }
@@ -153,5 +160,18 @@ export class HolidayComponent {
       });
     });
     return total.toFixed(1);
+  }
+
+  isActive(holiday: CompanyHoliday): boolean {
+    this.employee.data.assignments.sort((a,b) => a.compareTo(b));
+    const actual = holiday.getActual(this.year);
+    const startasgmt = this.employee.data.assignments[0];
+    const endasgmt = this.employee.data.assignments[
+      this.employee.data.assignments.length - 1];
+    if (actual) {
+      return (actual.getTime() >= startasgmt.startDate.getTime() &&
+        actual.getTime() <= endasgmt.endDate.getTime());
+    }
+    return true;
   }
 }

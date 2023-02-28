@@ -20,6 +20,16 @@ export class PtoMonthComponent {
 
   constructor() {}
 
+  getStyle(field: string): string {
+    let answer = `${field} `;
+    if (this.leaveMonth.active) {
+      answer += 'active';
+    } else {
+      answer += 'disabled';
+    }
+    return answer;
+  }
+
   getActualHours(): string {
     let total = 0.0;
     this._month.leaveGroups.forEach(lg => {

@@ -9,7 +9,7 @@
     <div class="actual">Hours</div>
   </div>
   <app-pto-holiday-cell *ngFor="let hol of holidays" [year]="year" [holiday]="hol"
-  ></app-pto-holiday-cell>
+   [activecell]="isActive(hol)"></app-pto-holiday-cell>
   <div class="fxLayout-row-center">
     <div class="code">&nbsp;</div>
     <div class="daysleft">Days Left</div>

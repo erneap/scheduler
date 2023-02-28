@@ -140,7 +140,8 @@ export class LeaveRequestComponent {
       const start = this.editorForm.value.start;
       const end = this.editorForm.value.end;
       const code = this.editorForm.value.primarycode;
-      this.dialogService.showSpinner()
+      this.dialogService.showSpinner();
+      this.authService.statusMessage = "Processing leave request";
       this.empService.addNewLeaveRequest(this.employee.id, start, end, code)
         .subscribe({
           next: (resp) => {
@@ -171,10 +172,11 @@ export class LeaveRequestComponent {
                 this.currentLeaveRequest = this.currentLeaveRequests[0];
               }
             }
+            this.authService.statusMessage = "Leave Request processing complete";
           },
           error: err => {
             this.dialogService.closeSpinner();
-            console.log(err.error);
+            this.authService.statusMessage = err.error.exception;
           }
         });
     }
@@ -209,6 +211,8 @@ export class LeaveRequestComponent {
             this.currentLeaveRequest.id, 'dates', sDate)
             .subscribe({
               next: (resp) => {
+                this.authService.statusMessage = "Updating Leave Request "
+                  + "Start/End Date changes";
                 this.dialogService.closeSpinner();
                 if (resp.headers.get('token') !== null) {
                   this.authService.setToken(resp.headers.get('token') as string);
@@ -238,10 +242,11 @@ export class LeaveRequestComponent {
                     }
                   }
                 }
+                this.authService.statusMessage = "Update complete";
               },
               error: err => {
                 this.dialogService.closeSpinner();
-                console.log(err)
+                this.authService.statusMessage = err.error.exception;
               }
             });
           break;
@@ -250,6 +255,8 @@ export class LeaveRequestComponent {
             this.currentLeaveRequest.id, 'code', this.editorForm.value.primarycode)
             .subscribe({
               next: (resp) => {
+                this.authService.statusMessage = "Updating Leave Request "
+                  + "Primary Code change";
                 this.dialogService.closeSpinner();
                 if (resp.headers.get('token') !== null) {
                   this.authService.setToken(resp.headers.get('token') as string);
@@ -279,10 +286,11 @@ export class LeaveRequestComponent {
                     }
                   }
                 }
+                this.authService.statusMessage = "Update complete";
               },
               error: err => {
                 this.dialogService.closeSpinner();
-                console.log(err)
+                this.authService.statusMessage = err.error.exception;
               }
             });
           break;
@@ -292,6 +300,7 @@ export class LeaveRequestComponent {
 
   processDayChange(value: string) {
     if (value !== '' && this.currentLeaveRequest) {
+      this.authService.statusMessage = "Updating Leave Request Date change";
       this.empService.updateLeaveRequest(this.employee.id, 
         this.currentLeaveRequest.id, 'day', value)
         .subscribe({
@@ -325,10 +334,11 @@ export class LeaveRequestComponent {
                 }
               }
             }
+            this.authService.statusMessage = "Update complete";
           },
           error: err => {
             this.dialogService.closeSpinner();
-            console.log(err)
+            this.authService.statusMessage = err.error.exception;
           }
         });
     }
@@ -345,6 +355,7 @@ export class LeaveRequestComponent {
         const reqid = this.currentLeaveRequest?.id;
         this.clearRequest();
         if (reqid) {
+          this.authService.statusMessage = "Deleting Leave Request";
           this.empService.deleteLeaveRequest(this.employee.id, reqid)
             .subscribe({
               next: (resp) => {
@@ -377,10 +388,11 @@ export class LeaveRequestComponent {
                     }
                   }
                 }
+                this.authService.statusMessage = "Deletion Complete";
               },
               error: err => {
                 this.dialogService.closeSpinner();
-                console.log(err)
+                this.authService.statusMessage = err.error.exception;
               }
             });
         }

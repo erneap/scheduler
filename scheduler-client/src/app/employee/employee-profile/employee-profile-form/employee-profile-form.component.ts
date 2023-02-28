@@ -100,6 +100,7 @@ export class EmployeeProfileFormComponent {
       const id = (user && user.id) ? user.id : '';
       const passwd = this.profileForm.value.password;
       this.dialogService.showSpinner();
+      this.authService.statusMessage = "Updating User Password";
       this.authService.changePassword(id, passwd)
         .subscribe({
           next: (resp) => {
@@ -115,10 +116,11 @@ export class EmployeeProfileFormComponent {
                 this.profileForm.controls['password2'].setValue(undefined);
               }
             }
+            this.authService.statusMessage = "Update complete";
           },
           error: error => {
             this.dialogService.closeSpinner();
-            this.formError = `${error.status} - ${transformErrorString(error)}`;
+            this.authService.statusMessage = error.error.exception;
           }
         });
     }
@@ -142,6 +144,7 @@ export class EmployeeProfileFormComponent {
         break;
     }
     this.dialogService.showSpinner();
+    this.authService.statusMessage = `Updating User's ${field.toUpperCase()}`;
     this.authService.changeUser(this.employee.id, field, value)
       .subscribe({
         next: (resp) => {
@@ -172,11 +175,12 @@ export class EmployeeProfileFormComponent {
                 }
               }
             }
-          } 
+          }
+          this.authService.statusMessage = "Update complete"; 
         },
         error: (err) => {
           this.dialogService.closeSpinner();
-          console.log(err);
+          this.authService.statusMessage = err.error.exception;
         }
       });
   }

@@ -110,7 +110,6 @@ func UpdateEmployeeBasic(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -159,7 +158,6 @@ func CreateEmployeeAssignment(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -218,7 +216,6 @@ func UpdateEmployeeAssignment(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -275,7 +272,6 @@ func UpdateEmployeeAssignmentWorkday(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -309,7 +305,6 @@ func DeleteEmployeeAssignment(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -417,7 +412,6 @@ func CreateEmployeeVariation(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -522,7 +516,6 @@ func UpdateEmployeeVariation(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -574,7 +567,6 @@ func UpdateEmployeeVariationWorkday(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -618,7 +610,6 @@ func DeleteEmployeeVariation(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -672,7 +663,6 @@ func CreateEmployeeLeaveBalance(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -716,7 +706,6 @@ func DeleteEmployeeLeaveBalance(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -755,7 +744,6 @@ func CreateEmployeeLeaveRequest(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -800,7 +788,6 @@ func UpdateEmployeeLeaveRequest(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -835,7 +822,6 @@ func DeleteEmployeeLeaveRequest(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -874,7 +860,6 @@ func AddEmployeeLaborCode(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -905,6 +890,5 @@ func DeleteEmployeeLaborCode(c *gin.Context) {
 	}
 
 	// return the corrected employee back to the client.
-	emp.Decrypt()
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }

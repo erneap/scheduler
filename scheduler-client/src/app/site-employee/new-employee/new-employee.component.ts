@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Assignment, Schedule } from 'src/app/models/employees/assignments';
 import { Employee, EmployeeLaborCode } from 'src/app/models/employees/employee';
+import { AnnualLeave } from 'src/app/models/employees/leave';
 import { LaborCode } from 'src/app/models/sites/laborcode';
 import { Workcenter } from 'src/app/models/sites/workcenter';
 import { Company } from 'src/app/models/teams/company';
@@ -79,6 +80,7 @@ export class NewEmployeeComponent {
     }
     if (this.employee.data.assignments.length === 0) {
       const asgmt = new Assignment();
+      asgmt.id = 1;
       asgmt.startDate = new Date();
       asgmt.endDate = new Date(9999, 12, 30);
       if (asgmt.schedules.length === 0) {
@@ -225,17 +227,22 @@ export class NewEmployeeComponent {
     this.employee.data.assignments[0].site = this.siteid;  
     this.employee.data.assignments[0].workcenter = this.employeeForm.value.workcenter;
     const start:Date = new Date(this.employeeForm.value.startdate);
-    console.log(start);
-    this.employee.data.assignments[0].startDate = new Date(start.getFullYear(),
-      start.getMonth(), start.getDate());
-    this.employee.data.assignments[0].endDate = new Date(9999, 11, 30);
+    this.employee.data.assignments[0].startDate = new Date(Date.UTC(start.getFullYear(),
+      start.getMonth(), start.getDate()));
+    this.employee.data.assignments[0].endDate = new Date(Date.UTC(9999, 11, 30));
     this.employee.data.assignments[0].schedules[0] = this.schedule;
+    const balance = new AnnualLeave({
+      year: (new Date()).getFullYear(),
+      annual: 120.0,
+      carryover: 0.0
+    });
+    this.employee.data.balance.push(balance);
 
     this.dialogService.showSpinner();
-    this.newError = '';
+    this.authService.statusMessage = "Creating New Employee";
     this.empService.addEmployee(this.employee, passwd, this.teamid, this.siteid)
       .subscribe({
-        next: (resp) => {
+        next: resp => {
           this.dialogService.closeSpinner();
           if (resp.headers.get('token') !== null) {
             this.authService.setToken(resp.headers.get('token') as string);
@@ -265,13 +272,13 @@ export class NewEmployeeComponent {
               this.siteService.setSite(site);
               this.siteService.setSelectedEmployee(data.employee);
             }
-            this.router.navigateByUrl('/siteemployees/editor');
+            this.router.navigateByUrl('/siteemployees');
           }
+          this.authService.statusMessage = "Employee Created";
         },
         error: err => {
           this.dialogService.closeSpinner();
-          console.log(err);
-          this.newError = err.Error();
+          this.authService.statusMessage = err.error;
         }
       });
   }

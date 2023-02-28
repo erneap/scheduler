@@ -613,7 +613,6 @@ func (e *EmployeeConverter) Write() {
 	empCol.DeleteMany(context.TODO(), bson.M{})
 
 	for _, emp := range e.Employees {
-		emp.Encrypt()
 		empCol.InsertOne(context.TODO(), emp)
 	}
 
@@ -623,7 +622,6 @@ func (e *EmployeeConverter) Write() {
 
 	for _, eWork := range e.EmployeeWork {
 		sort.Sort(employees.ByEmployeeWork(eWork.Work))
-		eWork.Encrypt()
 		empWorkCol.InsertOne(context.TODO(), eWork)
 	}
 }

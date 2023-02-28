@@ -1,15 +1,9 @@
 package employees
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,15 +13,14 @@ import (
 )
 
 type Employee struct {
-	ID            primitive.ObjectID `json:"id" bson:"_id"`
-	TeamID        primitive.ObjectID `json:"team" bson:"team"`
-	SiteID        string             `json:"site" bson:"site"`
-	UserID        primitive.ObjectID `json:"userid" bson:"userid"`
-	Email         string             `json:"email" bson:"email"`
-	Name          EmployeeName       `json:"name" bson:"name"`
-	EncryptedData string             `json:"-" bson:"encrypted"`
-	Data          EmployeeData       `json:"data" bson:"-"`
-	Work          []Work             `json:"work,omitempty"`
+	ID     primitive.ObjectID `json:"id" bson:"_id"`
+	TeamID primitive.ObjectID `json:"team" bson:"team"`
+	SiteID string             `json:"site" bson:"site"`
+	UserID primitive.ObjectID `json:"userid" bson:"userid"`
+	Email  string             `json:"email" bson:"email"`
+	Name   EmployeeName       `json:"name" bson:"name"`
+	Data   EmployeeData       `json:"data" bson:"data"`
+	Work   []Work             `json:"work,omitempty"`
 }
 
 type ByEmployees []Employee
@@ -43,80 +36,6 @@ func (c ByEmployees) Less(i, j int) bool {
 	return c[i].Name.LastName < c[j].Name.LastName
 }
 func (c ByEmployees) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
-
-func (e *Employee) Encrypt() error {
-	// remove work data before encryption
-	data, err := json.Marshal(e.Data)
-	if err != nil {
-		return err
-	}
-
-	// get the security key from the environment and create a byte array from
-	// it for the cipher
-	keyString := os.Getenv("SECURITY_KEY")
-	key := []byte(keyString)
-
-	// create the aes cipher using our security key
-	c, err := aes.NewCipher(key)
-	if err != nil {
-		return err
-	}
-
-	// create the GCM for the symetric key
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		return err
-	}
-
-	// create a new byte array to hold the nonce which must be passed to create
-	// the encrypted value.
-	nonce := make([]byte, gcm.NonceSize())
-	// and populate it with a random code
-	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		return err
-	}
-
-	// lastly, encrypt the value and store in problem property above
-	e.EncryptedData = string(gcm.Seal(nonce, nonce, data, nil))
-
-	return nil
-}
-
-func (e *Employee) Decrypt() error {
-	prob := []byte(e.EncryptedData)
-	if len(prob) == 0 {
-		return errors.New("no encrypted employee data")
-	}
-	// get the security key from the environment and create a byte array from
-	// it for the cipher
-	keyString := os.Getenv("SECURITY_KEY")
-	key := []byte(keyString)
-
-	// create the aes cipher using our security key
-	c, err := aes.NewCipher(key)
-	if err != nil {
-		return err
-	}
-
-	// create the GCM for the symetric key
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		return err
-	}
-
-	nonceSize := gcm.NonceSize()
-	if len(prob) < nonceSize {
-		return errors.New("encrypted data too small")
-	}
-
-	nonce, prob := prob[:nonceSize], prob[nonceSize:]
-	plainText, err := gcm.Open(nil, nonce, prob, nil)
-	if err != nil {
-		return err
-	}
-	json.Unmarshal(plainText, &e.Data)
-	return nil
-}
 
 func (e *Employee) RemoveLeaves(start, end time.Time) {
 	sort.Sort(ByLeaveDay(e.Data.Leaves))
