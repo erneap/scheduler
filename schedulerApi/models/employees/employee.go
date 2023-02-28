@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -160,7 +159,7 @@ func (e *Employee) AddAssignment(site, wkctr string, start time.Time) {
 	e.Data.Assignments[len(e.Data.Assignments)-1] = lastAsgmt
 
 	// create the new assignment
-	newAsgmt := employees.Assignment{
+	newAsgmt := Assignment{
 		ID:           uint(max + 1),
 		Site:         site,
 		Workcenter:   wkctr,
