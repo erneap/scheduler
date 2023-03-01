@@ -2,7 +2,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Employee, IEmployee } from '../models/employees/employee';
-import { ChangeAssignmentRequest, EmployeeLeaveRequest, EmployeeResponse, NewEmployeeAssignment, NewEmployeeRequest, UpdateRequest } from '../models/web/employeeWeb';
+import { ChangeAssignmentRequest, EmployeeLaborCodeRequest, EmployeeLeaveRequest, EmployeeResponse, NewEmployeeAssignment, NewEmployeeRequest, UpdateRequest } from '../models/web/employeeWeb';
 import { CacheService } from './cache.service';
 import { TeamService } from './team.service';
 
@@ -163,6 +163,24 @@ export class EmployeeService extends CacheService {
   deleteAssignment(empID: string, asgmtID: number):
     Observable<HttpResponse<EmployeeResponse>> {
     const url = `/scheduler/api/v1/employee/assignment/${empID}/${asgmtID}`;
+    return this.httpClient.delete<EmployeeResponse>(url, { observe: 'response'});
+  }
+
+  addLaborCode(empID: string, chgNo: string, ext: string):
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/laborcode';
+    const data: EmployeeLaborCodeRequest = {
+      employee: empID,
+      chargeNumber: chgNo,
+      extension: ext,
+    };
+    return this.httpClient.post<EmployeeResponse>(url, data, 
+      {observe: 'response'});
+  }
+
+  removeLaborCode(empID: string, chgNo: string, ext: string):
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = `/scheduler/api/v1/employee/laborcode/${empID}/${chgNo}/${ext}`;
     return this.httpClient.delete<EmployeeResponse>(url, { observe: 'response'});
   }
 }

@@ -14,6 +14,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NewEmployeeComponent } from './new-employee/new-employee.component';
 import { SiteEmployeeEditorComponent } from './site-employee-editor/site-employee-editor.component';
 import { SiteEmployeeCompanyInfoComponent } from './site-employee-company-info/site-employee-company-info.component';
+import { SiteEmployeeLaborCodesComponent } from './site-employee-labor-codes/site-employee-labor-codes.component';
+import { SiteEmployeeVariationComponent } from './site-employee-variation/site-employee-variation.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +27,9 @@ import { SiteEmployeeCompanyInfoComponent } from './site-employee-company-info/s
     SiteEmployeeAssignmentScheduleDayComponent,
     NewEmployeeComponent,
     SiteEmployeeEditorComponent,
-    SiteEmployeeCompanyInfoComponent
+    SiteEmployeeCompanyInfoComponent,
+    SiteEmployeeLaborCodesComponent,
+    SiteEmployeeVariationComponent
   ],
   imports: [
     CommonModule,

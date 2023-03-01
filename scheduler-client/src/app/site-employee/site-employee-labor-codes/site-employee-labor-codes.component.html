@@ -1,0 +1,36 @@
+<div class="fxLayout fxLayout-column-center">
+  <mat-card style="background-color: #3f51b5; color: white;">
+    <mat-card-header>
+      <div class="fxLayout-row-left">
+        <div class="fxLayout-column-topleft">
+          <div class="headline">Employee's Company Information</div>
+          <div class="subheadline">{{employee.name.getFullName()}}</div>
+        </div>
+      </div>
+    </mat-card-header>
+    <mat-card-content class="fxLayout-column-center">
+      <div class="fxLayout-column-center">
+        <div class="fxLayout-row-center year">
+          <button mat-button color="warning" (click)="updateYear('down')">
+            &lt;&lt;
+          </button>
+          <span class="flex-spacer"></span>
+          {{year}}
+          <span class="flex-spacer"></span>
+          <button mat-button color="warning" (click)="updateYear('up')">
+            &gt;&gt;
+          </button>
+        </div>
+        <div class="fxLayout-column-center" 
+          style="background-color: white;padding-left:15px;padding-right: 25px;">
+          <div *ngFor="let lc of laborcodes">
+            <mat-checkbox [checked]="lc.checked"
+              (change)="onSelect(lc.chargenumber, lc.extension, $event)">
+              {{lc.chargenumber}} - {{lc.extension}}
+            </mat-checkbox>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

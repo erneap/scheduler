@@ -10,7 +10,9 @@
     </app-site-employee-company-info>
   </mat-tab>
   <mat-tab label="Labor Codes">
-
+    <app-site-employee-labor-codes [employee]="employee"
+      (changed)="employeeChanged($event)">
+    </app-site-employee-labor-codes>
   </mat-tab>
   <mat-tab label="Assignments">
     <app-site-employee-assignment [employee]="employee"
@@ -18,7 +20,8 @@
     ></app-site-employee-assignment>
   </mat-tab>
   <mat-tab label="Variations">
-
+    <app-site-employee-variation [employee]="employee"
+      (changed)="employeeChanged($event)"></app-site-employee-variation>
   </mat-tab>
   <mat-tab label="PTO/Holidays List">
     <app-site-pto-holiday [employee]="employee"></app-site-pto-holiday>

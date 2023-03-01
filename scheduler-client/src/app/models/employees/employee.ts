@@ -216,6 +216,16 @@ export class EmployeeData implements IEmployeeData {
     });
     return answer;
   }
+
+  hasLaborCode(chgNo: string, ext: string): boolean {
+    let answer = false;
+    this.laborCodes.forEach(lc => {
+      if (lc.chargeNumber === chgNo && lc.extension === ext) {
+        answer = true;
+      }
+    });
+    return answer;
+  }
 }
 
 export interface IEmployee {
