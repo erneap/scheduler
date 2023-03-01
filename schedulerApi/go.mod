@@ -1,9 +1,8 @@
-module github.com/erneap/scheduler/scheduleApi
+module github.com/erneap/scheduler/schedulerApi
 
 go 1.19
 
 require (
-	github.com/erneap/scheduler/schedulerApi v0.0.0-20230217035936-5fcc09189765
 	github.com/gin-gonic/gin v1.9.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/joho/godotenv v1.5.1

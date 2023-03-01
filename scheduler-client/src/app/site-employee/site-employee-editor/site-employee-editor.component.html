@@ -1,15 +1,21 @@
 <mat-tab-group preserveContent="true">
   <mat-tab label="Profile">
-    <app-site-employee-basic [employee]="employee"></app-site-employee-basic>
+    <app-site-employee-basic [employee]="employee"
+    (changed)="employeeChanged($event)"
+    ></app-site-employee-basic>
   </mat-tab>
   <mat-tab label="Company Info">
-
+    <app-site-employee-company-info [employee]="employee"
+      (changed)="employeeChanged($event)">
+    </app-site-employee-company-info>
   </mat-tab>
   <mat-tab label="Labor Codes">
 
   </mat-tab>
   <mat-tab label="Assignments">
-    <app-site-employee-assignment [employee]="employee"></app-site-employee-assignment>
+    <app-site-employee-assignment [employee]="employee"
+    (changed)="employeeChanged($event)"
+    ></app-site-employee-assignment>
   </mat-tab>
   <mat-tab label="Variations">
 

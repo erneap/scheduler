@@ -10,6 +10,7 @@
           <button mat-icon-button color="accent"
             *ngIf="this.assignment.id > 1"
             matTooltip="Delete Current Assignment"
+            (click)="deleteAssignment()"
             >
             <mat-icon>delete</mat-icon>
           </button>
@@ -63,8 +64,10 @@
             </div>
             <ng-container *ngIf="!showSchedule">
               <div class="fxLayout-row-center">
-                <button mat-raised-button color="accent">Add</button>
-                <button mat-raised-button color="warn">Clear</button>
+                <button mat-raised-button color="accent"
+                  (click)="addAssignment()">Add</button>
+                <button mat-raised-button color="warn"
+                  (click)="clearAssignment()">Clear</button>
               </div>
             </ng-container>
             <ng-container *ngIf="showSchedule">

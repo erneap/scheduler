@@ -12,6 +12,7 @@ import (
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -75,15 +76,31 @@ func UpdateEmployeeBasic(c *gin.Context) {
 		}
 		return
 	}
+	id, _ := primitive.ObjectIDFromHex(data.ID)
+	user := services.GetUser(id)
 
 	// update the corresponding field
 	switch strings.ToLower(data.Field) {
 	case "first", "firstname":
 		emp.Name.FirstName = data.StringValue()
+		if user != nil {
+			user.FirstName = data.StringValue()
+		}
 	case "middle", "middlename":
 		emp.Name.MiddleName = data.StringValue()
+		if user != nil {
+			user.MiddleName = data.StringValue()
+		}
 	case "last", "lastname":
 		emp.Name.LastName = data.StringValue()
+		if user != nil {
+			user.LastName = data.StringValue()
+		}
+	case "email", "emailaddress":
+		emp.Email = data.StringValue()
+		if user != nil {
+			user.EmailAddress = data.StringValue()
+		}
 	case "suffix":
 		emp.Name.Suffix = data.StringValue()
 	case "company":
@@ -108,6 +125,11 @@ func UpdateEmployeeBasic(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
 			Exception: err.Error()})
 		return
+	}
+
+	// send user back to services for update
+	if user != nil {
+		services.UpdateUser(*user)
 	}
 
 	// return the corrected employee back to the client.
@@ -135,21 +157,7 @@ func CreateEmployeeAssignment(c *gin.Context) {
 		}
 		return
 	}
-	sort.Sort(employees.ByAssignment(emp.Data.Assignments))
-	lastAssignment := emp.Data.Assignments[len(emp.Data.Assignments)-1]
-	lastAssignment.EndDate = newAsgmt.StartDate.AddDate(0, 0, -1)
-
-	asgmt := employees.Assignment{
-		ID:           uint(len(emp.Data.Assignments)),
-		Site:         newAsgmt.SiteID,
-		Workcenter:   newAsgmt.Workcenter,
-		StartDate:    newAsgmt.StartDate,
-		EndDate:      time.Date(9999, 12, 30, 23, 59, 59, 0, time.UTC),
-		RotationDate: newAsgmt.StartDate,
-		RotationDays: 0,
-	}
-	asgmt.AddSchedule(newAsgmt.ScheduleDays)
-	emp.Data.Assignments = append(emp.Data.Assignments, asgmt)
+	emp.AddAssignment(newAsgmt.SiteID, newAsgmt.Workcenter, newAsgmt.StartDate)
 
 	err = services.UpdateEmployee(emp)
 	if err != nil {

@@ -188,12 +188,16 @@ func (e *Employee) AddAssignment(site, wkctr string, start time.Time) {
 func (e *Employee) RemoveAssignment(id uint) {
 	pos := -1
 	if id > 1 {
+		sort.Sort(ByAssignment(e.Data.Assignments))
 		for i, asgmt := range e.Data.Assignments {
 			if asgmt.ID == id {
 				pos = i
 			}
 		}
 		if pos >= 0 {
+			asgmt := e.Data.Assignments[pos-1]
+			asgmt.EndDate = time.Date(9999, 12, 30, 0, 0, 0, 0, time.UTC)
+			e.Data.Assignments[pos-1] = asgmt
 			e.Data.Assignments = append(e.Data.Assignments[:pos],
 				e.Data.Assignments[pos+1:]...)
 		}

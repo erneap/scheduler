@@ -1,5 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { Assignment, Schedule } from 'src/app/models/employees/assignments';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { Workcenter } from 'src/app/models/sites/workcenter';
@@ -24,6 +26,7 @@ export class SiteEmployeeAssignmentComponent {
   get employee(): Employee {
     return this._employee;
   }
+  @Output() changed = new EventEmitter<Employee>();
   siteID: string = '';
   assignment: Assignment = new Assignment();
   schedule: Schedule = new Schedule();
@@ -38,6 +41,7 @@ export class SiteEmployeeAssignmentComponent {
     protected empService: EmployeeService,
     protected authService: AuthService,
     protected dialogService: DialogService,
+    protected dialog: MatDialog,
     private fb: FormBuilder
   ) {
     const site = this.siteService.getSite();
@@ -226,10 +230,8 @@ export class SiteEmployeeAssignmentComponent {
                 this.siteService.setSite(site);
                 this.siteService.setSelectedEmployee(data.employee);
               }
-              if (field.toLowerCase() === "addschedule") {
-
-              }
             }
+            this.changed.emit(new Employee(this.employee));
             this.authService.statusMessage = "Update complete";
           },
           error: err => {
@@ -310,6 +312,7 @@ export class SiteEmployeeAssignmentComponent {
                   this.siteService.setSelectedEmployee(data.employee);
                 }
               }
+              this.changed.emit(new Employee(this.employee));
               this.authService.statusMessage = "Update complete";
             },
             error: err => {
@@ -366,6 +369,7 @@ export class SiteEmployeeAssignmentComponent {
                   this.siteService.setSelectedEmployee(data.employee);
                 }
               }
+              this.changed.emit(new Employee(this.employee));
               this.authService.statusMessage = "Update complete";
             },
             error: err => {
@@ -375,5 +379,131 @@ export class SiteEmployeeAssignmentComponent {
           });
       }
     }
+  }
+
+  addAssignment() {
+    const wkctr = this.asgmtForm.value.workcenter;
+    const start = this.asgmtForm.value.startdate;
+    let siteID = '';
+    let empID = this.employee.id;
+    const site = this.siteService.getSite();
+    if (site) {
+      siteID = site.id;
+    }
+    this.authService.statusMessage = 'Adding new assignment'
+    this.empService.AddAssignment(empID, siteID, wkctr, start, 7)
+      .subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: EmployeeResponse | null = resp.body;
+          if (data && data !== null) {
+            if (data.employee) {
+              this.employee = new Employee(data.employee);
+              this.employee.data.assignments.sort((a,b) => a.compareTo(b));
+              this.assignment = new Assignment(this.employee.data.assignments[
+                this.employee.data.assignments.length - 1]);
+              this.schedule = this.assignment.schedules[0];
+            }
+            const emp = this.empService.getEmployee();
+            if (data.employee && emp && emp.id === data.employee.id) {
+              this.empService.setEmployee(data.employee);
+            }
+            const site = this.siteService.getSite();
+            if (site && site.employees && site.employees.length && data.employee) {
+              let found = false;
+              for (let i=0; i < site.employees.length && !found; i++) {
+                if (site.employees[i].id === data.employee.id) {
+                  site.employees[i] = new Employee(data.employee);
+                  found = true;
+                }
+              }
+              if (!found) {
+                site.employees.push(new Employee(data.employee));
+              }
+              site.employees.sort((a,b) => a.compareTo(b));
+              this.siteService.setSite(site);
+              this.siteService.setSelectedEmployee(data.employee);
+            }
+          }
+          this.changed.emit(new Employee(this.employee));
+          this.authService.statusMessage = "Update complete";
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      })
+  }
+
+  clearAssignment() {
+    this.asgmtForm.controls['workcenter'].setValue('');
+    this.asgmtForm.controls['startdate'].setValue(new Date());
+    this.asgmtForm.controls['enddate'].setValue(new Date(Date.UTC(9999, 11, 30)));
+    this.asgmtForm.controls['schedule'].setValue('0');
+    this.asgmtForm.controls['rotationdate'].setValue(new Date());
+    this.asgmtForm.controls['rotationdays'].setValue(0);
+  }
+
+  deleteAssignment() {
+    const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+      data: {title: 'Confirm Assignment Deletion', 
+      message: 'Are you sure you want to delete this assignment?'},
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(result);
+      if (result === 'yes') {
+        this.dialogService.showSpinner();
+        this.authService.statusMessage = "Deleting Employee Assignment";
+        this.empService.deleteAssignment(this.employee.id, this.assignment.id)
+          .subscribe({
+            next: resp => {
+              this.dialogService.closeSpinner();
+              if (resp.headers.get('token') !== null) {
+                this.authService.setToken(resp.headers.get('token') as string);
+              }
+              const data: EmployeeResponse | null = resp.body;
+              if (data && data !== null) {
+                if (data.employee) {
+                  this.employee = new Employee(data.employee);
+                  this.employee.data.assignments.sort((a,b) => a.compareTo(b));
+                  this.assignment = new Assignment(this.employee.data.assignments[
+                    this.employee.data.assignments.length - 1]);
+                  this.schedule = this.assignment.schedules[0];
+                }
+                const emp = this.empService.getEmployee();
+                if (data.employee && emp && emp.id === data.employee.id) {
+                  this.empService.setEmployee(data.employee);
+                }
+                const site = this.siteService.getSite();
+                if (site && site.employees && site.employees.length && data.employee) {
+                  let found = false;
+                  for (let i=0; i < site.employees.length && !found; i++) {
+                    if (site.employees[i].id === data.employee.id) {
+                      site.employees[i] = new Employee(data.employee);
+                      found = true;
+                    }
+                  }
+                  if (!found) {
+                    site.employees.push(new Employee(data.employee));
+                  }
+                  site.employees.sort((a,b) => a.compareTo(b));
+                  this.siteService.setSite(site);
+                  this.siteService.setSelectedEmployee(data.employee);
+                }
+              }
+              this.changed.emit(new Employee(this.employee));
+              this.authService.statusMessage = "Deletion complete";
+            },
+            error: err => {
+              this.dialogService.closeSpinner();
+              this.authService.statusMessage = err.error.exception;
+            }
+          });
+      }
+    })
   }
 }

@@ -26,4 +26,8 @@ export class SiteEmployeeEditorComponent {
     protected siteService: SiteService
   ) {
   }
+
+  employeeChanged(emp: Employee) {
+    this.employee = new Employee(emp);
+  }
 }

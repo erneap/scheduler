@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { transformErrorString } from 'src/app/models/employees/common';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { MustMatchValidator } from 'src/app/models/validators/must-match-validator.directive';
 import { PasswordStrengthValidator } from 'src/app/models/validators/password-strength-validator.directive';
-import { AuthenticationResponse, Message } from 'src/app/models/web/employeeWeb';
+import { AuthenticationResponse, EmployeeResponse, Message } from 'src/app/models/web/employeeWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
 import { EmployeeService } from 'src/app/services/employee.service';
@@ -33,6 +33,8 @@ export class EmployeeProfileFormComponent {
     }
     return this._employee;
   }
+  @Output() changed = new EventEmitter<Employee>();
+
   profileForm: FormGroup;
   formError: string = '';
   showPassword: boolean = true;
@@ -145,22 +147,17 @@ export class EmployeeProfileFormComponent {
     }
     this.dialogService.showSpinner();
     this.authService.statusMessage = `Updating User's ${field.toUpperCase()}`;
-    this.authService.changeUser(this.employee.id, field, value)
+    this.empService.updateEmployee(this.employee.id, field, value)
       .subscribe({
         next: (resp) => {
           this.dialogService.closeSpinner();
           if (resp.headers.get('token') !== null) {
             this.authService.setToken(resp.headers.get('token') as string);
           }
-          const data: AuthenticationResponse | null = resp.body;
+          const data: EmployeeResponse | null = resp.body;
           if (data && data !== null) {
-            if (data.user) {
-              const usr = this.authService.getUser();
-              if (usr && usr.id === data.user.id) {
-                this.authService.setUser(usr);
-              }
-            }
             if (data.employee) {
+              this.employee = data.employee;
               const emp = this.empService.getEmployee();
               if (emp && emp.id === data.employee.id) {
                 this.empService.setEmployee(data.employee);
@@ -176,6 +173,7 @@ export class EmployeeProfileFormComponent {
               }
             }
           }
+          this.changed.emit(new Employee(this.employee));
           this.authService.statusMessage = "Update complete"; 
         },
         error: (err) => {

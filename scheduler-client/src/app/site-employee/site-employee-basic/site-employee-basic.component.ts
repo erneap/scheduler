@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
@@ -17,11 +17,15 @@ export class SiteEmployeeBasicComponent {
   get employee(): Employee {
     return this._employee;
   }
+  @Output() changed = new EventEmitter<Employee>();
 
   constructor(
     protected siteService: SiteService,
     protected empService: EmployeeService
   ) {
-    
+  }
+
+  employeeChanged(emp: Employee) {
+    this.changed.emit(emp);
   }
 }

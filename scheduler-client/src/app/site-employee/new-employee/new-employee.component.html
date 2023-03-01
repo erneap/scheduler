@@ -89,7 +89,7 @@
                         <mat-option *ngFor="let co of companies"
                           [value]="co.id">{{co.name}}</mat-option>
                       </mat-select>
-                      <mat-error *ngIf="this.employeeForm.get('last')?.hasError('required')"
+                      <mat-error *ngIf="this.employeeForm.get('company')?.hasError('required')"
                       class="error">Required</mat-error>
                     </mat-form-field>
                   </div>
