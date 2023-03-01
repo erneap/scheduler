@@ -518,11 +518,19 @@ func (e *EmployeeConverter) ReadEmployeeVariations(baseDate time.Time) {
 				for k, emp := range e.Employees {
 					if emp.Data.CompanyInfo.EmployeeID == empID {
 						wkctr := emp.Data.Assignments[0].Workcenter
+						max := uint(0)
 						for d := 0; d < 7; d++ {
 							if variation.Schedule.Workdays[d].Code != "" {
 								variation.Schedule.Workdays[d].Workcenter = wkctr
 							}
 						}
+						for _, vari := range emp.Data.Variations {
+							if vari.ID > max {
+								max = vari.ID
+							}
+						}
+						max++
+						variation.ID = max
 						emp.Data.Variations = append(emp.Data.Variations, variation)
 						sort.Sort(employees.ByVariation(emp.Data.Variations))
 						e.Employees[k] = emp

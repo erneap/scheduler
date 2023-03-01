@@ -1,16 +1,25 @@
 <div class="fxLayout fxLayout-column-center">
-  <mat-card style="background-color: #3f51b5; color: white;">
+  <mat-card style="background-color: #3f51b5; color: white;min-width:1000px;">
     <mat-card-header>
       <div class="fxLayout-row-left">
-        <div class="fxLayout-column-topleft">
+        <div class="fxLayout-column-center">
           <div class="headline">Employee's Company Information</div>
           <div class="subheadline">{{employee.name.getFullName()}}</div>
         </div>
       </div>
     </mat-card-header>
     <mat-card-content class="fxLayout-column-center">
-      <div class="fxLayout-column-center">
-      </div>
+      <form class="fxLayout-column-center">
+        <mat-form-field class="formFieldWider">
+          <mat-label>Selected Variation</mat-label>
+          <mat-select>
+            <mat-option value="0">New Variation</mat-option>
+            <mat-option *ngFor="let vari of variations" [value]="vari.id">
+              {{getLabel(vari)}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
     </mat-card-content>
   </mat-card>
 </div>
