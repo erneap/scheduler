@@ -1,38 +1,48 @@
 <mat-tab-group preserveContent="true">
-  <mat-tab label="Profile">
-    <app-site-employee-basic [employee]="employee"
-    (changed)="employeeChanged($event)"
-    ></app-site-employee-basic>
+  <mat-tab label="Personal/Company">
+    <mat-tab-group preserveContent="true">
+      <mat-tab label="Personal Information">
+        <app-site-employee-profile [employee]="employee"
+          (changed)="employeeChanged($event)"></app-site-employee-profile>
+      </mat-tab>
+      <mat-tab label="Company Information">
+        <app-site-employee-company-info [employee]="employee"
+        (changed)="employeeChanged($event)">
+        </app-site-employee-company-info>
+      </mat-tab>
+    </mat-tab-group>
   </mat-tab>
-  <mat-tab label="Company Info">
-    <app-site-employee-company-info [employee]="employee"
-      (changed)="employeeChanged($event)">
-    </app-site-employee-company-info>
+  <mat-tab label="Work Related">
+    <mat-tab-group preserveContent="true">
+      <mat-tab label="Assigned Labor Codes">
+        <app-site-employee-labor-codes [employee]="employee"
+          (changed)="employeeChanged($event)">
+        </app-site-employee-labor-codes>
+      </mat-tab><mat-tab label="Assignments">
+        <app-site-employee-assignment [employee]="employee"
+        (changed)="employeeChanged($event)"
+        ></app-site-employee-assignment>
+      </mat-tab>
+      <mat-tab label="Variations">
+        <app-site-employee-variation [employee]="employee"
+          (changed)="employeeChanged($event)"></app-site-employee-variation>
+      </mat-tab>
+    </mat-tab-group>
   </mat-tab>
-  <mat-tab label="Labor Codes">
-    <app-site-employee-labor-codes [employee]="employee"
-      (changed)="employeeChanged($event)">
-    </app-site-employee-labor-codes>
-  </mat-tab>
-  <mat-tab label="Assignments">
-    <app-site-employee-assignment [employee]="employee"
-    (changed)="employeeChanged($event)"
-    ></app-site-employee-assignment>
-  </mat-tab>
-  <mat-tab label="Variations">
-    <app-site-employee-variation [employee]="employee"
-      (changed)="employeeChanged($event)"></app-site-employee-variation>
-  </mat-tab>
-  <mat-tab label="PTO/Holidays List">
-    <app-site-pto-holiday [employee]="employee"></app-site-pto-holiday>
-  </mat-tab>
-  <mat-tab label="Leaves">
-
-  </mat-tab>
-  <mat-tab label="Leave Balances">
-
-  </mat-tab>
-  <mat-tab label="Leave Requests">
-
+  <mat-tab label="Leave Information">
+    <mat-tab-group preserveContent="true">
+      <mat-tab label="PTO/Holidays List">
+        <app-site-pto-holiday [employee]="employee"></app-site-pto-holiday>
+      </mat-tab>
+      <mat-tab label="Leaves">
+    
+      </mat-tab>
+      <mat-tab label="Leave Balances">
+    
+      </mat-tab>
+      <mat-tab label="Leave Requests">
+    
+      </mat-tab>
+    </mat-tab-group>
   </mat-tab>
 </mat-tab-group>

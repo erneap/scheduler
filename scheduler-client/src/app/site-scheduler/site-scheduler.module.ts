@@ -12,6 +12,7 @@ import { SiteAvailabilityComponent } from './site-availability/site-availability
 import { SiteAvailabilityMonthComponent } from './site-availability/site-availability-month/site-availability-month.component';
 import { SiteAvailabilityShiftComponent } from './site-availability/site-availability-shift/site-availability-shift.component';
 import { SiteAvailabilityDayComponent } from './site-availability/site-availability-day/site-availability-day.component';
+import { SiteMidScheduleComponent } from './site-mid-schedule/site-mid-schedule.component';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { SiteAvailabilityDayComponent } from './site-availability/site-availabil
     SiteAvailabilityComponent,
     SiteAvailabilityMonthComponent,
     SiteAvailabilityShiftComponent,
-    SiteAvailabilityDayComponent
+    SiteAvailabilityDayComponent,
+    SiteMidScheduleComponent
   ],
   imports: [
     CommonModule,

@@ -6,7 +6,6 @@ import { MaterialModule } from '../material.module';
 import { GenericModule } from '../generic/generic.module';
 import { SitePtoHolidayComponent } from './site-pto-holiday/site-pto-holiday.component';
 import { EmployeeModule } from '../employee/employee.module';
-import { SiteEmployeeBasicComponent } from './site-employee-basic/site-employee-basic.component';
 import { SiteEmployeeAssignmentComponent } from './site-employee-assignment/site-employee-assignment.component';
 import { SiteEmployeeAssignmentScheduleComponent } from './site-employee-assignment/site-employee-assignment-schedule/site-employee-assignment-schedule.component';
 import { SiteEmployeeAssignmentScheduleDayComponent } from './site-employee-assignment/site-employee-assignment-schedule-day/site-employee-assignment-schedule-day.component';
@@ -16,12 +15,13 @@ import { SiteEmployeeEditorComponent } from './site-employee-editor/site-employe
 import { SiteEmployeeCompanyInfoComponent } from './site-employee-company-info/site-employee-company-info.component';
 import { SiteEmployeeLaborCodesComponent } from './site-employee-labor-codes/site-employee-labor-codes.component';
 import { SiteEmployeeVariationComponent } from './site-employee-variation/site-employee-variation.component';
+import { LeaveInformationComponent } from './leave-information/leave-information.component';
+import { SiteEmployeeProfileComponent } from './site-employee-profile/site-employee-profile.component';
 
 @NgModule({
   declarations: [
     SiteEmployeeComponent,
     SitePtoHolidayComponent,
-    SiteEmployeeBasicComponent,
     SiteEmployeeAssignmentComponent,
     SiteEmployeeAssignmentScheduleComponent,
     SiteEmployeeAssignmentScheduleDayComponent,
@@ -29,7 +29,9 @@ import { SiteEmployeeVariationComponent } from './site-employee-variation/site-e
     SiteEmployeeEditorComponent,
     SiteEmployeeCompanyInfoComponent,
     SiteEmployeeLaborCodesComponent,
-    SiteEmployeeVariationComponent
+    SiteEmployeeVariationComponent,
+    LeaveInformationComponent,
+    SiteEmployeeProfileComponent
   ],
   imports: [
     CommonModule,

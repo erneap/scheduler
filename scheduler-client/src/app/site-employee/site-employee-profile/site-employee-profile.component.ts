@@ -4,11 +4,11 @@ import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
 
 @Component({
-  selector: 'app-site-employee-basic',
-  templateUrl: './site-employee-basic.component.html',
-  styleUrls: ['./site-employee-basic.component.scss']
+  selector: 'app-site-employee-profile',
+  templateUrl: './site-employee-profile.component.html',
+  styleUrls: ['./site-employee-profile.component.scss']
 })
-export class SiteEmployeeBasicComponent {
+export class SiteEmployeeProfileComponent {
   private _employee: Employee = new Employee();
   @Input()
   public set employee(iEmp: IEmployee) {
