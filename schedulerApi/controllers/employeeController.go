@@ -338,7 +338,6 @@ func CreateEmployeeVariation(c *gin.Context) {
 		return
 	}
 
-	data.DaysOff = strings.ToLower(data.DaysOff)
 	emp, err := services.GetEmployee(data.EmployeeID)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -357,62 +356,10 @@ func CreateEmployeeVariation(c *gin.Context) {
 			max = vari.ID
 		}
 	}
+	data.Variation.ID = max + 1
 
-	variation := employees.Variation{
-		ID:        max + 1,
-		Site:      data.SiteID,
-		IsMids:    data.IsMids,
-		StartDate: data.StartDate,
-		EndDate:   data.EndDate,
-	}
-	variation.SetScheduleDays()
-	sort.Sort(employees.ByWorkday(variation.Schedule.Workdays))
-
-	start := time.Date(variation.StartDate.Year(), variation.StartDate.Month(),
-		variation.StartDate.Day(), 0, 0, 0, 0, time.UTC)
-	for start.Weekday() != time.Sunday {
-		start = start.AddDate(0, 0, -1)
-	}
-	count := uint(0)
-	for start.Before(variation.EndDate) || start.Equal(variation.EndDate) {
-		count++
-		wd := variation.Schedule.Workdays[count]
-		if start.Equal(variation.StartDate) || start.After(variation.StartDate) {
-			if (start.Weekday() == time.Sunday && (data.DaysOff != "ss" &&
-				data.DaysOff != "sm" && data.DaysOff != "fss" && data.DaysOff != "ssm" &&
-				data.DaysOff != "smt")) ||
-				(start.Weekday() == time.Monday && (data.DaysOff != "mt" &&
-					data.DaysOff != "sm" && data.DaysOff != "mtw" && data.DaysOff != "ssm" &&
-					data.DaysOff != "smt")) ||
-				(start.Weekday() == time.Tuesday && (data.DaysOff != "mt" &&
-					data.DaysOff != "tw" && data.DaysOff != "mtw" && data.DaysOff != "twt" &&
-					data.DaysOff != "smt")) ||
-				(start.Weekday() == time.Wednesday && (data.DaysOff != "tw" &&
-					data.DaysOff != "wt" && data.DaysOff != "mtw" && data.DaysOff != "twt" &&
-					data.DaysOff != "wtf")) ||
-				(start.Weekday() == time.Thursday && (data.DaysOff != "wt" &&
-					data.DaysOff != "tf" && data.DaysOff != "twt" && data.DaysOff != "wtf" &&
-					data.DaysOff != "tfs")) ||
-				(start.Weekday() == time.Friday && (data.DaysOff != "tf" &&
-					data.DaysOff != "fs" && data.DaysOff != "wtf" && data.DaysOff != "tfs" &&
-					data.DaysOff != "fss")) ||
-				(start.Weekday() == time.Saturday && (data.DaysOff != "fs" &&
-					data.DaysOff != "ss" && data.DaysOff != "tfs" && data.DaysOff != "fss" &&
-					data.DaysOff != "ssm")) {
-				wd.Workcenter = data.Workcenter
-				wd.Code = data.Code
-				wd.Hours = data.Hours
-			} else {
-				wd.Workcenter = ""
-				wd.Code = ""
-				wd.Hours = float64(0.0)
-			}
-		}
-		variation.Schedule.Workdays[count] = wd
-		start = start.AddDate(0, 0, 1)
-	}
-
-	emp.Data.Variations = append(emp.Data.Variations, variation)
+	fmt.Println(data.Variation.ID)
+	emp.Data.Variations = append(emp.Data.Variations, data.Variation)
 	sort.Sort(employees.ByVariation(emp.Data.Variations))
 
 	err = services.UpdateEmployee(emp)
@@ -458,6 +405,8 @@ func UpdateEmployeeVariation(c *gin.Context) {
 				vari.StartDate = data.DateValue()
 			case "end", "enddate":
 				vari.EndDate = data.DateValue()
+			case "changeschedule":
+				vari.Schedule.SetScheduleDays(data.IntValue())
 			case "resetschedule":
 				workcenter := ""
 				code := ""

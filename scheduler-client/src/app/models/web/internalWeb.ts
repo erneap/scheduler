@@ -1,5 +1,6 @@
 import { supportsPassiveEventListeners } from "@angular/cdk/platform";
-import { IWorkday, Workday } from "../employees/assignments";
+import { IVariation, IWorkday, Variation, Workday } from "../employees/assignments";
+import { Employee, IEmployee } from "../employees/employee";
 
 export class WorkWeek {
   private week: Workday[];
@@ -35,5 +36,30 @@ export class WorkWeek {
 
   compareTo(other: WorkWeek): number {
     return (this.id < other.id) ? -1 : 1;
+  }
+}
+
+export class WebEmployeeVariation {
+  employee: Employee;
+  variation: Variation;
+
+  constructor(emp: IEmployee, vari: IVariation) {
+    this.employee = new Employee(emp);
+    this.variation = new Variation(vari);
+  }
+
+  compareTo(other?: WebEmployeeVariation): number {
+    if (other) {
+      if (this.variation.startdate.getTime() === other.variation.startdate.getTime()) {
+        if (this.variation.enddate.getTime() === other.variation.enddate.getTime()) {
+          return this.employee.compareTo(other.employee);
+        }
+        return (this.variation.enddate.getTime() 
+          < other.variation.enddate.getTime()) ? -1 : 1;
+      }
+      return (this.variation.startdate.getTime() 
+        < other.variation.startdate.getTime()) ? -1 : 1;
+    }
+    return -1;
   }
 }

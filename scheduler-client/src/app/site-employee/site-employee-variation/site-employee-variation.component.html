@@ -9,7 +9,8 @@
         <span class="flex-spacer"></span>
         <button mat-icon-button color="accent"
             *ngIf="this.variation && this.variation.id > 1"
-            matTooltip="Delete Current Variation">
+            matTooltip="Delete Current Variation"
+            (click)="deleteVariation()">
             <mat-icon>delete</mat-icon>
           </button>
       </div>
@@ -31,9 +32,11 @@
             <mat-label>Variation Date Range</mat-label>
             <mat-date-range-input [rangePicker]="picker">
               <input matStartDate formControlName="start" 
-                placeholder="Start Date" style="color: black;">
+                placeholder="Start Date" style="color: black;"
+                (dateChange)="updateVariation('start')">
               <input matEndDate formControlName="end" 
-                placeholder="End Date" style="color: black;">
+                placeholder="End Date" style="color: black;"
+                (dateChange)="updateVariation('end')">
             </mat-date-range-input>
             <mat-hint> MM/DD/YYYY - MM/DD/YYYY</mat-hint>
             <mat-datepicker-toggle matIconSuffix [for]="picker">
@@ -41,19 +44,21 @@
             <mat-date-range-picker #picker></mat-date-range-picker>
           </mat-form-field>
           <div class="checkbox" style="background-color: white;">
-            <mat-checkbox formControlName="mids" style="height: 55px;">
+            <mat-checkbox formControlName="mids" style="height: 55px;"
+              (change)="updateVariation('mids')">
               MID Shift Rotation</mat-checkbox>
           </div>
         </div>
       </form>
       <div class="fxLayout-row-center">
-        <app-site-employee-assignment-schedule [schedule]="variation.schedule"
-          >
+        <app-site-employee-assignment-schedule [schedule]="schedule"
+          (change)="updateSchedule($event)">
         </app-site-employee-assignment-schedule>
       </div>
       <div class="fxLayout-row-center">
         <button mat-raised-button color="accent" 
-          *ngIf="variation.id === 0 && variationForm.valid">
+          *ngIf="variation.id === 0 && variationForm.valid"
+          (click)="addVariation()">
           Add
         </button>
       </div>

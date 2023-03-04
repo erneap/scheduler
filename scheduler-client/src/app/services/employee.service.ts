@@ -1,8 +1,9 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Variation } from '../models/employees/assignments';
 import { Employee, IEmployee } from '../models/employees/employee';
-import { ChangeAssignmentRequest, EmployeeLaborCodeRequest, EmployeeLeaveRequest, EmployeeResponse, NewEmployeeAssignment, NewEmployeeRequest, UpdateRequest } from '../models/web/employeeWeb';
+import { ChangeAssignmentRequest, EmployeeLaborCodeRequest, EmployeeLeaveRequest, EmployeeResponse, NewEmployeeAssignment, NewEmployeeRequest, NewEmployeeVariation, UpdateRequest } from '../models/web/employeeWeb';
 import { CacheService } from './cache.service';
 import { TeamService } from './team.service';
 
@@ -182,5 +183,30 @@ export class EmployeeService extends CacheService {
     Observable<HttpResponse<EmployeeResponse>> {
     const url = `/scheduler/api/v1/employee/laborcode/${empID}/${chgNo}/${ext}`;
     return this.httpClient.delete<EmployeeResponse>(url, { observe: 'response'});
+  }
+
+  addVariation(empID: string, vari: Variation): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/variation';
+    const data: NewEmployeeVariation = {
+      employee: empID,
+      variation: vari,
+    }
+    return this.httpClient.post<EmployeeResponse>(url, data, { observe: 'response'});
+  }
+
+  updateVariation(data: ChangeAssignmentRequest, isWorkday: boolean):
+    Observable<HttpResponse<EmployeeResponse>> {
+    let url = '/scheduler/api/v1/employee/variation';
+    if (isWorkday) {
+      url += '/workday';
+    }
+    return this.httpClient.put<EmployeeResponse>(url, data, { observe: 'response'});
+  }
+
+  deleteVariation(empID: string, variationID: number): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = `/scheduler/api/v1/employee/variation/${empID}/${variationID}`;
+    return this.httpClient.delete<EmployeeResponse>(url, {observe: 'response'});
   }
 }

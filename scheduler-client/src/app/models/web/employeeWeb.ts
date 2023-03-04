@@ -1,3 +1,4 @@
+import { Variation } from "../employees/assignments";
 import { IEmployee } from "../employees/employee";
 import { ISite } from "../sites/site";
 import { ITeam } from "../teams/team";
@@ -50,14 +51,7 @@ export interface ChangeAssignmentRequest {
 
 export interface NewEmployeeVariation {
   employee: string;
-  site: string;
-  mids: boolean;
-  start: Date;
-  end: Date;
-  workcenter: string;
-  code: string;
-  hours: number;
-  daysoff: string;
+  variation: Variation;
 }
 
 export interface LeaveBalanceRequest {

@@ -454,7 +454,6 @@ export class SiteEmployeeAssignmentComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
       if (result === 'yes') {
         this.dialogService.showSpinner();
         this.authService.statusMessage = "Deleting Employee Assignment";

@@ -111,15 +111,8 @@ func (ur *ChangeAssignmentRequest) DateValue() time.Time {
 }
 
 type NewEmployeeVariation struct {
-	EmployeeID string    `json:"employee"`
-	SiteID     string    `json:"site"`
-	IsMids     bool      `json:"mids"`
-	StartDate  time.Time `json:"start"`
-	EndDate    time.Time `json:"end"`
-	Workcenter string    `json:"workcenter"`
-	Code       string    `json:"code"`
-	Hours      float64   `json:"hours"`
-	DaysOff    string    `json:"daysoff"`
+	EmployeeID string              `json:"employee"`
+	Variation  employees.Variation `json:"variation"`
 }
 
 type LeaveBalanceRequest struct {
