@@ -24,6 +24,7 @@ export class AnnualLeave implements IAnnualLeave {
 }
 
 export interface ILeaveDay {
+  id: number;
   leavedate: Date;
   code: string;
   hours: number;
@@ -32,6 +33,7 @@ export interface ILeaveDay {
 }
 
 export class LeaveDay implements ILeaveDay {
+  id: number;
   leavedate: Date;
   code: string;
   hours: number;
@@ -39,6 +41,7 @@ export class LeaveDay implements ILeaveDay {
   requestid: string;
 
   constructor(ld?: ILeaveDay) {
+    this.id = (ld) ? ld.id : 1;
     this.leavedate = (ld) ? new Date(ld.leavedate) : new Date();
     this.code = (ld) ? ld.code : '';
     this.hours = (ld) ? ld.hours : 0.0;

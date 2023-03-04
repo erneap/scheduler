@@ -17,6 +17,8 @@ import { SiteEmployeeLaborCodesComponent } from './site-employee-labor-codes/sit
 import { SiteEmployeeVariationComponent } from './site-employee-variation/site-employee-variation.component';
 import { LeaveInformationComponent } from './leave-information/leave-information.component';
 import { SiteEmployeeProfileComponent } from './site-employee-profile/site-employee-profile.component';
+import { SiteEmployeeLeaveComponent } from './site-employee-leave/site-employee-leave.component';
+import { SiteEmployeeLeaveRowComponent } from './site-employee-leave/site-employee-leave-row/site-employee-leave-row.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +33,9 @@ import { SiteEmployeeProfileComponent } from './site-employee-profile/site-emplo
     SiteEmployeeLaborCodesComponent,
     SiteEmployeeVariationComponent,
     LeaveInformationComponent,
-    SiteEmployeeProfileComponent
+    SiteEmployeeProfileComponent,
+    SiteEmployeeLeaveComponent,
+    SiteEmployeeLeaveRowComponent
   ],
   imports: [
     CommonModule,

@@ -433,7 +433,14 @@ func (e *EmployeeConverter) ReadEmployeeLeaves(baseDate time.Time) {
 					Status:    status,
 				}
 				for k, emp := range e.Employees {
+					max := 0
 					if emp.Data.CompanyInfo.EmployeeID == empID {
+						for _, ld := range emp.Data.Leaves {
+							if ld.ID > max {
+								max = ld.ID
+							}
+						}
+						lv.ID = max + 1
 						emp.Data.Leaves = append(emp.Data.Leaves, lv)
 						sort.Sort(employees.ByLeaveDay(emp.Data.Leaves))
 						e.Employees[k] = emp

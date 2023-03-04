@@ -21,6 +21,7 @@ func (c ByBalance) Less(i, j int) bool {
 func (c ByBalance) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
 type LeaveDay struct {
+	ID        int       `json:"id" bson:"id"`
 	LeaveDate time.Time `json:"leavedate" bson:"leavedate"`
 	Code      string    `json:"code" bson:"code"`
 	Hours     float64   `json:"hours" bson:"hours"`
