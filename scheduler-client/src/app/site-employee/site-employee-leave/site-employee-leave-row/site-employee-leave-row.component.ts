@@ -1,11 +1,15 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { Employee } from 'src/app/models/employees/employee';
 import { ILeaveDay, LeaveDay } from 'src/app/models/employees/leave';
 import { Workcode } from 'src/app/models/teams/workcode';
+import { EmployeeResponse } from 'src/app/models/web/employeeWeb';
+import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
 import { EmployeeService } from 'src/app/services/employee.service';
+import { SiteService } from 'src/app/services/site.service';
 import { TeamService } from 'src/app/services/team.service';
 
 @Component({
@@ -25,13 +29,15 @@ export class SiteEmployeeLeaveRowComponent {
     return this._leave;
   }
   @Input() employee: Employee = new Employee();
-  @Output() changed = new EventEmitter<string>();
+  @Output() changed = new EventEmitter<Employee>();
   leaveForm: FormGroup;
   leaveCodes: Workcode[];
   showInput: boolean = true;
 
   constructor(
+    protected authService: AuthService,
     protected empService: EmployeeService,
+    protected siteService: SiteService,
     protected teamService: TeamService,
     protected dialogService: DialogService,
     protected dialog: MatDialog,
@@ -47,7 +53,8 @@ export class SiteEmployeeLeaveRowComponent {
       })
     }
     this.leaveForm = this.fb.group({
-      date: [this.dateString(new Date()), [Validators.required]],
+      date: [this.dateString(new Date()), [Validators.required, 
+        Validators.pattern('^[0-9]{2}/[0-9]{2}/[0-9]{4}$')]],
       code: ['', [Validators.required]],
       hours: ['', [Validators.required]],
       status: ['approved', [Validators.required]],
@@ -119,5 +126,148 @@ export class SiteEmployeeLeaveRowComponent {
       }
     });
     return answer;
+  }
+
+  updateLeave(field: string) {
+    let value = '';
+    let valid = false;
+    switch (field.toLowerCase()) {
+      case "date":
+        value = this.leaveForm.value.date;
+        let dateregexp = new RegExp('^[0-9]{2}/[0-9]{2}/[0-9]{4}$');
+        valid = dateregexp.test(value);
+        if (!valid) {
+          this.authService.statusMessage = 'Date must be in MM/DD/YYYY format';
+        }
+        break;
+      case "code":
+        value = this.leaveForm.value.code;
+        this.leaveCodes.forEach(lc => {
+          if (lc.id.toLowerCase() === value.toLowerCase()) {
+            valid = true;
+          }
+        });
+        if (!valid) {
+          this.authService.statusMessage = "Select a good leave type";
+        }
+        break;
+      case "hours":
+        value = this.leaveForm.value.hours;
+        let hoursregexp = new RegExp('^[0-9]{1,2}(\.[0.9])?$');
+        valid = hoursregexp.test(value);
+        if (!valid) {
+          this.authService.statusMessage = "Leave hours must be a decimal number";
+        }
+        break;
+      case "status":
+        value = this.leaveForm.value.status;
+        valid = true;
+    }
+    if (valid) {
+      this.empService.updateLeave(this.employee.id, this.leaveday.id, field,
+        value).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: EmployeeResponse | null = resp.body;
+            if (data && data !== null) {
+              if (data.employee) {
+                this.employee = new Employee(data.employee);
+                this.employee.data.leaves.sort((a,b) => a.compareTo(b));
+                this.employee.data.leaves.forEach(lv => {
+                  if (lv.id === this.leaveday.id) {
+                    this.leaveday = lv;
+                  }
+                });
+              }
+              const emp = this.empService.getEmployee();
+              if (data.employee && emp && emp.id === data.employee.id) {
+                this.empService.setEmployee(data.employee);
+              }
+              const site = this.siteService.getSite();
+              if (site && site.employees && site.employees.length && data.employee) {
+                let found = false;
+                for (let i=0; i < site.employees.length && !found; i++) {
+                  if (site.employees[i].id === data.employee.id) {
+                    site.employees[i] = new Employee(data.employee);
+                    found = true;
+                  }
+                }
+                if (!found) {
+                  site.employees.push(new Employee(data.employee));
+                }
+                site.employees.sort((a,b) => a.compareTo(b));
+                this.siteService.setSite(site);
+                this.siteService.setSelectedEmployee(data.employee);
+              }
+            }
+            this.changed.emit(new Employee(this.employee));
+            this.authService.statusMessage = "Update complete";
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.error.exception;
+          }
+        })
+    }
+  }
+  
+  deleteLeave() {
+    const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+      data: {title: 'Confirm Leave Deletion', 
+      message: 'Are you sure you want to delete this leave?'},
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'yes') {
+        this.dialogService.showSpinner();
+        this.authService.statusMessage = "Deleting Employee Leave";
+        this.empService.deleteLeave(this.employee.id, this.leaveday.id)
+          .subscribe({
+            next: resp => {
+              this.dialogService.closeSpinner();
+              if (resp.headers.get('token') !== null) {
+                this.authService.setToken(resp.headers.get('token') as string);
+              }
+              const data: EmployeeResponse | null = resp.body;
+              if (data && data !== null) {
+                if (data.employee) {
+                  this.employee = new Employee(data.employee);
+                  this.employee.data.assignments.sort((a,b) => a.compareTo(b));
+                }
+                const emp = this.empService.getEmployee();
+                if (data.employee && emp && emp.id === data.employee.id) {
+                  this.empService.setEmployee(data.employee);
+                }
+                const site = this.siteService.getSite();
+                if (site && site.employees && site.employees.length && data.employee) {
+                  let found = false;
+                  for (let i=0; i < site.employees.length && !found; i++) {
+                    if (site.employees[i].id === data.employee.id) {
+                      site.employees[i] = new Employee(data.employee);
+                      found = true;
+                    }
+                  }
+                  if (!found) {
+                    site.employees.push(new Employee(data.employee));
+                  }
+                  site.employees.sort((a,b) => a.compareTo(b));
+                  this.siteService.setSite(site);
+                  this.siteService.setSelectedEmployee(data.employee);
+                }
+              }
+              this.changed.emit(new Employee(this.employee));
+              this.authService.statusMessage = "Deletion complete";
+            },
+            error: err => {
+              this.dialogService.closeSpinner();
+              this.authService.statusMessage = err.error.exception;
+            }
+          });
+        
+      }
+    });
   }
 }

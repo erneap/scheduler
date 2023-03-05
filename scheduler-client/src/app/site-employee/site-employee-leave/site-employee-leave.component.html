@@ -24,14 +24,15 @@
       <div class="leavebox">
         <div class="fxLayout-column-center">
           <app-site-employee-leave-row *ngFor="let ld of leaveDays"
-          [leaveday]="ld" [employee]="employee"></app-site-employee-leave-row>
+          [leaveday]="ld" [employee]="employee"
+          (changed)="updateEmployee($event)"></app-site-employee-leave-row>
         </div>
       </div>
       <form [formGroup]="leaveForm">
         <div class="fxLayout-row-center">
           <div class="delete">
             <mat-icon class="addIcon" *ngIf="leaveForm.valid"
-            matTooltip="Add Leave">add</mat-icon>
+            matTooltip="Add Leave" (click)="addLeave()">add</mat-icon>
           </div>
           <div class="date">
             <input matInput class="form-field" formControlName="date">

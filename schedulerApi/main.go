@@ -54,6 +54,12 @@ func main() {
 				balance.PUT("/", controllers.CreateEmployeeLeaveBalance)
 				balance.DELETE("/:empid/:year", controllers.DeleteEmployeeLeaveBalance)
 			}
+			leaves := emp.Group("/leaves").Use(middleware.CheckJWT())
+			{
+				leaves.POST("/", controllers.AddEmployeeLeaveDay)
+				leaves.PUT("/", controllers.UpdateEmployeeLeaveDay)
+				leaves.DELETE("/:empid/:lvid", controllers.DeleteEmployeeLeaveDay)
+			}
 			lvReq := emp.Group("/request").Use(middleware.CheckJWT())
 			{
 				lvReq.POST("/", controllers.CreateEmployeeLeaveRequest)

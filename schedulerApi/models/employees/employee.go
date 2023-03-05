@@ -243,22 +243,26 @@ func (e *Employee) UpdateAnnualLeave(year int, annual, carry float64) {
 	}
 }
 
-func (e *Employee) UpdateLeave(date time.Time, code, status string,
+func (e *Employee) AddLeave(id int, date time.Time, code, status string,
 	hours float64, requestID *primitive.ObjectID) {
 	found := false
+	max := 0
 	for _, lv := range e.Data.Leaves {
-		if lv.LeaveDate.Equal(date) {
+		if (lv.LeaveDate.Equal(date) &&
+			strings.EqualFold(lv.Code, code)) || lv.ID == id {
 			found = true
-			lv.Code = code
 			lv.Status = status
 			lv.Hours = hours
 			if requestID != nil {
 				lv.RequestID = requestID.Hex()
 			}
+		} else if lv.ID > max {
+			max = lv.ID
 		}
 	}
 	if !found {
 		lv := LeaveDay{
+			ID:        max + 1,
 			LeaveDate: date,
 			Code:      code,
 			Hours:     hours,
@@ -267,6 +271,49 @@ func (e *Employee) UpdateLeave(date time.Time, code, status string,
 		}
 		e.Data.Leaves = append(e.Data.Leaves, lv)
 		sort.Sort(ByLeaveDay(e.Data.Leaves))
+	}
+}
+
+func (e *Employee) UpdateLeave(id int, field, value string) error {
+	found := false
+	for i := 0; i < len(e.Data.Leaves) && !found; i++ {
+		lv := e.Data.Leaves[i]
+		if lv.ID == id {
+			switch strings.ToLower(field) {
+			case "date":
+				date, err := time.ParseInLocation("01/02/2006", value, time.UTC)
+				if err != nil {
+					return err
+				}
+				lv.LeaveDate = date
+			case "code":
+				lv.Code = value
+			case "hours":
+				hrs, err := strconv.ParseFloat(value, 64)
+				if err != nil {
+					return err
+				}
+				lv.Hours = hrs
+			case "status":
+				lv.Status = value
+			case "requestid":
+				lv.RequestID = value
+			}
+			e.Data.Leaves[i] = lv
+		}
+	}
+	return nil
+}
+
+func (e *Employee) DeleteLeave(id int) {
+	pos := -1
+	for i, lv := range e.Data.Leaves {
+		if lv.ID == id {
+			pos = i
+		}
+	}
+	if pos >= 0 {
+		e.Data.Leaves = append(e.Data.Leaves[:pos], e.Data.Leaves[pos+1:]...)
 	}
 }
 

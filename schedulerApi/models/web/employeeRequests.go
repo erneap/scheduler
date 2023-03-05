@@ -134,3 +134,8 @@ type EmployeeLaborCodeRequest struct {
 	ChargeNumber string `json:"chargeNumber"`
 	Extension    string `json:"extension"`
 }
+
+type EmployeeLeaveDayRequest struct {
+	EmployeeID string             `json:"employee"`
+	Leave      employees.LeaveDay `json:"leave"`
+}

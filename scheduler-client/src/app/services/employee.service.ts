@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Variation } from '../models/employees/assignments';
 import { Employee, IEmployee } from '../models/employees/employee';
-import { ChangeAssignmentRequest, EmployeeLaborCodeRequest, EmployeeLeaveRequest, EmployeeResponse, NewEmployeeAssignment, NewEmployeeRequest, NewEmployeeVariation, UpdateRequest } from '../models/web/employeeWeb';
+import { LeaveDay } from '../models/employees/leave';
+import { ChangeAssignmentRequest, EmployeeLaborCodeRequest, EmployeeLeaveDayRequest, EmployeeLeaveRequest, EmployeeResponse, NewEmployeeAssignment, NewEmployeeRequest, NewEmployeeVariation, UpdateRequest } from '../models/web/employeeWeb';
 import { CacheService } from './cache.service';
 import { TeamService } from './team.service';
 
@@ -207,6 +208,36 @@ export class EmployeeService extends CacheService {
   deleteVariation(empID: string, variationID: number): 
     Observable<HttpResponse<EmployeeResponse>> {
     const url = `/scheduler/api/v1/employee/variation/${empID}/${variationID}`;
+    return this.httpClient.delete<EmployeeResponse>(url, {observe: 'response'});
+  }
+
+  addLeave(empID: string, leave: LeaveDay): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/leaves';
+    const data: EmployeeLeaveDayRequest = {
+      employee: empID,
+      leave: leave,
+    };
+    return this.httpClient.post<EmployeeResponse>(url, data, 
+      { observe: 'response'});
+  }
+
+  updateLeave(empID: string, id: number, field: string, value: string): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/leaves';
+    const data: UpdateRequest = {
+      id: empID,
+      optional: `${id}`,
+      field: field,
+      value: value,
+    };
+    return this.httpClient.put<EmployeeResponse>(url, data,
+      {observe: 'response'});
+  }
+
+  deleteLeave(empID: string, id: number): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = `/scheduler/api/v1/employee/leaves/${empID}/${id}`;
     return this.httpClient.delete<EmployeeResponse>(url, {observe: 'response'});
   }
 }

@@ -1,4 +1,5 @@
-<mat-tab-group preserveContent="true">
+<mat-tab-group preserveContent="true" [backgroundColor]="'primary'"
+  style="margin-top: 10px;">
   <mat-tab label="Personal/Company">
     <mat-tab-group preserveContent="true">
       <mat-tab label="Personal Information">
@@ -35,7 +36,8 @@
         <app-site-pto-holiday [employee]="employee"></app-site-pto-holiday>
       </mat-tab>
       <mat-tab label="Leaves">
-        <app-site-employee-leave [employee]="employee"></app-site-employee-leave>
+        <app-site-employee-leave [employee]="employee"
+        (changed)="employeeChanged($event)"></app-site-employee-leave>
       </mat-tab>
       <mat-tab label="Leave Balances">
     

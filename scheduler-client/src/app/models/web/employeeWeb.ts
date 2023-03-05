@@ -1,5 +1,6 @@
 import { Variation } from "../employees/assignments";
 import { IEmployee } from "../employees/employee";
+import { LeaveDay } from "../employees/leave";
 import { ISite } from "../sites/site";
 import { ITeam } from "../teams/team";
 import { IUser } from "../users/user";
@@ -72,6 +73,11 @@ export interface EmployeeLaborCodeRequest {
   employee: string;
   chargeNumber: string;
   extension: string;
+}
+
+export interface EmployeeLeaveDayRequest {
+  employee: string;
+  leave: LeaveDay;
 }
 
 export interface AuthenticationResponse {

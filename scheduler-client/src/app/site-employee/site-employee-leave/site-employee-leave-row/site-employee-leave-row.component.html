@@ -1,13 +1,14 @@
 <form [formGroup]="leaveForm">
   <div class="fxLayout-row-center" [style]="getRowStyle()">
-    <div class="delete">
+    <div class="delete" (click)="deleteLeave()">
       <mat-icon class="deleteIcon" matTooltip="Delete leave"
       *ngIf="showInput">delete</mat-icon>
     </div>
     <div class="date">
       <ng-container *ngIf="showInput">
         <input matInput class="form-field" formControlName="date" 
-        [style]="getInputStyle()">
+          [style]="getInputStyle()" matTooltip="MM/DD/YYYY format"
+          (blur)="updateLeave('date')">
       </ng-container>
       <ng-container *ngIf="!showInput">
         {{dateString(leaveday.leavedate)}}
@@ -16,7 +17,7 @@
     <div class="code">
       <ng-container *ngIf="showInput">
         <select class="form-field" formControlName="code" 
-        [style]="getInputStyle()">
+        [style]="getInputStyle()" (change)="updateLeave('code')">
           <option *ngFor="let lc of leaveCodes" [value]="lc.id">
             {{lc.title}}
           </option>
@@ -29,7 +30,7 @@
     <div class="hours">
       <ng-container *ngIf="showInput">
         <input class="form-field" formControlName="hours" 
-        [style]="getInputStyle()">
+        [style]="getInputStyle()" (blur)="updateLeave('hours')">
       </ng-container>
       <ng-container *ngIf="!showInput">
         {{leaveday.hours.toFixed(1)}}
@@ -38,7 +39,7 @@
     <div class="status">
       <ng-container *ngIf="showInput">
         <select class="form-field" formControlName="status" 
-        [style]="getInputStyle()">
+        [style]="getInputStyle()" (change)="updateLeave('status')">
           <option value="REQUESTED">Requested</option>
           <option value="APPROVED">Approved</option>
           <option value="ACTUAL">Actual</option>
