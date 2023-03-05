@@ -92,8 +92,8 @@ export class PtoComponent {
       month.month = new Date(Date.UTC(this._year, i, 1));
       let endMonth = new Date(Date.UTC(this._year, i+1, 1));
       endMonth = new Date(endMonth.getTime() - 3600000);
-      let active = (startAsgmt.startDate.getTime() > endMonth.getTime() 
-        || (endAsgmt.endDate.getTime() < month.month.getTime()));
+      let active = (startAsgmt?.startDate.getTime() > endMonth.getTime() 
+        || (endAsgmt?.endDate.getTime() < month.month.getTime()));
       month.active = !active;
       this.leaveMonths.push(month);
     }
