@@ -1,0 +1,91 @@
+<div class="fxLayout-row-topcenter">
+  <div class="fxLayout-column-top" style="width: 30%;height:100%;min-height: 150px;">
+    <h3>Current Leave Requests</h3>
+    <div class="lrList">
+      <ng-container *ngIf="currentLeaveRequests.length > 0">
+        <button mat-raised-button *ngFor="let req of currentLeaveRequests"
+        (click)="this.setDisplayedLeaveRequest(req.id)"
+        >{{this.getDateString(req.startdate)}} - {{this.getDateString(req.enddate)}}</button>
+      </ng-container>
+      <ng-container *ngIf="currentLeaveRequests.length <= 0">
+        No Leave Requests
+      </ng-container>
+    </div>
+  </div>
+  <div class="fxLayout-column-center" style="width: 68%;">
+    <form [formGroup]="editorForm">
+      <div class="fxLayout-row-center">
+        <div class="formFieldWide">
+          <mat-form-field class="fieldWidthWide">
+            <mat-label>Request Dates</mat-label>
+            <mat-date-range-input
+              [rangePicker]="picker">
+              <input matStartDate placeholder="Start Date"
+                formControlName="start" (dateChange)="processChange('start')">
+              <input matEndDate placeholder="End Date"
+                formControlName="end" (dateChange)="processChange('end')">
+            </mat-date-range-input>
+            <mat-hint>Include Time Off</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-date-range-picker #picker></mat-date-range-picker>
+          </mat-form-field>
+        </div>
+        <div class="formFieldWide">
+          <mat-form-field class="fieldWidthWide">
+            <mat-select formControlName="primarycode"
+              (selectionChange)="processChange('code')">
+              <mat-option *ngFor="let wc of leaveList" [value]="wc.id">
+                {{wc.title}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div> 
+        <button mat-icon-button  
+          *ngIf="!currentLeaveRequest && editorForm.valid"
+          matTooltip="Add/Update Leave Request"
+          (click)="processNewRequest()">
+          <mat-icon>add</mat-icon>
+        </button> 
+        <button mat-icon-button color="accent"
+            *ngIf="this.currentLeaveRequest"
+            matTooltip="Delete Current Leave Request"
+            (click)="deleteRequest()">
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button mat-icon-button
+            matTooltip="Clear editor"
+            (click)="clearRequest()">
+            <mat-icon>deselect</mat-icon>
+          </button>
+      </div>
+    </form>
+    <div *ngIf="this.currentLeaveRequest" style="padding-bottom: 10px;">
+      <div class="fxLayout-column-center">
+        <div class="fxLayout-row-center">
+          <div class="label">Created On:</div>
+          <div class="label">{{getCurrentLeaveRequestDate()}}</div>
+        </div>
+        <div class="fxLayout-row-center">
+          <div class="label">Current Status:</div>
+          <div class="label">{{currentLeaveRequest.status.toUpperCase()}}</div>
+        </div>
+        <div class="fxLayout-row-center">
+          <div class="label">Approved By:</div>
+          <div class="label">{{getApprovedBy()}}</div>
+        </div>
+        <div class="fxLayout-row-center">
+          <div class="label">Approval Date:</div>
+          <div class="label">{{getApprovedDate()}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="fxLayout-row-center" *ngIf="this.currentLeaveRequest">
+      <app-leave-request-calendar [leaveCodes]="leaveList" 
+        [startdate]="currentLeaveRequest.startdate"
+        [enddate]="currentLeaveRequest.enddate"
+        [leavedays]="currentLeaveRequest.requesteddays"
+        (changed)="processDayChange($event)">
+      </app-leave-request-calendar>
+    </div>
+  </div>
+</div>

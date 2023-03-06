@@ -43,7 +43,8 @@
     
       </mat-tab>
       <mat-tab label="Leave Requests">
-    
+        <app-site-employee-leave-request [employee]="employee"
+          (changed)="employeeChanged($event)"></app-site-employee-leave-request>
       </mat-tab>
     </mat-tab-group>
   </mat-tab>

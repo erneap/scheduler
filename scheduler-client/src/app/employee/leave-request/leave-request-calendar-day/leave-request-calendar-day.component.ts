@@ -72,7 +72,6 @@ export class LeaveRequestCalendarDayComponent {
 
   setLeave() {
     if (this._leave && this._start && this._end && this._codes.length > 0) {
-      const end = new Date(this.endDate.getTime() + (24 * 3600000));
       this.dayForm.controls["code"].setValue(this.leave.code);
       if (this.leave.code !== '') {
         this.dayForm.controls["hours"].setValue(this.leave.hours);
@@ -80,7 +79,7 @@ export class LeaveRequestCalendarDayComponent {
         this.dayForm.controls["hours"].setValue('');
       }
       if (this.leave.leavedate.getTime() >= this.startDate.getTime()
-        && this.leave.leavedate.getTime() <= end.getTime()) {
+        && this.leave.leavedate.getTime() <= this.endDate.getTime()) {
         if (this.leave.code !== '') {
           this.leaveCodes.forEach(wc => {
             if (wc.id.toLowerCase() == this.leave.code.toLowerCase()) {

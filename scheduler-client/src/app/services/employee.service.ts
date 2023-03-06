@@ -75,8 +75,12 @@ export class EmployeeService extends CacheService {
 
   addNewLeaveRequest(empid: string, start: Date, end: Date, 
     code: string): Observable<HttpResponse<EmployeeResponse>> {
+    start = new Date(Date.UTC(start.getFullYear(), start.getMonth(),
+      start.getDate()));
+    end = new Date(Date.UTC(end.getFullYear(), end.getMonth(), 
+      end.getDate()));
     const data: EmployeeLeaveRequest = {
-      employee: this.getEmployeeID(),
+      employee: empid,
       code: code,
       startdate: start,
       enddate: end,

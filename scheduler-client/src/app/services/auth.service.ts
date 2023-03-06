@@ -21,7 +21,7 @@ export class AuthService extends CacheService {
   isCompanyLead = false;
   schedulerLabel = "Scheduler";
   section: string = 'employee';
-  statusMessage: string = 'test message';
+  statusMessage: string = '';
 
   authStatus = new BehaviorSubject<IAuthStatus>( 
     this.getItem('authStatus') || defaultAuthStatus);

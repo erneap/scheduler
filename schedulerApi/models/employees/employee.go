@@ -131,7 +131,7 @@ func (e *Employee) GetStandardWorkday(date time.Time) float64 {
 	}
 	for start.Before(end) || start.Equal(end) {
 		wd := e.GetWorkday(start, 0.0)
-		if wd.Code != "" {
+		if wd != nil && wd.Code != "" {
 			count++
 		}
 		start = start.AddDate(0, 0, 1)
