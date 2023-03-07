@@ -13,5 +13,6 @@
       </mat-checkbox>
     </div>
   </div>
-  <app-site-employee-editor [employee]="employee"></app-site-employee-editor>
+  <app-site-employee-editor [employee]="employee"
+  (siteChanged)="siteChanged($event)"></app-site-employee-editor>
 </div>

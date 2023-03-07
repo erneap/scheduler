@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ListItem } from '../generic/button-list/listitem';
 import { Employee } from '../models/employees/employee';
+import { Site } from '../models/sites/site';
 import { AuthService } from '../services/auth.service';
 import { EmployeeService } from '../services/employee.service';
 import { SiteService } from '../services/site.service';
@@ -77,5 +78,9 @@ export class SiteEmployeeComponent {
       return "employee active";
     }
     return "employee";
+  }
+
+  siteChanged(site: Site) {
+    this.setEmployees();
   }
 }

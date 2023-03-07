@@ -4,7 +4,11 @@ import { Observable } from 'rxjs';
 import { Variation } from '../models/employees/assignments';
 import { Employee, IEmployee } from '../models/employees/employee';
 import { LeaveDay } from '../models/employees/leave';
-import { ChangeAssignmentRequest, EmployeeLaborCodeRequest, EmployeeLeaveDayRequest, EmployeeLeaveRequest, EmployeeResponse, NewEmployeeAssignment, NewEmployeeRequest, NewEmployeeVariation, UpdateRequest } from '../models/web/employeeWeb';
+import { ChangeAssignmentRequest, EmployeeLaborCodeRequest, 
+  EmployeeLeaveDayRequest, EmployeeLeaveRequest, EmployeeResponse, 
+  NewEmployeeAssignment, NewEmployeeRequest, NewEmployeeVariation, 
+  UpdateRequest, LeaveBalanceRequest } from '../models/web/employeeWeb';
+import { CreateSiteEmployeeLeaveBalances, SiteResponse } from '../models/web/siteWeb';
 import { CacheService } from './cache.service';
 import { TeamService } from './team.service';
 
@@ -243,5 +247,42 @@ export class EmployeeService extends CacheService {
     Observable<HttpResponse<EmployeeResponse>> {
     const url = `/scheduler/api/v1/employee/leaves/${empID}/${id}`;
     return this.httpClient.delete<EmployeeResponse>(url, {observe: 'response'});
+  }
+
+  createLeaveBalance(empID: string, year: number): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/balance';
+    const data: LeaveBalanceRequest = {
+      employee: empID,
+      year: year,
+      annual: 0.0,
+      carryover: 0.0
+    };
+    return this.httpClient.post<EmployeeResponse>(url, data, 
+      {observe: 'response'});
+  }
+
+  updateLeaveBalance(empID: string, year: number, field: string, value: string): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/balance';
+    const data: UpdateRequest = {
+      id: empID,
+      optional: `${year}`,
+      field: field,
+      value: value
+    };
+    return this.httpClient.put<EmployeeResponse>(url, data, 
+      {observe: 'response'});
+  }
+
+  createAllLeaveBalances(teamID: string, siteID: string, year: number): 
+  Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site/balances';
+    const data: CreateSiteEmployeeLeaveBalances = {
+      team: teamID,
+      siteid: siteID,
+      year: year
+    };
+    return this.httpClient.post<SiteResponse>(url, data, { observe: 'response'});
   }
 }

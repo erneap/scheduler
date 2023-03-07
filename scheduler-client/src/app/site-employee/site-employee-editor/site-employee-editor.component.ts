@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Employee } from 'src/app/models/employees/employee';
+import { Site } from 'src/app/models/sites/site';
 import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
 
@@ -20,6 +21,7 @@ export class SiteEmployeeEditorComponent {
     } 
     return new Employee();
   }
+  @Output() siteChanged = new EventEmitter<Site>()
 
   constructor(
     protected empService: EmployeeService,
@@ -29,5 +31,9 @@ export class SiteEmployeeEditorComponent {
 
   employeeChanged(emp: Employee) {
     this.employee = new Employee(emp);
+  }
+
+  siteUpdated(site: Site) {
+    this.siteChanged.emit(site);
   }
 }

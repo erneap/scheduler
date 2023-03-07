@@ -11,6 +11,7 @@ import { AbstractControl, NG_VALIDATORS, Validator } from '@angular/forms';
 })
 export class PasswordStrengthValidator implements Validator {
   validate(control: AbstractControl) : {[key: string]: any} | null {
+    control.
     const value: string = (control.value && control.value !== null) 
       ? control.value : '';
     if (value === '' || value === null) {

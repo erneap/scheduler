@@ -4,6 +4,8 @@ import { HomeComponent } from './home/home.component';
 import { NotFoundComponent } from './home/not-found/not-found.component';
 import { NewEmployeeComponent } from './site-employee/new-employee/new-employee.component';
 import { SiteEmployeeComponent } from './site-employee/site-employee.component';
+import { NewSiteComponent } from './site/new-site/new-site.component';
+import { SiteComponent } from './site/site.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -18,6 +20,8 @@ const routes: Routes = [
   },
   { path: 'newemployee', component: NewEmployeeComponent },
   { path: 'siteemployees', component: SiteEmployeeComponent},
+  { path: 'newsite', component: NewSiteComponent },
+  { path: 'siteeditor', component: SiteComponent},
   { path: '**', component: NotFoundComponent}
 ];
 

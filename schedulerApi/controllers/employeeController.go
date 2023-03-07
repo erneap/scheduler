@@ -207,7 +207,6 @@ func UpdateEmployeeAssignment(c *gin.Context) {
 			case "rotationdays":
 				asgmt.RotationDays = data.IntValue()
 			case "addschedule":
-				fmt.Println(data.IntValue())
 				asgmt.AddSchedule(data.IntValue())
 			case "changeschedule":
 				asgmt.ChangeScheduleDays(data.ScheduleID, data.IntValue())
@@ -264,7 +263,6 @@ func UpdateEmployeeAssignmentWorkday(c *gin.Context) {
 							case "hours":
 								wd.Hours = data.FloatValue()
 							}
-							fmt.Println(wd.Code)
 							sch.Workdays[k] = wd
 							asgmt.Schedules[j] = sch
 							emp.Data.Assignments[i] = asgmt
@@ -358,7 +356,6 @@ func CreateEmployeeVariation(c *gin.Context) {
 	}
 	data.Variation.ID = max + 1
 
-	fmt.Println(data.Variation.ID)
 	emp.Data.Variations = append(emp.Data.Variations, data.Variation)
 	sort.Sort(employees.ByVariation(emp.Data.Variations))
 
@@ -593,26 +590,63 @@ func CreateEmployeeLeaveBalance(c *gin.Context) {
 		return
 	}
 
-	found := false
+	emp.CreateLeaveBalance(data.Year)
+
+	err = services.UpdateEmployee(emp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	// return the corrected employee back to the client.
+	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
+}
+
+func UpdateEmployeeLeaveBalance(c *gin.Context) {
+	var data web.UpdateRequest
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.EmployeeResponse{Employee: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	fmt.Println(data.ID)
+	emp, err := services.GetEmployee(data.ID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.EmployeeResponse{Employee: nil,
+				Exception: "Employee Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	year, err := strconv.Atoi(data.OptionalID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
+	fvalue, err := strconv.ParseFloat(data.StringValue(), 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+			Exception: err.Error()})
+		return
+	}
+
 	for i, lb := range emp.Data.Balances {
-		if lb.Year == data.Year {
-			found = true
-			if data.AnnualLeave >= 0.0 {
-				lb.Annual = data.AnnualLeave
-			}
-			if data.CarryOver >= 0.0 {
-				lb.Carryover = data.CarryOver
+		if lb.Year == year {
+			if strings.ToLower(data.Field) == "annual" {
+				lb.Annual = fvalue
+			} else {
+				lb.Carryover = fvalue
 			}
 			emp.Data.Balances[i] = lb
 		}
-	}
-	if !found {
-		balance := employees.AnnualLeave{
-			Year:      data.Year,
-			Annual:    data.AnnualLeave,
-			Carryover: data.CarryOver,
-		}
-		emp.Data.Balances = append(emp.Data.Balances, balance)
 	}
 
 	err = services.UpdateEmployee(emp)
@@ -805,8 +839,6 @@ func AddEmployeeLeaveDay(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(data.Leave.LeaveDate)
-	fmt.Println(emp.Name.LastName)
 	emp.AddLeave(data.Leave.ID, data.Leave.LeaveDate, data.Leave.Code,
 		data.Leave.Status, data.Leave.Hours, &primitive.NilObjectID)
 	if err != nil {

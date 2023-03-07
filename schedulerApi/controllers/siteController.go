@@ -109,6 +109,44 @@ func DeleteSite(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// mass create for site's employee leave balances
+func AddSitesEmployeeLeaveBalances(c *gin.Context) {
+	var data web.CreateEmployeeLeaveBalances
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.EmployeeResponse{Employee: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	start := time.Date(data.Year, 1, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(data.Year, 12, 31, 0, 0, 0, 0, time.UTC)
+	emps, _ := services.GetEmployees(data.TeamID, data.SiteID)
+	for _, emp := range emps {
+		if emp.IsActive(start) || emp.IsActive(end) {
+			emp.CreateLeaveBalance(data.Year)
+			services.UpdateEmployee(&emp)
+		}
+	}
+
+	site, err := services.GetSite(data.TeamID, data.SiteID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.SiteResponse{Team: nil, Site: nil,
+				Exception: "Site Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	emps, _ = services.GetEmployees(data.TeamID, data.SiteID)
+	site.Employees = append(site.Employees, emps...)
+	sort.Sort(employees.ByEmployees(site.Employees))
+
+	c.JSON(http.StatusOK, web.SiteResponse{Team: nil, Site: site, Exception: ""})
+}
+
 // workcenter controls
 func CreateWorkcenter(c *gin.Context) {
 	var data web.NewSiteWorkcenter

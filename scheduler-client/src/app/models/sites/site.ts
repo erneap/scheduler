@@ -7,6 +7,7 @@ export interface ISite {
   id: string;
   name: string;
   showMids: boolean;
+  utcOffset?: number;
   workcenters?: IWorkcenter[];
   laborCodes?: ILaborCode[];
   forecasts?: IForecastReport[];
@@ -17,6 +18,7 @@ export class Site implements ISite {
   id: string;
   name: string;
   showMids: boolean;
+  utcOffset?: number;
   workcenters?: Workcenter[];
   laborCodes?: LaborCode[];
   forecasts?: ForecastReport[];
@@ -26,6 +28,7 @@ export class Site implements ISite {
     this.id = (site) ? site.id : '';
     this.name = (site) ? site.name : '';
     this.showMids = (site) ? site.showMids : true;
+    this.utcOffset = (site && site.utcOffset) ? site.utcOffset : 0;
     this.workcenters = [];
     if (site && site.workcenters && site.workcenters.length > 0) {
       site.workcenters.forEach(wc => {

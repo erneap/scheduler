@@ -51,7 +51,7 @@ func main() {
 			balance := emp.Group("/balance").Use(middleware.CheckJWT())
 			{
 				balance.POST("/", controllers.CreateEmployeeLeaveBalance)
-				balance.PUT("/", controllers.CreateEmployeeLeaveBalance)
+				balance.PUT("/", controllers.UpdateEmployeeLeaveBalance)
 				balance.DELETE("/:empid/:year", controllers.DeleteEmployeeLeaveBalance)
 			}
 			leaves := emp.Group("/leaves").Use(middleware.CheckJWT())
@@ -80,6 +80,7 @@ func main() {
 			site.POST("/", controllers.CreateSite)
 			site.PUT("/", controllers.UpdateSite)
 			site.DELETE("/:teamid/:siteid", controllers.DeleteSite)
+			site.POST("/balances", controllers.AddSitesEmployeeLeaveBalances)
 
 			wkctr := site.Group("/workcenter")
 			{

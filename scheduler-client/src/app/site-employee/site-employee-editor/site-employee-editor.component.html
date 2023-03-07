@@ -40,7 +40,9 @@
         (changed)="employeeChanged($event)"></app-site-employee-leave>
       </mat-tab>
       <mat-tab label="Leave Balances">
-    
+        <app-site-employee-leave-balance [employee]="employee"
+          (changed)="employeeChanged($event)"
+          (siteChanged)="siteUpdated($event)"></app-site-employee-leave-balance>
       </mat-tab>
       <mat-tab label="Leave Requests">
         <app-site-employee-leave-request [employee]="employee"

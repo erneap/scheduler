@@ -15,9 +15,27 @@
         </div>
       </mat-card-header>
       <mat-card-content class="fxLayout-column-center">
-          <app-employee-profile-form [employee]="employee"
-            (changed)="employeeChanged($event)">
-          </app-employee-profile-form>
+        <app-employee-profile-form [employee]="employee"
+          (changed)="employeeChanged($event)">
+        </app-employee-profile-form>
+        <div class="fxLayout-row-center">
+          User Authentication/Permissions
+        </div>
+        <div class="fxLayout-row-center">
+          <button mat-raised-button color="accent" style="margin: 5px;">
+            Unlock Account</button>
+          <button mat-raised-button color="warn" style="margin: 5px;">
+            Create Authentication Account</button>
+        </div>
+        <div class="fxLayout-column-topleft" style="background-color: white; color: black;">
+          <h4>User's Permissions</h4>
+          <mat-checkbox>Employee</mat-checkbox>
+          <mat-checkbox >Site Scheduler</mat-checkbox>
+          <mat-checkbox >Site Company Lead</mat-checkbox>
+          <mat-checkbox>Site Leader</mat-checkbox>
+          <mat-checkbox>Team Leader</mat-checkbox>
+          <mat-checkbox>Application Admin</mat-checkbox>
+        </div>
       </mat-card-content>
   </mat-card>
 </div>

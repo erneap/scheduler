@@ -39,12 +39,10 @@
       style="height: 20px;">New Employee</a>
       <a mat-list-item routerLink="/siteemployees"
       style="height: 20px;">Employee Editor</a>
-      <a mat-list-item
-      style="height: 20px;">Workcenters</a>
-      <a mat-list-item
-      style="height: 20px;">Labor Codes Maintenance</a>
-      <a mat-list-item
-      style="height: 20px;">Forecast Report Maintenance</a>
+      <a mat-list-item style="height: 20px;" routerLink="/newsite"
+      *ngIf="this.authService.isAdmin">New Site</a>
+      <a mat-list-item routerLink="/siteeditor"
+      style="height: 20px;">Site Editor</a>
     </mat-nav-list>
   </mat-expansion-panel>
   <mat-expansion-panel 

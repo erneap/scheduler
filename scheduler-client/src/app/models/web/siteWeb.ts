@@ -7,6 +7,12 @@ export interface NewSiteRequest {
   name: string;
 }
 
+export interface CreateSiteEmployeeLeaveBalances {
+  team: string;
+  siteid: string;
+  year: number;
+}
+
 export interface NewSiteWorkcenter {
   team: string;
   siteid: string;

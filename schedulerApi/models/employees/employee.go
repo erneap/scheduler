@@ -75,6 +75,16 @@ type EmployeeData struct {
 	LaborCodes  []EmployeeLaborCode `json:"laborCodes,omitempty"`
 }
 
+func (e *Employee) IsActive(date time.Time) bool {
+	answer := false
+	for _, asgmt := range e.Data.Assignments {
+		if asgmt.UseAssignment(e.SiteID, date) {
+			answer = true
+		}
+	}
+	return answer
+}
+
 func (e *Employee) IsAssigned(site, workcenter string, start, end time.Time) bool {
 	answer := false
 	for _, asgmt := range e.Data.Assignments {
@@ -220,6 +230,41 @@ func (e *Employee) PurgeOldData(date time.Time) {
 			e.Data.Variations = append(e.Data.Variations[:i],
 				e.Data.Variations[i+1:]...)
 		}
+	}
+}
+
+func (e *Employee) CreateLeaveBalance(year int) {
+	found := false
+	lastAnnual := 0.0
+	lastCarry := 0.0
+	for _, al := range e.Data.Balances {
+		if al.Year == year {
+			found = true
+		}
+		if al.Year == year-1 {
+			lastAnnual = al.Annual
+			lastCarry = al.Carryover
+		}
+	}
+	if !found {
+		al := AnnualLeave{
+			Year:      year,
+			Annual:    lastAnnual,
+			Carryover: 0.0,
+		}
+		if lastAnnual == 0.0 {
+			al.Annual = 120.0
+		} else {
+			carry := lastAnnual + lastCarry
+			for _, lv := range e.Data.Leaves {
+				if lv.LeaveDate.Year() == year-1 && strings.ToLower(lv.Code) == "v" &&
+					strings.ToLower(lv.Status) == "actual" {
+					carry -= lv.Hours
+				}
+			}
+			al.Carryover = carry
+		}
+		e.Data.Balances = append(e.Data.Balances, al)
 	}
 }
 

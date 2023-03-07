@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
+import { AuthService } from 'src/app/services/auth.service';
 import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
 
@@ -21,7 +22,8 @@ export class SiteEmployeeProfileComponent {
 
   constructor(
     protected siteService: SiteService,
-    protected empService: EmployeeService
+    protected empService: EmployeeService,
+    protected authService: AuthService
   ) {
   }
 

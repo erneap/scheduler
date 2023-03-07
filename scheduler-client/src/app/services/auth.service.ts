@@ -62,6 +62,19 @@ export class AuthService extends CacheService {
     }
   }
 
+  public isInRoles(roles: string[]): boolean {
+    let answer = false;
+    const user = this.getUser();
+    if (user) {
+      roles.forEach(role => {
+        if (user.isInGroup("scheduler", role)) {
+          answer = true;
+        }
+      });
+    }
+    return answer;
+  }
+
   isTokenExpired(): Boolean {
     const authStatus = this.getDecodedToken();
     return (Math.floor((new Date()).getTime() / 1000)) >= authStatus.exp;
@@ -86,7 +99,7 @@ export class AuthService extends CacheService {
       if (iUser) {
         const user = new User(iUser);
         this.isScheduler = user.isInGroup("scheduler", "scheduler");
-        this.isLeader = user.isInGroup("scheduler", "leader");
+        this.isLeader = user.isInGroup("scheduler", "sitelead");
         this.isAdmin = user.isInGroup("scheduler", "admin");
         this.isCompanyLead = user.isInGroup("scheduler", "companylead");
         this.isAuthenticated = true;

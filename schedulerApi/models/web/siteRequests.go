@@ -8,6 +8,12 @@ type NewSiteRequest struct {
 	Name   string `json:"name"`
 }
 
+type CreateEmployeeLeaveBalances struct {
+	TeamID string `json:"team"`
+	SiteID string `json:"siteid"`
+	Year   int    `json:"year"`
+}
+
 type NewSiteWorkcenter struct {
 	TeamID  string `json:"team"`
 	SiteID  string `json:"siteid"`
