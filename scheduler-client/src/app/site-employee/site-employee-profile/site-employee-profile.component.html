@@ -22,19 +22,30 @@
           User Authentication/Permissions
         </div>
         <div class="fxLayout-row-center">
-          <button mat-raised-button color="accent" style="margin: 5px;">
+          <button mat-raised-button color="accent" style="margin: 5px;"
+            *ngIf="employee.user">
             Unlock Account</button>
-          <button mat-raised-button color="warn" style="margin: 5px;">
+          <button mat-raised-button color="warn" style="margin: 5px;"
+            *ngIf="!employee.user">
             Create Authentication Account</button>
         </div>
-        <div class="fxLayout-column-topleft" style="background-color: white; color: black;">
-          <h4>User's Permissions</h4>
-          <mat-checkbox>Employee</mat-checkbox>
-          <mat-checkbox >Site Scheduler</mat-checkbox>
-          <mat-checkbox >Site Company Lead</mat-checkbox>
-          <mat-checkbox>Site Leader</mat-checkbox>
-          <mat-checkbox>Team Leader</mat-checkbox>
-          <mat-checkbox>Application Admin</mat-checkbox>
+        <div class="fxLayout-column-center" *ngIf="employee.user"
+        style="background-color: white; color: black;">
+          <form [formGroup]="permForm">
+            <div class="fxLayout-column-topleft">
+              <h4>User's Permissions</h4>
+              <div class="fxLayout-row-center">
+                <mat-checkbox formControlName="employee">Employee</mat-checkbox>
+                <mat-checkbox formControlName="scheduler" >Site Scheduler</mat-checkbox>
+                <mat-checkbox formControlName="company" >Site Company Lead</mat-checkbox>
+              </div>
+              <div class="fxLayout-row-center">
+                <mat-checkbox formControlName="siteleader">Site Leader</mat-checkbox>
+                <mat-checkbox formControlName="teamleader" *ngIf="authService.isAdmin">Team Leader</mat-checkbox>
+                <mat-checkbox formControlName="admin" *ngIf="authService.isAdmin">Application Admin</mat-checkbox>
+              </div>
+            </div>
+          </form>
         </div>
       </mat-card-content>
   </mat-card>

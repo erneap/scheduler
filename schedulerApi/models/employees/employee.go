@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/erneap/scheduler/schedulerApi/models/users"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -20,6 +21,7 @@ type Employee struct {
 	Email  string             `json:"email" bson:"email"`
 	Name   EmployeeName       `json:"name" bson:"name"`
 	Data   EmployeeData       `json:"data" bson:"data"`
+	User   *users.User        `json:"user,omitempty" bson:"-"`
 	Work   []Work             `json:"work,omitempty"`
 }
 

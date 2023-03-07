@@ -102,9 +102,11 @@ func Login(c *gin.Context) {
 	site.Employees = site.Employees[:0]
 	if len(emps) > 0 {
 		for _, emp := range emps {
+			emp.User = nil
 			for _, usr := range users {
 				if usr.ID == emp.ID {
 					emp.Email = usr.EmailAddress
+					emp.User = &usr
 				}
 			}
 			site.Employees = append(site.Employees, emp)

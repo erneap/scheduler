@@ -1,3 +1,4 @@
+import { IUser, User } from "../users/user";
 import { Assignment, IAssignment, IVariation, Variation, Workday } from "./assignments";
 import { CompanyInfo, ICompanyInfo } from "./company";
 import { AnnualLeave, IAnnualLeave, ILeaveDay, ILeaveRequest, LeaveDay, LeaveRequest } from "./leave";
@@ -235,6 +236,7 @@ export interface IEmployee {
   email: string;
   name: IEmployeeName;
   data: IEmployeeData;
+  user?: IUser;
 }
 
 export class Employee implements IEmployee {
@@ -244,6 +246,7 @@ export class Employee implements IEmployee {
   email: string;
   name: EmployeeName;
   data: EmployeeData;
+  user?: User;
 
   constructor(emp?: IEmployee) {
     this.id = (emp) ? emp.id : '';
@@ -252,6 +255,7 @@ export class Employee implements IEmployee {
     this.email = (emp) ? emp.email : '';
     this.name = (emp) ? new EmployeeName(emp.name) : new EmployeeName();
     this.data = (emp) ? new EmployeeData(emp.data) : new EmployeeData();
+    this.user = (emp && emp.user) ? new User(emp.user) : undefined;
   }
 
   compareTo(other?: Employee): number {

@@ -1,10 +1,13 @@
 import { ISite } from "../sites/site";
 import { ITeam } from "../teams/team";
+import { IUser, User } from "../users/user";
 
 export interface NewSiteRequest {
   team: string;
   siteid: string;
   name: string;
+  lead: IUser;
+  scheduler?: IUser;
 }
 
 export interface CreateSiteEmployeeLeaveBalances {
