@@ -8,6 +8,7 @@ import { IUser } from "../users/user";
 export interface AuthenticationRequest {
   emailAddress: string;
   password: string;
+  add?: boolean;
 }
 
 export interface UpdateRequest {
@@ -15,6 +16,12 @@ export interface UpdateRequest {
   optional?: string;
   field: string;
   value: string;
+}
+
+export interface CreateUserAccount {
+  id: string;
+  emailAddress: string;
+  password: string;
 }
 
 export interface ChangePasswordRequest {

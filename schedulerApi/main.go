@@ -33,6 +33,7 @@ func main() {
 				controllers.CreateEmployee)
 			emp.PUT("/", middleware.CheckJWT(), controllers.UpdateEmployeeBasic)
 			emp.DELETE("/:empid", middleware.CheckJWT(), controllers.DeleteEmployee)
+			emp.POST("/account", middleware.CheckJWT(), controllers.CreateUserAccount)
 			asgmt := emp.Group("/assignment").Use(middleware.CheckJWT())
 			{
 				asgmt.POST("/", controllers.CreateEmployeeAssignment)

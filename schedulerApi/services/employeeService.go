@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/erneap/scheduler/schedulerApi/models/config"
 	"github.com/erneap/scheduler/schedulerApi/models/employees"
@@ -96,6 +97,7 @@ func CreateEmployee(emp employees.Employee, passwd, teamID,
 
 func GetEmployee(id string) (*employees.Employee, error) {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
+	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
 	oEmpID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -112,14 +114,15 @@ func GetEmployee(id string) (*employees.Employee, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	if err != nil {
-		return nil, err
-	}
+	var user users.User
+	userCol.FindOne(context.TODO(), filter).Decode(&user)
+	emp.User = &user
 	return &emp, nil
 }
 
 func GetEmployeeByName(first, middle, last string) (*employees.Employee, error) {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
+	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
 	filter := bson.M{
 		"name.firstname":  first,
@@ -144,14 +147,19 @@ func GetEmployeeByName(first, middle, last string) (*employees.Employee, error) 
 			return nil, err
 		}
 	}
-	if err != nil {
-		return nil, err
+	var user users.User
+	filter = bson.M{
+		"_id": emp.ID,
 	}
+	userCol.FindOne(context.TODO(), filter).Decode(&user)
+	emp.User = &user
+
 	return &emp, nil
 }
 
 func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
+	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
 	oTID, _ := primitive.ObjectIDFromHex(teamid)
 	filter := bson.M{
@@ -171,6 +179,12 @@ func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 	}
 
 	for i, emp := range employees {
+		filter = bson.M{
+			"_id": emp.ID,
+		}
+		var user users.User
+		userCol.FindOne(context.TODO(), filter).Decode(&user)
+		emp.User = &user
 		employees[i] = emp
 	}
 
@@ -190,6 +204,7 @@ func UpdateEmployee(emp *employees.Employee) error {
 
 func DeleteEmployee(empID string) error {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
+	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
 	oEmpID, _ := primitive.ObjectIDFromHex(empID)
 	filter := bson.M{
@@ -202,6 +217,29 @@ func DeleteEmployee(empID string) error {
 	}
 	if result.DeletedCount <= 0 {
 		return errors.New("employee not found")
+	}
+
+	var user users.User
+	err = userCol.FindOne(context.TODO(), filter).Decode(&user)
+	if err == nil {
+		found := false
+		for i := len(user.Workgroups) - 1; i >= 0; i-- {
+			parts := strings.Split(user.Workgroups[i], "-")
+			if strings.EqualFold(parts[0], "scheduler") {
+				found = true
+				user.Workgroups = append(user.Workgroups[:i], user.Workgroups[i+1:]...)
+			}
+		}
+		if found && len(user.Workgroups) > 0 {
+			fmt.Println("Updating User")
+			userCol.UpdateOne(context.TODO(), filter, user)
+		} else {
+			fmt.Println("Deleting User")
+			_, err = userCol.DeleteOne(context.TODO(), filter)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		}
 	}
 	return nil
 }

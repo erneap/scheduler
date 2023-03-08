@@ -2,6 +2,7 @@ export interface IUser {
   id: string;
   emailAddress: string;
   passwordExpires: Date;
+  badAttempts: number;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -12,6 +13,7 @@ export class User implements IUser {
   id: string;
   emailAddress: string;
   passwordExpires: Date;
+  badAttempts: number;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -21,6 +23,7 @@ export class User implements IUser {
     this.id = (user) ? user.id : '';
     this.emailAddress = (user) ? user.emailAddress : '';
     this.passwordExpires = (user) ? new Date(user.passwordExpires) : new Date(0);
+    this.badAttempts = (user) ? user.badAttempts : 0;
     this.firstName = (user) ? user.firstName : '';
     this.middleName = (user) ? user.middleName : '';
     this.lastName = (user) ? user.lastName : '';
@@ -63,5 +66,12 @@ export class User implements IUser {
       }
     });
     return answer;
+  }
+
+  isLocked(): boolean {
+    if (this.badAttempts > 2) {
+      return true;
+    }
+    return false;
   }
 }

@@ -80,7 +80,7 @@ func Login(c *gin.Context) {
 					Token: "", Exception: err.Error()})
 		}
 	}
-	emp.Email = user.EmailAddress
+	emp.User = user
 
 	team, err := services.GetTeam(emp.TeamID.Hex())
 	if err != nil {
@@ -96,17 +96,26 @@ func Login(c *gin.Context) {
 				Token: "", Exception: err.Error()})
 	}
 
-	users := services.GetUsers()
+	usrs := services.GetUsers()
 
 	emps, _ := services.GetEmployees(team.ID.Hex(), emp.SiteID)
 	site.Employees = site.Employees[:0]
 	if len(emps) > 0 {
 		for _, emp := range emps {
 			emp.User = nil
-			for _, usr := range users {
+			for _, usr := range usrs {
 				if usr.ID == emp.ID {
 					emp.Email = usr.EmailAddress
-					emp.User = &usr
+					user := users.User{
+						ID:           usr.ID,
+						EmailAddress: usr.EmailAddress,
+						BadAttempts:  usr.BadAttempts,
+						FirstName:    usr.FirstName,
+						MiddleName:   usr.MiddleName,
+						LastName:     usr.LastName,
+					}
+					user.Workgroups = append(user.Workgroups, usr.Workgroups...)
+					emp.User = &user
 				}
 			}
 			site.Employees = append(site.Employees, emp)
@@ -194,6 +203,8 @@ func ChangeUser(c *gin.Context) {
 		user.MiddleName = data.StringValue()
 	case "last", "lastname":
 		user.LastName = data.StringValue()
+	case "unlock":
+		user.BadAttempts = 0
 	}
 
 	emp, _ := services.GetEmployee(data.ID)

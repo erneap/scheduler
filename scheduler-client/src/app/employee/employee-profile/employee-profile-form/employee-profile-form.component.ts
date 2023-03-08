@@ -59,8 +59,13 @@ export class EmployeeProfileFormComponent {
   }
 
   setForm() {
-    this.showPassword = this.employee.email !== '';
-    this.profileForm.controls["email"].setValue(this.employee.email);
+    if (this.employee.user) {
+      this.showPassword = true;
+      this.profileForm.controls["email"].setValue(this.employee.user.emailAddress);
+    } else {
+      this.showPassword = false;
+      this.profileForm.controls["email"].setValue('');
+    }
     this.profileForm.controls["first"].setValue(this.employee.name.first);
     this.profileForm.controls["middle"].setValue(this.employee.name.middle);
     this.profileForm.controls["last"].setValue(this.employee.name.last);

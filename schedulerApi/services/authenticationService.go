@@ -61,6 +61,12 @@ func CreateUser(email, first, middle, last, password string) *users.User {
 	return &user
 }
 
+func AddUser(user *users.User) *users.User {
+	userCol := config.GetCollection(config.DB, "authenticate", "users")
+	userCol.InsertOne(context.TODO(), user)
+	return user
+}
+
 // CRUD Retrieve Functions (One and ALL)
 func GetUser(id primitive.ObjectID) *users.User {
 	var user users.User

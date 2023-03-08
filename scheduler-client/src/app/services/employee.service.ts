@@ -7,7 +7,7 @@ import { LeaveDay } from '../models/employees/leave';
 import { ChangeAssignmentRequest, EmployeeLaborCodeRequest, 
   EmployeeLeaveDayRequest, EmployeeLeaveRequest, EmployeeResponse, 
   NewEmployeeAssignment, NewEmployeeRequest, NewEmployeeVariation, 
-  UpdateRequest, LeaveBalanceRequest } from '../models/web/employeeWeb';
+  UpdateRequest, LeaveBalanceRequest, CreateUserAccount, Message } from '../models/web/employeeWeb';
 import { CreateSiteEmployeeLeaveBalances, SiteResponse } from '../models/web/siteWeb';
 import { CacheService } from './cache.service';
 import { TeamService } from './team.service';
@@ -75,6 +75,22 @@ export class EmployeeService extends CacheService {
     };
     return this.httpClient.put<EmployeeResponse>(url, data, 
       { observe: 'response'});
+  }
+
+  deleteEmployee(empID: string): Observable<HttpResponse<Message>> {
+    const url = `/scheduler/api/v1/employee/${empID}`;
+    return this.httpClient.delete<Message>(url, {observe: 'response'});
+  }
+
+  addUserAccount(empID: string, email: string, password: string): 
+    Observable<HttpResponse<EmployeeResponse>> {
+    const url = '/scheduler/api/v1/employee/account';
+    const data: CreateUserAccount = {
+      id: empID,
+      emailAddress: email,
+      password: password,
+    }
+    return this.httpClient.post<EmployeeResponse>(url, data, {observe: 'response'});
   }
 
   addNewLeaveRequest(empid: string, start: Date, end: Date, 

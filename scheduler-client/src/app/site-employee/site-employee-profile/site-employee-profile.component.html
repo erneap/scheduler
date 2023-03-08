@@ -9,7 +9,8 @@
           <span class="flex-spacer"></span>
           <button mat-icon-button color="accent"
             *ngIf="this.employee.id !== ''"
-            matTooltip="Delete Current Employee">
+            matTooltip="Delete Current Employee"
+            (click)="deleteEmployee()">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
@@ -23,10 +24,11 @@
         </div>
         <div class="fxLayout-row-center">
           <button mat-raised-button color="accent" style="margin: 5px;"
-            *ngIf="employee.user">
+            *ngIf="employee.user && employee.user.isLocked()"
+            (click)="unlockUser()">
             Unlock Account</button>
           <button mat-raised-button color="warn" style="margin: 5px;"
-            *ngIf="!employee.user">
+            *ngIf="!employee.user" (click)="addUserAccount()">
             Create Authentication Account</button>
         </div>
         <div class="fxLayout-column-center" *ngIf="employee.user"
@@ -35,14 +37,22 @@
             <div class="fxLayout-column-topleft">
               <h4>User's Permissions</h4>
               <div class="fxLayout-row-center">
-                <mat-checkbox formControlName="employee">Employee</mat-checkbox>
-                <mat-checkbox formControlName="scheduler" >Site Scheduler</mat-checkbox>
-                <mat-checkbox formControlName="company" >Site Company Lead</mat-checkbox>
+                <mat-checkbox formControlName="employee"
+                  (change)="updatePermission('employee')">Employee</mat-checkbox>
+                <mat-checkbox formControlName="scheduler" 
+                  (change)="updatePermission('scheduler')">Site Scheduler</mat-checkbox>
+                <mat-checkbox formControlName="company"  
+                  (change)="updatePermission('company')">Site Company Lead</mat-checkbox>
               </div>
               <div class="fxLayout-row-center">
-                <mat-checkbox formControlName="siteleader">Site Leader</mat-checkbox>
-                <mat-checkbox formControlName="teamleader" *ngIf="authService.isAdmin">Team Leader</mat-checkbox>
-                <mat-checkbox formControlName="admin" *ngIf="authService.isAdmin">Application Admin</mat-checkbox>
+                <mat-checkbox formControlName="siteleader" 
+                  (change)="updatePermission('siteleader')">Site Leader</mat-checkbox>
+                <mat-checkbox formControlName="teamleader" 
+                  *ngIf="authService.isAdmin" 
+                  (change)="updatePermission('teamleader')">Team Leader</mat-checkbox>
+                <mat-checkbox formControlName="admin" 
+                  *ngIf="authService.isAdmin" 
+                  (change)="updatePermission('admin')">Application Admin</mat-checkbox>
               </div>
             </div>
           </form>

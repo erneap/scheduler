@@ -6,6 +6,8 @@ export interface NewSiteRequest {
   team: string;
   siteid: string;
   name: string;
+  mids: boolean;
+  offset: number;
   lead: IUser;
   scheduler?: IUser;
 }

@@ -22,7 +22,7 @@
       <a mat-list-item routerLink="/siteschedule/schedule"
       style="height: 20px;">Schedule</a>
       <a mat-list-item 
-        *ngIf="this.authService.isScheduler || this.authService.isLeader"
+        *ngIf="this.authService.isScheduler || this.authService.isSiteLeader"
         routerLink="/siteschedule/coverage"
         style="height: 20px;">Coverage</a>
       <a mat-list-item routerLink="/siteschedule/mids"
@@ -30,7 +30,7 @@
     </mat-nav-list>
   </mat-expansion-panel>
   <mat-expansion-panel  expanded="true"
-    *ngIf="this.authService.isScheduler || this.authService.isLeader">
+    *ngIf="this.authService.isScheduler || this.authService.isSiteLeader">
     <mat-expansion-panel-header>
       <mat-panel-title>Site Editing</mat-panel-title>
     </mat-expansion-panel-header>
@@ -39,14 +39,27 @@
       style="height: 20px;">New Employee</a>
       <a mat-list-item routerLink="/siteemployees"
       style="height: 20px;">Employee Editor</a>
-      <a mat-list-item style="height: 20px;" routerLink="/newsite"
-      *ngIf="this.authService.isAdmin">New Site</a>
       <a mat-list-item routerLink="/siteeditor"
       style="height: 20px;">Site Editor</a>
     </mat-nav-list>
   </mat-expansion-panel>
+  <mat-expansion-panel  expanded="true"
+    *ngIf="this.authService.isAdmin">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Team Editing</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-nav-list>
+      <a mat-list-item style="height: 20px;" routerLink="/newsite">New Site</a>
+      <a mat-list-item
+      style="height: 20px;">Sites Employees Editor</a>
+      <a mat-list-item
+      style="height: 20px;">Team Sites Editor</a>
+      <a mat-list-item
+      style="height: 20px;">Team Editor</a>
+    </mat-nav-list>
+  </mat-expansion-panel>
   <mat-expansion-panel 
-    *ngIf="this.authService.isScheduler || this.authService.isLeader || this.authService.isCompanyLead"
+    *ngIf="this.authService.isScheduler || this.authService.isSiteLeader || this.authService.isCompanyLead"
     >
     <mat-expansion-panel-header>
       <mat-panel-title>Data Ingest</mat-panel-title>
@@ -56,6 +69,16 @@
       style="height: 20px;">Upload Ingest</a>
       <a mat-list-item
       style="height: 20px;">Manual Work/Leave Entry</a>
+    </mat-nav-list>
+  </mat-expansion-panel>
+  <mat-expansion-panel 
+    *ngIf="this.authService.isAdmin">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Administrator Actions</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-nav-list>
+      <a mat-list-item
+      style="height: 20px;">User Account Maintenance</a>
     </mat-nav-list>
   </mat-expansion-panel>
 </mat-accordion>

@@ -162,39 +162,41 @@ export class NewEmployeeComponent {
   }
 
   changeAssignmentSchedule(data: string) {
-    const chgParts = data.split('|');
-    const field = chgParts[3];
-    if (chgParts[0].toLowerCase() === 'workday') {
-      if (chgParts[2] !== '') {
-        const workday = Number(chgParts[2]);
-        let found = false;
-        for (let i=0; 
-          i < this.employee.data.assignments[0].schedules[0].workdays.length 
-          && !found; i++) {
-          const wd = this.employee.data.assignments[0].schedules[0].workdays[i];
-          if (wd.id === workday) {
-            switch (field.toLowerCase()) {
-              case "code":
-                wd.code = chgParts[4];
-                break;
-              case "workcenter":
-                wd.workcenter = chgParts[4];
-                break;
-              case "hours":
-                const hrs = Number(chgParts[4]);
-                wd.hours = hrs;
-                break;
+    if (typeof data === "string") {
+      const chgParts = data.split('|');
+      const field = chgParts[3];
+      if (chgParts[0].toLowerCase() === 'workday') {
+        if (chgParts[2] !== '') {
+          const workday = Number(chgParts[2]);
+          let found = false;
+          for (let i=0; 
+            i < this.employee.data.assignments[0].schedules[0].workdays.length 
+            && !found; i++) {
+            const wd = this.employee.data.assignments[0].schedules[0].workdays[i];
+            if (wd.id === workday) {
+              switch (field.toLowerCase()) {
+                case "code":
+                  wd.code = chgParts[4];
+                  break;
+                case "workcenter":
+                  wd.workcenter = chgParts[4];
+                  break;
+                case "hours":
+                  const hrs = Number(chgParts[4]);
+                  wd.hours = hrs;
+                  break;
+              }
+              found = true;
+              this.employee.data.assignments[0].schedules[0].workdays[i] = wd;
             }
-            found = true;
-            this.employee.data.assignments[0].schedules[0].workdays[i] = wd;
           }
         }
-      }
-    } else {
-      if (field.toLowerCase() === 'changeschedule') {
-        const days = Number(chgParts[4]);
-        this.schedule.setScheduleDays(days);
-        this.schedule = new Schedule(this.schedule);
+      } else {
+        if (field.toLowerCase() === 'changeschedule') {
+          const days = Number(chgParts[4]);
+          this.schedule.setScheduleDays(days);
+          this.schedule = new Schedule(this.schedule);
+        }
       }
     }
   }

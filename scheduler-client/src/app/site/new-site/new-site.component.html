@@ -129,61 +129,63 @@
                 </mat-panel-title>
               </mat-expansion-panel-header>
               <div class="fxLayout-column-center" style="margin-top: 10px;">
-                <div class="fxLayout-row-center">
-                  <mat-form-field>
-                    <mat-label>E-mail Address</mat-label>
-                    <input matInput formControlName="email">
-                    <mat-error *ngIf="this.siteForm.get('newemail')?.hasError('required')"
-                      class="error">Required</mat-error>
-                  </mat-form-field>
-                </div>
-                <div class="fxLayout-row-center">
-                  <div class="formField">
-                    <mat-form-field class="fieldWidth">
-                      <mat-label>First Name</mat-label>
-                      <input matInput formControlName="first">
-                      <mat-error *ngIf="this.siteForm.get('first')?.hasError('required')"
+                <form [formGroup]="schedulerForm">
+                  <div class="fxLayout-row-center">
+                    <mat-form-field>
+                      <mat-label>E-mail Address</mat-label>
+                      <input matInput formControlName="email">
+                      <mat-error *ngIf="this.siteForm.get('newemail')?.hasError('required')"
                         class="error">Required</mat-error>
                     </mat-form-field>
                   </div>
-                  <div class="formField">
-                    <mat-form-field class="fieldWidth">
-                      <mat-label>Middle Name</mat-label>
-                      <input matInput formControlName="middle">
-                      <mat-hint>Optional</mat-hint>
-                    </mat-form-field>
+                  <div class="fxLayout-row-center">
+                    <div class="formField">
+                      <mat-form-field class="fieldWidth">
+                        <mat-label>First Name</mat-label>
+                        <input matInput formControlName="first">
+                        <mat-error *ngIf="this.siteForm.get('first')?.hasError('required')"
+                          class="error">Required</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="formField">
+                      <mat-form-field class="fieldWidth">
+                        <mat-label>Middle Name</mat-label>
+                        <input matInput formControlName="middle">
+                        <mat-hint>Optional</mat-hint>
+                      </mat-form-field>
+                    </div>
+                    <div class="formField">
+                      <mat-form-field class="fieldWidth">
+                        <mat-label>Last Name</mat-label>
+                        <input matInput formControlName="last">
+                        <mat-error *ngIf="this.siteForm.get('last')?.hasError('required')"
+                          class="error">Required</mat-error>
+                      </mat-form-field>
+                    </div>
                   </div>
-                  <div class="formField">
-                    <mat-form-field class="fieldWidth">
-                      <mat-label>Last Name</mat-label>
-                      <input matInput formControlName="last">
-                      <mat-error *ngIf="this.siteForm.get('last')?.hasError('required')"
-                        class="error">Required</mat-error>
-                    </mat-form-field>
+                  <div class="fxLayout-row-center">
+                    <div class="formFieldWide">
+                      <mat-form-field class="fieldWidthWide">
+                        <mat-label>New Password</mat-label>
+                        <input matInput type="password" formControlName="password">
+                        <mat-error *ngIf="this.siteForm.get('newpassword')?.invalid"
+                          class="error">
+                          {{getPasswordError()}}
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="formFieldWide">
+                      <mat-form-field class="fieldWidthWide">
+                        <mat-label>Verify New Password</mat-label>
+                        <input matInput type="password" formControlName="password2">
+                        <mat-error *ngIf="this.siteForm.get('password2')?.invalid"
+                          class="error">
+                          {{getVerifyError()}}
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
                   </div>
-                </div>
-                <div class="fxLayout-row-center">
-                  <div class="formFieldWide">
-                    <mat-form-field class="fieldWidthWide">
-                      <mat-label>New Password</mat-label>
-                      <input matInput type="password" formControlName="password">
-                      <mat-error *ngIf="this.siteForm.get('newpassword')?.invalid"
-                        class="error">
-                        {{getPasswordError()}}
-                      </mat-error>
-                    </mat-form-field>
-                  </div>
-                  <div class="formFieldWide">
-                    <mat-form-field class="fieldWidthWide">
-                      <mat-label>Verify New Password</mat-label>
-                      <input matInput type="password" formControlName="password2">
-                      <mat-error *ngIf="this.siteForm.get('password2')?.invalid"
-                        class="error">
-                        {{getVerifyError()}}
-                      </mat-error>
-                    </mat-form-field>
-                  </div>
-                </div>
+                </form>
               </div>
             </mat-expansion-panel>
           </mat-accordion>

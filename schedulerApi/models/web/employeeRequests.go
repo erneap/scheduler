@@ -32,6 +32,12 @@ func (ur *UpdateRequest) BooleanValue() bool {
 	return ur.Value.(bool)
 }
 
+type CreateUserAccount struct {
+	ID           string `json:"id"`
+	EmailAddress string `json:"emailAddress"`
+	Password     string `json:"password"`
+}
+
 type ChangePasswordRequest struct {
 	ID       string `json:"id"`
 	Password string `json:"password"`

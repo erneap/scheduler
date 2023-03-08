@@ -12,6 +12,7 @@ import (
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -58,6 +59,71 @@ func CreateSite(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
 			Exception: err.Error()})
 		return
+	}
+	site.ShowMids = data.UseMids
+	site.UtcOffset = data.Offset
+	newWorkcenter := sites.Workcenter{
+		ID:     "leads",
+		Name:   "LEADS",
+		SortID: uint(1),
+	}
+	site.Workcenters = append(site.Workcenters, newWorkcenter)
+	services.UpdateSite(data.TeamID, *site)
+	teamID, _ := primitive.ObjectIDFromHex(data.TeamID)
+
+	emp := employees.Employee{
+		ID:     primitive.NewObjectID(),
+		TeamID: teamID,
+		SiteID: site.ID,
+		Name: employees.EmployeeName{
+			FirstName:  data.Leader.FirstName,
+			MiddleName: data.Leader.MiddleName,
+			LastName:   data.Leader.LastName,
+		},
+		Data: employees.EmployeeData{},
+	}
+	asgmt := employees.Assignment{
+		ID:           uint(1),
+		Site:         data.SiteID,
+		Workcenter:   "leads",
+		StartDate:    time.Now().UTC(),
+		EndDate:      time.Date(9999, 12, 30, 0, 0, 0, 0, time.UTC),
+		RotationDate: time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC),
+		RotationDays: 0,
+	}
+	emp.Data.Assignments = append(emp.Data.Assignments, asgmt)
+
+	empl, _ := services.CreateEmployee(emp, data.Leader.Password, data.TeamID,
+		data.SiteID)
+	site.Employees = append(site.Employees, *empl)
+
+	if data.Scheduler != nil {
+		emp = employees.Employee{
+			ID:     primitive.NewObjectID(),
+			TeamID: teamID,
+			SiteID: site.ID,
+			Email:  data.Scheduler.EmailAddress,
+			Name: employees.EmployeeName{
+				FirstName:  data.Scheduler.FirstName,
+				MiddleName: data.Scheduler.MiddleName,
+				LastName:   data.Scheduler.LastName,
+			},
+			Data: employees.EmployeeData{},
+		}
+		asgmt := employees.Assignment{
+			ID:           uint(1),
+			Site:         data.SiteID,
+			Workcenter:   "leads",
+			StartDate:    time.Now().UTC(),
+			EndDate:      time.Date(9999, 12, 30, 0, 0, 0, 0, time.UTC),
+			RotationDate: time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC),
+			RotationDays: 0,
+		}
+		emp.Data.Assignments = append(emp.Data.Assignments, asgmt)
+
+		empl, _ = services.CreateEmployee(emp, data.Scheduler.Password, data.TeamID,
+			data.SiteID)
+		site.Employees = append(site.Employees, *empl)
 	}
 
 	c.JSON(http.StatusOK, web.SiteResponse{Team: nil, Site: site, Exception: ""})

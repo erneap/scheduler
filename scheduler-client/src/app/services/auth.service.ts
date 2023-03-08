@@ -16,7 +16,8 @@ export class AuthService extends CacheService {
   isAuthenticated = false;
   lastPage = '';
   isScheduler = false;
-  isLeader = false;
+  isSiteLeader = false;
+  isTeamLeader = false;
   isAdmin = false;
   isCompanyLead = false;
   schedulerLabel = "Scheduler";
@@ -99,7 +100,8 @@ export class AuthService extends CacheService {
       if (iUser) {
         const user = new User(iUser);
         this.isScheduler = user.isInGroup("scheduler", "scheduler");
-        this.isLeader = user.isInGroup("scheduler", "sitelead");
+        this.isSiteLeader = user.isInGroup("scheduler", "sitelead");
+        this.isTeamLeader = user.isInGroup("scheduler", "teamlead")
         this.isAdmin = user.isInGroup("scheduler", "admin");
         this.isCompanyLead = user.isInGroup("scheduler", "companylead");
         this.isAuthenticated = true;
@@ -114,7 +116,8 @@ export class AuthService extends CacheService {
   setUser(iUser: IUser) {
     const user = new User(iUser);
     this.isScheduler = user.isInGroup("scheduler", "scheduler");
-    this.isLeader = user.isInGroup("scheduler", "leader");
+    this.isSiteLeader = user.isInGroup("scheduler", "sitelead");
+    this.isTeamLeader = user.isInGroup("scheduler", "teamlead")
     this.isAdmin = user.isInGroup("scheduler", "admin");
     this.isCompanyLead = user.isInGroup("scheduler", "companylead");
     this.setItem('current-user', user);

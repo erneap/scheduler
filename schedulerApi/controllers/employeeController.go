@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/erneap/scheduler/schedulerApi/models/employees"
+	"github.com/erneap/scheduler/schedulerApi/models/users"
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,10 @@ func GetEmployee(c *gin.Context) {
 		}
 		return
 	}
+
+	id, _ := primitive.ObjectIDFromHex(empID)
+	user := services.GetUser(id)
+	emp.User = user
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }
 
@@ -117,6 +122,37 @@ func UpdateEmployeeBasic(c *gin.Context) {
 		emp.Data.CompanyInfo.CostCenter = data.StringValue()
 	case "division":
 		emp.Data.CompanyInfo.Division = data.StringValue()
+	case "unlock":
+		if user != nil {
+			user.BadAttempts = 0
+		}
+	case "addworkgroup", "addperm", "addpermission":
+		if user != nil {
+			wg := "scheduler-" + data.StringValue()
+			found := false
+			for _, wGroup := range user.Workgroups {
+				if strings.EqualFold(wGroup, wg) {
+					found = true
+				}
+			}
+			if !found {
+				user.Workgroups = append(user.Workgroups, wg)
+			}
+		}
+	case "removeworkgroup", "remove", "removeperm", "removepermission":
+		if user != nil {
+			wg := "scheduler-" + data.StringValue()
+			pos := -1
+			for i, wGroup := range user.Workgroups {
+				if strings.EqualFold(wGroup, wg) {
+					pos = i
+				}
+			}
+			if pos >= 0 {
+				user.Workgroups = append(user.Workgroups[:pos],
+					user.Workgroups[pos+1:]...)
+			}
+		}
 	}
 
 	// send the employee back to the service for update.
@@ -131,7 +167,55 @@ func UpdateEmployeeBasic(c *gin.Context) {
 	if user != nil {
 		services.UpdateUser(*user)
 	}
+	emp.User = user
 
+	// return the corrected employee back to the client.
+	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
+}
+
+func CreateUserAccount(c *gin.Context) {
+	var data web.CreateUserAccount
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.EmployeeResponse{Employee: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	// Get the Employee through the data service
+	emp, err := services.GetEmployee(data.ID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.EmployeeResponse{Employee: nil,
+				Exception: "Employee Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+	id, _ := primitive.ObjectIDFromHex(data.ID)
+	user := services.GetUser(id)
+
+	if user == nil {
+		user = &users.User{
+			ID:           id,
+			EmailAddress: data.EmailAddress,
+			FirstName:    emp.Name.FirstName,
+			MiddleName:   emp.Name.MiddleName,
+			LastName:     emp.Name.LastName,
+		}
+		user.SetPassword(data.Password)
+		user.Workgroups = append(user.Workgroups, "scheduler-employee")
+
+		usr := services.AddUser(user)
+		if usr == nil {
+			c.JSON(http.StatusBadRequest, web.EmployeeResponse{Employee: nil,
+				Exception: "Problem creating User Account"})
+			return
+		}
+		emp.User = usr
+	}
 	// return the corrected employee back to the client.
 	c.JSON(http.StatusOK, web.EmployeeResponse{Employee: emp, Exception: ""})
 }

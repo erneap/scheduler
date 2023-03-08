@@ -21,7 +21,7 @@ type User struct {
 	EmailAddress    string             `json:"emailAddress" bson:"emailAddress"`
 	Password        string             `json:"-" bson:"password"`
 	PasswordExpires time.Time          `json:"passwordExpires" bson:"passwordExpires"`
-	BadAttempts     uint               `json:"-" bson:"badAttempts"`
+	BadAttempts     uint               `json:"badAttempts" bson:"badAttempts"`
 	FirstName       string             `json:"firstName" bson:"firstName"`
 	MiddleName      string             `json:"middleName,omitempty" bson:"middleName,omitempty"`
 	LastName        string             `json:"lastName" bson:"lastName"`

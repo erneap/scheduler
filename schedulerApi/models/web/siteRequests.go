@@ -1,11 +1,19 @@
 package web
 
-import "time"
+import (
+	"time"
+
+	"github.com/erneap/scheduler/schedulerApi/models/users"
+)
 
 type NewSiteRequest struct {
-	TeamID string `json:"team"`
-	SiteID string `json:"siteid"`
-	Name   string `json:"name"`
+	TeamID    string      `json:"team"`
+	SiteID    string      `json:"siteid"`
+	Name      string      `json:"name"`
+	UseMids   bool        `json:"mids"`
+	Offset    float64     `json:"offset"`
+	Leader    *users.User `json:"lead"`
+	Scheduler *users.User `json:"scheduler,omitempty"`
 }
 
 type CreateEmployeeLeaveBalances struct {
