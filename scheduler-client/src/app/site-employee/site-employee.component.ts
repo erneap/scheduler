@@ -2,8 +2,9 @@ import { Component, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ListItem } from '../generic/button-list/listitem';
 import { Employee } from '../models/employees/employee';
-import { Site } from '../models/sites/site';
+import { ISite, Site } from '../models/sites/site';
 import { AuthService } from '../services/auth.service';
+import { DialogService } from '../services/dialog-service.service';
 import { EmployeeService } from '../services/employee.service';
 import { SiteService } from '../services/site.service';
 import { TeamService } from '../services/team.service';
@@ -14,13 +15,14 @@ import { TeamService } from '../services/team.service';
   styleUrls: ['./site-employee.component.scss']
 })
 export class SiteEmployeeComponent {
-  private _siteID: string = '';
+  private _site: Site = new Site();
   @Input()
-  public set siteid(id: string) {
-    this._siteID = id;
+  public set site(site: ISite) {
+    this._site = new Site(site);
+    this.setEmployees();
   }
-  get siteid(): string {
-    return this._siteID;
+  get site(): Site {
+    return this._site;
   }
   items: ListItem[] = [];
   activeOnly: boolean = true;
@@ -32,9 +34,16 @@ export class SiteEmployeeComponent {
     protected siteService: SiteService,
     protected empService: EmployeeService,
     protected teamService: TeamService,
+    protected dialogService: DialogService,
     protected router: Router,
     protected activeRouter: ActivatedRoute
   ) {
+    if (this.site.id === '') {
+      const site = this.siteService.getSite();
+      if (site) {
+        this._site = new Site(site);
+      }
+    }
     this.setEmployees();
     let iEmp = this.siteService.getSelectedEmployee();
     if (iEmp) {
@@ -52,18 +61,13 @@ export class SiteEmployeeComponent {
 
   setEmployees() {
     this.items = [];
-    if (this.siteid === '') {
-      const site = this.siteService.getSite();
-      if (site && site.employees) {
-        site.employees.forEach(iEmp => {
-          const emp = new Employee(iEmp);
-          if ((emp.isActive() && this.activeOnly) || !this.activeOnly) {
-            this.items.push(new ListItem(emp.id, emp.name.getLastFirst()));
-          }
-        });
-      }
-    } else {
-      
+    if (this.site.employees) {
+      this.site.employees.forEach(iEmp => {
+        const emp = new Employee(iEmp);
+        if ((emp.isActive() && this.activeOnly) || !this.activeOnly) {
+          this.items.push(new ListItem(emp.id, emp.name.getLastFirst()));
+        }
+      });
     }
   }
 

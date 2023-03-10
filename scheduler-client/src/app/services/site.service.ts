@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { Employee, IEmployee } from '../models/employees/employee';
 import { ISite, Site } from '../models/sites/site';
 import { IUser } from '../models/users/user';
-import { NewSiteRequest, SiteResponse } from '../models/web/siteWeb';
+import { NewSiteRequest, NewSiteWorkcenter, SiteResponse, SiteWorkcenterUpdate } from '../models/web/siteWeb';
 import { CacheService } from './cache.service';
 
 @Injectable({
@@ -64,5 +64,44 @@ export class SiteService extends CacheService {
   retrieveSite(teamID: string, siteID: string, allemployees: boolean): Observable<HttpResponse<SiteResponse>> {
     const url = `/scheduler/api/v1/site/${teamID}/${siteID}/${allemployees}`;
     return this.httpClient.get<SiteResponse>(url, {observe: 'response'});
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  /// Workcenter CRUD actions
+  /// - Retrieve - workcenters are passed as part of the site object and 
+  ///   response.
+  /// - Add
+  /// - Update
+  /// - Delete
+  //////////////////////////////////////////////////////////////////////////////
+  addWorkcenter(teamID: string, siteID: string, wkCtrID: string, name: string):
+    Observable<HttpResponse<SiteResponse>> {
+    const url = "/scheduler/api/v1/site/workcenter";
+    const data: NewSiteWorkcenter = {
+      team: teamID,
+      siteid: siteID,
+      wkctrid: wkCtrID,
+      name: name,
+    };
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  updateWorkcenter(teamID: string, siteID: string, wkCtrID: string, 
+    field: string, value: string): Observable<HttpResponse<SiteResponse>> {
+    const url = "/scheduler/api/v1/site/workcenter";
+    const data: SiteWorkcenterUpdate = {
+      team: teamID,
+      siteid: siteID,
+      wkctrid: wkCtrID,
+      field: field,
+      value: value,
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  deleteWorkcenter(teamID: string, siteID: string, wkCtrID: string): 
+    Observable<HttpResponse<SiteResponse>> {
+    const url = `/scheduler/api/v1/site/workcenter/${teamID}/${siteID}/${wkCtrID}`;
+    return this.httpClient.delete<SiteResponse>(url, {observe: 'response'});
   }
 }
