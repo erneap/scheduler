@@ -1,25 +1,27 @@
-<div class="fxLayout fxLayout-column-center">
+<div class="fxLayout flexlayout column center">
   <mat-card style="background-color: #3f51b5; color: white;">
       <mat-card-header>
-        <div class="fxLayout-row-center">
-          <div class="fxLayout-column-topleft">
+        <div class="flexlayout row center">
+          <div class="flexlayout column topleft">
             <div class="headline">Site's Workcenter Editor</div>
             <div class="subheadline">Site: {{site.name}}</div>
           </div>
-          <span class="flex-spacer"></span>
-          <button mat-icon-button color="accent"
-            *ngIf="selected !== 'new' && selected !== ''"
-            (click)="onDeleteWorkcenter()"
-            matTooltip="Delete selected workcenter">
-            <mat-icon>delete</mat-icon>
-          </button>
         </div>
       </mat-card-header>
       <mat-card-content style="padding-right: 25px;">
-        <div class="fxLayout-row-center" style="gap: 10px;">
-          <div class="fxLayout-column-topleft">
-            <h3>Workcenters</h3>
-            <div class="fxLayout-row-center">
+        <div class="flexlayout row top" style="gap: 10px;">
+          <div class="flexlayout column topleft">
+            <div class="flexlayout row center" style="width: 100%;">
+              <div class="subheadline" style="color: white;">Workcenters</div>
+              <span class="flex-spacer"></span>
+              <button mat-icon-button color="accent"
+                *ngIf="selected !== 'new' && selected !== ''"
+                (click)="onDeleteWorkcenter()"
+                matTooltip="Delete selected workcenter">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="flexlayout row topcenter">
               <div class="list">
                 <div *ngFor="let item of workcenters"
                 (click)="onSelectWorkcenter(item.id)"
@@ -39,7 +41,7 @@
                 </div>
               </div>
             </div>
-            <form [formGroup]="wcForm" class="fxLayout-column-center"
+            <form [formGroup]="wcForm" class="fxLayout-column-topleft"
               style="margin-top: 15px;">
               <mat-form-field appearance="fill" style="margin-bottom: 25px;">
                 <mat-label>Workcenter Identifier</mat-label>
@@ -66,10 +68,17 @@
               </div>
             </form>
           </div>
-          <div class="fxLayout-column-center">
-            <app-site-workcenter-shift></app-site-workcenter-shift>
-            <hr style="width: 100%;">
-            <app-site-workcenter-position></app-site-workcenter-position>
+          <div class="flexlayout column top" style="border: solid 1px white;padding: 2px;">
+            <mat-tab-group [backgroundColor]="'accent'">
+              <mat-tab label="Workcenter Shifts">
+                <app-site-workcenter-shift  [site]="site" [workcenter]="workcenter">
+                </app-site-workcenter-shift>
+              </mat-tab>
+              <mat-tab label="Workcenter Positions">
+                <app-site-workcenter-position>
+                </app-site-workcenter-position>
+              </mat-tab>
+            </mat-tab-group>
           </div>
         </div>
       </mat-card-content>

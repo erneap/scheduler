@@ -5,7 +5,7 @@ export interface IShift {
   name: string;
   sort: number;
   associatedCodes?: string[];
-  payCode: number;
+  payCode?: number;
   minimums?: number;
 }
 
@@ -14,7 +14,7 @@ export class Shift implements IShift {
   name: string;
   sort: number;
   associatedCodes?: string[];
-  payCode: number;
+  payCode?: number;
   minimums: number;
   employees?: Employee[];
 

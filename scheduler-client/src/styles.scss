@@ -11,6 +11,38 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     margin-top: 32px;
 }
 
+.flexlayout {
+    display: flex;
+}
+
+.column {
+    flex-direction: column;
+}
+
+.row {
+    flex-direction: row;
+}
+
+.center {
+    justify-content: center;
+    align-items: center;
+}
+
+.topcenter {
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.topleft {
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.topright {
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
 .fxLayout-column-center {
     display: flex;
     flex-direction: column;
@@ -119,6 +151,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .fieldWidthWide {
     width: 247px;
+}
+
+.extraWideField {
+    width: 300px;
 }
 
 ::ng-deep .spinner-dialog > mat-dialog-container {
