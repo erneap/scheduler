@@ -43,7 +43,8 @@
             </div>
             <form [formGroup]="wcForm" class="fxLayout-column-topleft"
               style="margin-top: 15px;">
-              <mat-form-field appearance="fill" style="margin-bottom: 25px;">
+              <mat-form-field appearance="fill" style="margin-bottom: 25px;"
+                *ngIf="selected === 'new'">
                 <mat-label>Workcenter Identifier</mat-label>
                 <input matInput formControlName="id" (blur)="onChangeField('id')">
                 <mat-hint>Only lower case letters, numbers and / or -</mat-hint>
