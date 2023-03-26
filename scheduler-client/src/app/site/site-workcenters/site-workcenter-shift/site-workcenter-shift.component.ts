@@ -5,6 +5,7 @@ import { ListItem } from 'src/app/generic/button-list/listitem';
 import { ISite, Site } from 'src/app/models/sites/site';
 import { IWorkcenter, Shift, Workcenter } from 'src/app/models/sites/workcenter';
 import { Workcode } from 'src/app/models/teams/workcode';
+import { SiteResponse } from 'src/app/models/web/siteWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
 import { SiteService } from 'src/app/services/site.service';
@@ -40,6 +41,7 @@ export class SiteWorkcenterShiftComponent {
   workcodes: Workcode[] = [];
   showSortUp: boolean = true;
   showSortDown: boolean = true;
+  teamid: string = '';
 
   constructor(
     protected authService: AuthService,
@@ -58,6 +60,7 @@ export class SiteWorkcenterShiftComponent {
     this.workcodes = [];
     const team = this.teamService.getTeam();
     if (team && team.workcodes) {
+      this.teamid = team.id;
       team.workcodes.forEach(wc => {
         if (!wc.isLeave) {
           this.workcodes.push(new Workcode(wc));
@@ -111,7 +114,39 @@ export class SiteWorkcenterShiftComponent {
   }
 
   onChangeSort(direction: string) {
-
+    this.authService.statusMessage = "Changing Sort Position";
+    this.dialogService.showSpinner();
+    this.siteService.updateWorkcenterShift(this.teamid, this.site.id, 
+      this.workcenter.id, this.selected, 'move', direction).subscribe({
+      next: resp => {
+        this.dialogService.closeSpinner();
+        if (resp.headers.get('token') !== null) {
+          this.authService.setToken(resp.headers.get('token') as string);
+        }
+        const data: SiteResponse | null = resp.body;
+        if (data && data != null && data.site) {
+          this.site = new Site(data.site);
+          const site = this.siteService.getSite();
+          if (site && data.site.id === site.id) {
+            this.siteService.setSite(new Site(data.site));
+            if (site.workcenters) {
+              site.workcenters.forEach(wc => {
+                if (wc.id === this.workcenter.id) {
+                  this.workcenter = new Workcenter(wc);
+                  this.setShifts();
+                }
+              });
+            }
+          }
+          this.teamService.setSelectedSite(new Site(data.site));
+        }
+        this.authService.statusMessage = "Retrieval complete"
+      },
+      error: err => {
+        this.dialogService.closeSpinner();
+        this.authService.statusMessage = err.error.exception;
+      }
+    });
   }
 
   onChangeField(field: string) {

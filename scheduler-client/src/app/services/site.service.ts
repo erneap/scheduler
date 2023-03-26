@@ -140,4 +140,39 @@ export class SiteService extends CacheService {
       + `${wkctrID}/${shiftID}`;
     return this.httpClient.delete<SiteResponse>(url, {observe: 'response'});
   }
+  
+  addWorkcenterPosition(teamID: string, siteID: string, wkctrID: string, posID: string,
+    posName: string): Observable<HttpResponse<SiteResponse>> {
+    const data: NewWorkcenterPosition = {
+      team: teamID,
+      siteid: siteID,
+      wkctrid: wkctrID,
+      positionid: posID,
+      name: posName,
+    }
+    const url = '/scheduler/api/v1/site/workcenter/shift';
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  updateWorkcenterPosition(teamID: string, siteID: string, wkctrID: string, 
+    posID: string, field: string, value: string): 
+    Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site/workcenter/shift';
+    const data: WorkcenterPositionUpdate = {
+      team: teamID,
+      siteid: siteID,
+      wkctrid: wkctrID,
+      positionid: posID,
+      field: field,
+      value: value,
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  deleteWorkcenterPosition(teamID: string, siteID: string, wkctrID: string, 
+  posID: string): Observable<HttpResponse<SiteResponse>> {
+    const url = `/scheduler/api/v1/site/workcenter/shift/${teamID}/${siteID}/`
+      + `${wkctrID}/${posID}`;
+    return this.httpClient.delete<SiteResponse>(url, {observe: 'response'});
+  }
 }
