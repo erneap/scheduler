@@ -441,6 +441,7 @@ func UpdateWorkcenterPosition(c *gin.Context) {
 
 	for w, wkctr := range site.Workcenters {
 		if strings.EqualFold(wkctr.ID, data.WkctrID) {
+			sort.Sort(sites.ByPosition(wkctr.Positions))
 			for p, position := range wkctr.Positions {
 				if strings.EqualFold(position.ID, data.PositionID) {
 					switch strings.ToLower(data.Field) {
@@ -620,6 +621,7 @@ func UpdateWorkcenterShift(c *gin.Context) {
 
 	for w, wkctr := range site.Workcenters {
 		if strings.EqualFold(wkctr.ID, data.WkctrID) {
+			sort.Sort(sites.ByShift(wkctr.Shifts))
 			for s, shift := range wkctr.Shifts {
 				if strings.EqualFold(shift.ID, data.PositionID) {
 					switch strings.ToLower(data.Field) {
@@ -628,6 +630,9 @@ func UpdateWorkcenterShift(c *gin.Context) {
 					case "paycode":
 						code, _ := strconv.ParseUint(data.Value, 10, 32)
 						shift.PayCode = uint(code)
+					case "minimums":
+						mins, _ := strconv.ParseUint(data.Value, 10, 32)
+						shift.Minimums = uint(mins)
 					case "move":
 						if strings.EqualFold(data.Value, "up") {
 							if s > 0 {

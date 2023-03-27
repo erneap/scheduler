@@ -74,7 +74,8 @@ export class SiteWorkcenterShiftComponent {
     this.shifts = []
     this.shifts.push(new ListItem('new', 'Add New Shift'));
     if (this.workcenter.shifts) {
-      this.workcenter.shifts.forEach(shft => {
+      const tshifts = this.workcenter.shifts.sort((a,b) => a.compareTo(b));
+      tshifts.forEach(shft => {
         this.shifts.push(new ListItem(shft.id, shft.name));
       });
     }
@@ -125,17 +126,18 @@ export class SiteWorkcenterShiftComponent {
         }
         const data: SiteResponse | null = resp.body;
         if (data && data != null && data.site) {
-          this.site = new Site(data.site);
           const site = this.siteService.getSite();
-          if (site && data.site.id === site.id) {
-            this.siteService.setSite(new Site(data.site));
-            if (site.workcenters) {
-              site.workcenters.forEach(wc => {
-                if (wc.id === this.workcenter.id) {
-                  this.workcenter = new Workcenter(wc);
-                  this.setShifts();
-                }
-              });
+          if (site) {
+            if (site.id === data.site.id) {
+              this.site = new Site(data.site);
+              this.siteService.setSite(new Site(data.site));
+              if (this.site.workcenters) {
+                this.site.workcenters.forEach(wc => {
+                  if (wc.id === this.workcenter.id) {
+                    this.workcenter = new Workcenter(wc);
+                  }
+                });
+              }
             }
           }
           this.teamService.setSelectedSite(new Site(data.site));
@@ -150,11 +152,96 @@ export class SiteWorkcenterShiftComponent {
   }
 
   onChangeField(field: string) {
-
+    this.authService.statusMessage = "Changing Field Value";
+    this.dialogService.showSpinner();
+    let outputValue: string = '';
+    const value = this.shiftForm.controls[field].value;
+    if (field.toLowerCase() === 'associated') {
+      let code = '';
+      if (this.workcenter.shifts) {
+        this.workcenter.shifts.forEach(s => {
+          if (s.id.toLowerCase() === this.selected.toLowerCase()) {
+            if (s.associatedCodes) {
+              if (s.associatedCodes.length > value.length) {
+                field = 'removecode';
+                for (let i=0; i < s.associatedCodes.length && code === ''; i++) {
+                  let found = false;
+                  for (let j=0; j < value.length && !false; j++) {
+                    if (s.associatedCodes[i] === value[j]) {
+                      found = true;
+                    }
+                  }
+                  if (!found) {
+                    code = s.associatedCodes[i];
+                  }
+                }
+              } else {
+                field = 'addcode';
+                for (let i=0; i < value.length && code === ''; i++) {
+                  let found = false;
+                  for (let j=0; j < s.associatedCodes.length && !found; j++) {
+                    if (s.associatedCodes[j] === value[i]) {
+                      found = true;
+                    }
+                  }
+                  if (!found) {
+                    code = value[i];
+                  }
+                }
+              }
+            } else if (value.length > 0) {
+              code = value[0];
+            } else {
+              field = '';
+            }
+          }
+        });
+      }
+      outputValue = code;
+    } else {
+      outputValue = `${value}`;
+    }
+    if (field !== '' && this.selected !== 'new') {
+      this.siteService.updateWorkcenterShift(this.teamid, this.site.id, 
+      this.workcenter.id, this.selected, field, outputValue).subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.site) {
+            const site = this.siteService.getSite();
+            if (site) {
+              if (site.id === data.site.id) {
+                this.site = new Site(data.site);
+                this.siteService.setSite(new Site(data.site));
+                if (this.site.workcenters) {
+                  this.site.workcenters.forEach(wc => {
+                    if (wc.id === this.workcenter.id) {
+                      this.workcenter = new Workcenter(wc);
+                      this.setShifts();
+                      this.setShift();
+                    }
+                  });
+                }
+              }
+            }
+            this.teamService.setSelectedSite(new Site(data.site));
+          }
+          this.authService.statusMessage = "Retrieval complete"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      });
+    }
   }
 
   onClearClick() {
-
+    this.selected = 'new';
+    this.setShift();
   }
 
   onAddShift() {

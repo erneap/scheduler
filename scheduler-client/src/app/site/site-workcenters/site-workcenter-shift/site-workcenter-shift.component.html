@@ -38,9 +38,22 @@
         </mat-form-field>
       </div>
       <div class="flexlayout row top">
-        <mat-form-field appearance="outline" class="extraWideField">
+        <button mat-raised-button color="warn"
+          *ngIf="selected !== 'new'"
+          >Delete</button>
+        <button mat-raised-button color="accent"
+          *ngIf="selected === 'new'"
+          (click)="onAddShift()" cdkFocusInitial>Add</button>
+        <button mat-raised-button color="warn" style="margin-left: 10px;"
+          *ngIf="selected === 'new'"
+          (click)="onClearClick()">Clear</button>
+      </div>
+      <div class="flexlayout row top">
+        <mat-form-field appearance="outline" class="extraWideField"
+        *ngIf="this.selected !== 'new'">
             <mat-label>Associated Work Codes</mat-label>
-            <mat-select formControlName="associated" multiple>
+            <mat-select formControlName="associated" multiple
+              (selectionChange)="onChangeField('associated')">
                 <mat-option *ngFor="let wc of workcodes" [value]="wc.id">
                     {{wc.id}}
                 </mat-option>
@@ -48,28 +61,21 @@
         </mat-form-field>
       </div>
       <div class="flexlayout row top">
-        <mat-form-field appearance="outline" class="formField">
+        <mat-form-field appearance="outline" class="formField"
+          *ngIf="this.selected !== 'new'">
           <mat-label>Pay Code</mat-label>
-          <input matInput formControlName="paycode">
+          <input matInput formControlName="paycode" 
+            (blur)="onChangeField('paycode')">
           <mat-hint>(Optional)</mat-hint>
         </mat-form-field>
-        <mat-form-field appearance="outline" class="formField">
+        <mat-form-field appearance="outline" class="formField"
+        *ngIf="this.selected !== 'new'">
           <mat-label>Minimum Working</mat-label>
-          <input type="number" matInput formControlName="minimums">
+          <input type="number" matInput formControlName="minimums"
+            (blur)="onChangeField('minimums')">
           <mat-error *ngIf="shiftForm.controls['minimums'].hasError('required')"
             class="error">Required</mat-error>
         </mat-form-field>
       </div>
-      <div class="flexlayout row top">
-        <button mat-raised-button color="warn" style="margin-left: 10px;"
-          *ngIf="selected === 'new'"
-          (click)="onClearClick()">Clear</button>
-        <button mat-raised-button color="accent"
-          *ngIf="selected === 'new'"
-          (click)="onAddShift()" cdkFocusInitial>Add</button>
-        <button mat-raised-button color="warn"
-          *ngIf="selected !== 'new'"
-          >Delete</button>
-    </div>
     </form>
   </div>
