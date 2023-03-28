@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ListItem } from 'src/app/generic/button-list/listitem';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { ISite, Site } from 'src/app/models/sites/site';
 import { IWorkcenter, Shift, Workcenter } from 'src/app/models/sites/workcenter';
 import { Workcode } from 'src/app/models/teams/workcode';
@@ -73,8 +74,16 @@ export class SiteWorkcenterShiftComponent {
   setShifts() {
     this.shifts = []
     this.shifts.push(new ListItem('new', 'Add New Shift'));
+    this.showSortDown = false;
+    this.showSortUp = false;
     if (this.workcenter.shifts) {
       const tshifts = this.workcenter.shifts.sort((a,b) => a.compareTo(b));
+      for (let i=0; i < tshifts.length; i++) {
+        if (tshifts[i].id === this.selected) {
+          this.showSortDown = (i < tshifts.length - 1);
+          this.showSortUp = (i > 0)
+        }
+      }
       tshifts.forEach(shft => {
         this.shifts.push(new ListItem(shft.id, shft.name));
       });
@@ -152,8 +161,6 @@ export class SiteWorkcenterShiftComponent {
   }
 
   onChangeField(field: string) {
-    this.authService.statusMessage = "Changing Field Value";
-    this.dialogService.showSpinner();
     let outputValue: string = '';
     const value = this.shiftForm.controls[field].value;
     if (field.toLowerCase() === 'associated') {
@@ -202,6 +209,8 @@ export class SiteWorkcenterShiftComponent {
       outputValue = `${value}`;
     }
     if (field !== '' && this.selected !== 'new') {
+      this.authService.statusMessage = "Changing Field Value";
+      this.dialogService.showSpinner();
       this.siteService.updateWorkcenterShift(this.teamid, this.site.id, 
       this.workcenter.id, this.selected, field, outputValue).subscribe({
         next: resp => {
@@ -239,16 +248,102 @@ export class SiteWorkcenterShiftComponent {
     }
   }
 
-  onClearClick() {
-    this.selected = 'new';
-    this.setShift();
+  onAddShift() {
+    if (this.shiftForm.controls['id'].valid 
+    && this.shiftForm.controls['name'].valid) {
+      const shiftID = this.shiftForm.value.id;
+      this.authService.statusMessage = "Adding Shift to workcenter";
+      this.dialogService.showSpinner();
+      this.siteService.addWorkcenterShift(this.teamid, this.site.id, 
+      this.workcenter.id, shiftID, this.shiftForm.value.name)
+      .subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.site) {
+            const site = this.siteService.getSite();
+            if (site) {
+              if (site.id === data.site.id) {
+                this.site = new Site(data.site);
+                this.siteService.setSite(new Site(data.site));
+                if (this.site.workcenters) {
+                  this.site.workcenters.forEach(wc => {
+                    if (wc.id === this.workcenter.id) {
+                      this.workcenter = new Workcenter(wc);
+                      this.selected = shiftID;
+                      this.setShifts();
+                      this.setShift();
+                    }
+                  });
+                }
+              }
+            }
+            this.teamService.setSelectedSite(new Site(data.site));
+          }
+          this.authService.statusMessage = "Addition complete"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      });
+    }
   }
 
-  onAddShift() {
-
+  showAddButton() {
+    return (this.shiftForm.value.id !== '' && this.shiftForm.value.name !== ''
+      && this.selected === 'new'); 
   }
 
   onDeleteShift() {
+    const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+      data: {title: 'Confirm Workcenter Shift Deletion', 
+      message: 'Are you sure you want to delete this Workcenter Shift?'},
+    });
 
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'yes') {
+        this.authService.statusMessage = "Deleting workcenter shift";
+        this.dialogService.showSpinner();
+        this.siteService.deleteWorkcenterShift(this.teamid, this.site.id, 
+        this.workcenter.id, this.selected).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: SiteResponse | null = resp.body;
+            if (data && data != null && data.site) {
+              const site = this.siteService.getSite();
+              if (site) {
+                if (site.id === data.site.id) {
+                  this.site = new Site(data.site);
+                  this.siteService.setSite(new Site(data.site));
+                  if (this.site.workcenters) {
+                    this.site.workcenters.forEach(wc => {
+                      if (wc.id === this.workcenter.id) {
+                        this.workcenter = new Workcenter(wc);
+                        this.selected = 'new';
+                        this.setShifts();
+                        this.setShift();
+                      }
+                    });
+                  }
+                }
+              }
+              this.teamService.setSelectedSite(new Site(data.site));
+            }
+            this.authService.statusMessage = "Shift deletion complete"
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.error.exception;
+          }
+        });
+      }
+    });
   }
 }

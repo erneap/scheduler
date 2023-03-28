@@ -18,6 +18,10 @@
           <mat-icon *ngIf="showSortDown">arrow_drop_down</mat-icon>
         </div>
       </div>
+      <button mat-icon-button color="warn" *ngIf="selected !== 'new'"
+        (click)="onDeleteShift()">
+        <mat-icon>delete</mat-icon>
+      </button>
     </div>
     <form [formGroup]="shiftForm" class="fxLayout-column-center"
       style="margin-top: 15px;">
@@ -36,17 +40,11 @@
             <mat-error *ngIf="shiftForm.controls['id'].hasError('required')"
             class="error">Required</mat-error>
         </mat-form-field>
-      </div>
-      <div class="flexlayout row top">
-        <button mat-raised-button color="warn"
-          *ngIf="selected !== 'new'"
-          >Delete</button>
-        <button mat-raised-button color="accent"
-          *ngIf="selected === 'new'"
-          (click)="onAddShift()" cdkFocusInitial>Add</button>
-        <button mat-raised-button color="warn" style="margin-left: 10px;"
-          *ngIf="selected === 'new'"
-          (click)="onClearClick()">Clear</button>
+        <button mat-icon-button color="accent"
+          *ngIf="showAddButton()"
+          (click)="onAddShift()">
+          <mat-icon>add</mat-icon>
+        </button>
       </div>
       <div class="flexlayout row top">
         <mat-form-field appearance="outline" class="extraWideField"
