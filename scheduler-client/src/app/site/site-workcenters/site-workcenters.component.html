@@ -69,7 +69,9 @@
               </div>
             </form>
           </div>
-          <div class="flexlayout column top" style="border: solid 1px white;padding: 2px;">
+          <div class="flexlayout column top" 
+          style="border: solid 1px white;padding: 2px;"
+          *ngIf="selected !== 'new'">
             <mat-tab-group [backgroundColor]="'accent'">
               <mat-tab label="Workcenter Shifts">
                 <app-site-workcenter-shift  [site]="site" [workcenter]="workcenter">

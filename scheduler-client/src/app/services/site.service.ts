@@ -150,14 +150,14 @@ export class SiteService extends CacheService {
       positionid: posID,
       name: posName,
     }
-    const url = '/scheduler/api/v1/site/workcenter/shift';
+    const url = '/scheduler/api/v1/site/workcenter/position';
     return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
   }
 
   updateWorkcenterPosition(teamID: string, siteID: string, wkctrID: string, 
     posID: string, field: string, value: string): 
     Observable<HttpResponse<SiteResponse>> {
-    const url = '/scheduler/api/v1/site/workcenter/shift';
+    const url = '/scheduler/api/v1/site/workcenter/position';
     const data: WorkcenterPositionUpdate = {
       team: teamID,
       siteid: siteID,
@@ -171,7 +171,7 @@ export class SiteService extends CacheService {
 
   deleteWorkcenterPosition(teamID: string, siteID: string, wkctrID: string, 
   posID: string): Observable<HttpResponse<SiteResponse>> {
-    const url = `/scheduler/api/v1/site/workcenter/shift/${teamID}/${siteID}/`
+    const url = `/scheduler/api/v1/site/workcenter/position/${teamID}/${siteID}/`
       + `${wkctrID}/${posID}`;
     return this.httpClient.delete<SiteResponse>(url, {observe: 'response'});
   }

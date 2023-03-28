@@ -35,7 +35,8 @@
         </mat-form-field>
         <mat-form-field>
             <mat-label>Shift Name/Title</mat-label>
-            <input matInput formControlName="name" >
+            <input matInput formControlName="name" 
+            (blur)="onChangePosition('name')">
             <mat-error *ngIf="shiftForm.controls['id'].hasError('required')"
             class="error">Required</mat-error>
         </mat-form-field>
@@ -46,8 +47,9 @@
       <div class="flexlayout row top">
         <mat-form-field appearance="outline" class="extraWideField"
         *ngIf="this.selected !== 'new'">
-            <mat-label>Associated Work Codes</mat-label>
-            <mat-select formControlName="assigned" multiple>
+            <mat-label>Assigned Employees</mat-label>
+            <mat-select formControlName="assigned" multiple
+              (selectionChange)="onChangePosition('assigned')">
                 <mat-option *ngFor="let emp of employees" [value]="emp.id">
                     {{emp.name.getLastFirst()}}
                 </mat-option>

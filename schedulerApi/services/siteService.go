@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/erneap/scheduler/schedulerApi/models/employees"
 	"github.com/erneap/scheduler/schedulerApi/models/sites"
 )
 
@@ -49,6 +50,9 @@ func GetSite(teamid, siteid string) (*sites.Site, error) {
 	for _, site := range team.Sites {
 		if strings.EqualFold(site.ID, siteid) {
 			answer = site
+			emps, _ := GetEmployees(teamid, siteid)
+			answer.Employees = append(site.Employees, emps...)
+			sort.Sort(employees.ByEmployees(answer.Employees))
 		}
 	}
 	return &answer, nil

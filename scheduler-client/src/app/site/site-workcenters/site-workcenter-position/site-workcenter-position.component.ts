@@ -22,6 +22,7 @@ export class SiteWorkcenterPositionComponent {
   @Input()
   public set site(site: ISite) {
     this._site = new Site(site);
+    this.setEmployees();
   }
   get site(): Site {
     return this._site;
@@ -55,11 +56,9 @@ export class SiteWorkcenterPositionComponent {
       name: ['', [Validators.required]],
       assigned: [],
     });
-    this.employees = [];
-    if (this.site.employees) {
-      this.site.employees.forEach(emp => {
-        this.employees.push(new Employee(emp));
-      })
+    const team = this.teamService.getTeam();
+    if (team) {
+      this.teamid = team.id;
     }
   }
 
@@ -80,9 +79,37 @@ export class SiteWorkcenterPositionComponent {
     }
   }
 
+  setPosition() {
+    if (this.selected !== 'new') {
+      if (this.workcenter.positions) {
+        this.workcenter.positions.forEach(pos => {
+          if (pos.id === this.selected) {
+            this.shiftForm.controls['id'].setValue(pos.id);
+            this.shiftForm.controls['name'].setValue(pos.name);
+            this.shiftForm.controls['assigned'].setValue(pos.assigned);
+          }
+        });
+      }
+    } else {
+      this.shiftForm.controls['id'].setValue('');
+      this.shiftForm.controls['name'].setValue('');
+      this.shiftForm.controls['assigned'].setValue([]);
+    }
+  }
+
+  setEmployees(): void {
+    this.employees = [];
+    if (this.site.employees) {
+      this.site.employees.forEach(emp => {
+        this.employees.push(new Employee(emp));
+      })
+    }
+  }
+
   selectPosition(id: string) {
     this.selected = id;
     this.setPositions();
+    this.setPosition();
   }
 
   getButtonStyle(id: string): string {
@@ -127,5 +154,102 @@ export class SiteWorkcenterPositionComponent {
         this.authService.statusMessage = err.error.exception;
       }
     });
+  }
+
+  onChangePosition(field: string) {
+    let outputValue = '';
+    const value = this.shiftForm.controls[field].value;
+    let id: string = ''
+    if (field.toLowerCase() === 'assigned') {
+      let code = '';
+      if (this.workcenter.positions) {
+        this.workcenter.positions.forEach(s => {
+          if (s.id.toLowerCase() === this.selected.toLowerCase()) {
+            if (s.assigned) {
+              if (s.assigned.length > value.length) {
+                field = 'removeassigned';
+                for (let i=0; i < s.assigned.length && code === ''; i++) {
+                  let found = false;
+                  for (let j=0; j < value.length && !false; j++) {
+                    if (s.assigned[i] === value[j]) {
+                      found = true;
+                    }
+                  }
+                  if (!found) {
+                    code = s.assigned[i];
+                  }
+                }
+              } else {
+                field = 'addassigned';
+                for (let i=0; i < value.length && code === ''; i++) {
+                  let found = false;
+                  for (let j=0; j < s.assigned.length && !found; j++) {
+                    if (s.assigned[j] === value[i]) {
+                      found = true;
+                    }
+                  }
+                  if (!found) {
+                    code = value[i];
+                  }
+                }
+              }
+            } else if (value.length > 0) {
+              code = value[0];
+            } else {
+              field = '';
+            }
+          }
+        });
+        outputValue = code;
+      } else {
+        outputValue = `${value}`;
+      }
+    }
+    if (field !== '' && this.selected !== 'new') {
+      this.authService.statusMessage = "Changing Field Value";
+      this.dialogService.showSpinner();
+      this.siteService.updateWorkcenterPosition(this.teamid, this.site.id, 
+      this.workcenter.id, this.selected, field, outputValue).subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.site) {
+            const site = this.siteService.getSite();
+            if (site) {
+              if (site.id === data.site.id) {
+                this.site = new Site(data.site);
+                this.siteService.setSite(new Site(data.site));
+                if (this.site.workcenters) {
+                  this.site.workcenters.forEach(wc => {
+                    if (wc.id === this.workcenter.id) {
+                      this.workcenter = new Workcenter(wc);
+                      this.setPositions();
+                      this.setPosition();
+                    }
+                  });
+                }
+              }
+            }
+            this.teamService.setSelectedSite(new Site(data.site));
+          }
+          this.authService.statusMessage = "Retrieval complete"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      });
+    }
+  }
+
+  onAddPosition() {
+
+  }
+
+  onDeletePosition() {
+
   }
 }
