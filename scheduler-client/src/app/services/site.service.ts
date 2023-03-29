@@ -3,9 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Employee, IEmployee } from '../models/employees/employee';
 import { ISite, Site } from '../models/sites/site';
-import { IUser } from '../models/users/user';
+import { IUser, User } from '../models/users/user';
 import { NewSiteRequest, NewSiteWorkcenter, SiteResponse, SiteWorkcenterUpdate,
-  NewWorkcenterPosition, WorkcenterPositionUpdate } from '../models/web/siteWeb';
+  NewWorkcenterPosition, WorkcenterPositionUpdate, CreateSiteForecast,
+  UpdateSiteForecast } 
+  from '../models/web/siteWeb';
 import { CacheService } from './cache.service';
 
 @Injectable({
@@ -60,6 +62,20 @@ export class SiteService extends CacheService {
       data.scheduler = scheduler;
     }
     return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  UpdateSite(teamID: string, siteID: string, siteName: string, mids: boolean, 
+  offset: number): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site';
+    const data: NewSiteRequest = {
+      team: teamID,
+      siteid: siteID,
+      name: siteName,
+      mids: mids,
+      offset: offset,
+      lead: new User(),
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
   }
 
   retrieveSite(teamID: string, siteID: string, allemployees: boolean): Observable<HttpResponse<SiteResponse>> {
@@ -174,5 +190,31 @@ export class SiteService extends CacheService {
     const url = `/scheduler/api/v1/site/workcenter/position/${teamID}/${siteID}/`
       + `${wkctrID}/${posID}`;
     return this.httpClient.delete<SiteResponse>(url, {observe: 'response'});
+  }
+
+  addForecastReport(teamid: string, siteid: string, name: string, start: Date, 
+  end: Date): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site/forecast';
+    const data: CreateSiteForecast = {
+      team: teamid,
+      siteid: siteid,
+      name: name,
+      startdate: start,
+      enddate: end,
+    }
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  updateForecastReport(teamid: string, siteid: string, reportid: number, 
+    field: string, value: string): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site/forecast';
+    const data: UpdateSiteForecast = {
+      team: teamid,
+      siteid: siteid,
+      reportid: reportid,
+      field: field,
+      value: value,
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
   }
 }

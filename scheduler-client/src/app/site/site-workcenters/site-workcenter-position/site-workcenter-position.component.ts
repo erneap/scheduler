@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ListItem } from 'src/app/generic/button-list/listitem';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { Employee } from 'src/app/models/employees/employee';
 import { ISite, Site } from 'src/app/models/sites/site';
 import { IWorkcenter, Position, Workcenter } from 'src/app/models/sites/workcenter';
@@ -35,6 +36,7 @@ export class SiteWorkcenterPositionComponent {
   get workcenter(): Workcenter {
     return this._workcenter;
   }
+  @Output() siteChanged = new EventEmitter<Site>();
   positions: ListItem[] = [];
   selected: string = 'new';
   position: Position = new Position();
@@ -135,6 +137,7 @@ export class SiteWorkcenterPositionComponent {
           if (site) {
             if (site.id === data.site.id) {
               this.site = new Site(data.site);
+              this.siteChanged.emit(new Site(data.site));
               this.siteService.setSite(new Site(data.site));
               if (this.site.workcenters) {
                 this.site.workcenters.forEach(wc => {
@@ -221,6 +224,7 @@ export class SiteWorkcenterPositionComponent {
             if (site) {
               if (site.id === data.site.id) {
                 this.site = new Site(data.site);
+                this.siteChanged.emit(new Site(data.site));
                 this.siteService.setSite(new Site(data.site));
                 if (this.site.workcenters) {
                   this.site.workcenters.forEach(wc => {
@@ -246,10 +250,104 @@ export class SiteWorkcenterPositionComponent {
   }
 
   onAddPosition() {
+    if (this.shiftForm.controls['id'].valid 
+    && this.shiftForm.controls['name'].valid) {
+      const id = this.shiftForm.value.id;
+      const name = this.shiftForm.value.name;
 
+      this.authService.statusMessage = "Adding new Workcenter Position";
+      this.dialogService.showSpinner();
+      this.siteService.addWorkcenterPosition(this.teamid, this.site.id, 
+      this.workcenter.id, id, name).subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.site) {
+            const site = this.siteService.getSite();
+            if (site) {
+              if (site.id === data.site.id) {
+                this.site = new Site(data.site);
+                this.siteChanged.emit(new Site(data.site));
+                this.siteService.setSite(new Site(data.site));
+                if (this.site.workcenters) {
+                  this.site.workcenters.forEach(wc => {
+                    if (wc.id === this.workcenter.id) {
+                      this.workcenter = new Workcenter(wc);
+                      this.selected = id;
+                      this.setPositions();
+                      this.setPosition();
+                    }
+                  });
+                }
+              }
+            }
+            this.teamService.setSelectedSite(new Site(data.site));
+          }
+          this.authService.statusMessage = "Add completed"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      });
+    }
   }
 
   onDeletePosition() {
+    const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+      data: {title: 'Confirm Workcenter Position Deletion', 
+      message: 'Are you sure you want to delete this Workcenter Position?'},
+    });
 
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'yes') {
+        this.authService.statusMessage = "Deleting Workcenter Position";
+        this.dialogService.showSpinner();
+        this.siteService.deleteWorkcenterPosition(this.teamid, this.site.id,
+          this.workcenter.id, this.selected).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: SiteResponse | null = resp.body;
+            if (data && data != null && data.site) {
+              const site = this.siteService.getSite();
+              if (site) {
+                if (site.id === data.site.id) {
+                  this.site = new Site(data.site);
+                  this.siteChanged.emit(new Site(data.site));
+                  this.siteService.setSite(new Site(data.site));
+                  if (this.site.workcenters) {
+                    this.site.workcenters.forEach(wc => {
+                      if (wc.id === this.workcenter.id) {
+                        this.workcenter = new Workcenter(wc);
+                        this.selected = 'new';
+                        this.setPositions();
+                        this.setPosition();
+                      }
+                    });
+                  }
+                }
+              }
+              this.teamService.setSelectedSite(new Site(data.site));
+            }
+            this.authService.statusMessage = "Deletion completed"
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.error.exception;
+          }
+        });
+      }
+    });
+  }
+
+  showAddButton(): boolean {
+    return (this.shiftForm.controls['id'].valid 
+      && this.shiftForm.controls['name'].valid);
   }
 }

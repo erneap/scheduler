@@ -53,6 +53,7 @@ export interface WorkcenterPositionUpdate {
 export interface NewSiteLaborCode {
   team: string;
   siteid: string;
+  reportid: number;
   chargeNumber: string;
   extension: string;
   clin?: string;
@@ -70,6 +71,7 @@ export interface NewSiteLaborCode {
 export interface UpdateSiteLaborCode {
   team: string;
   siteid: string;
+  reportid: number;
   chargeNumber: string;
   extension: string;
   field: string;

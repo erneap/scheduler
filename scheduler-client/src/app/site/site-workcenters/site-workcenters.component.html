@@ -74,11 +74,15 @@
           *ngIf="selected !== 'new'">
             <mat-tab-group [backgroundColor]="'accent'">
               <mat-tab label="Workcenter Shifts">
-                <app-site-workcenter-shift  [site]="site" [workcenter]="workcenter">
+                <app-site-workcenter-shift  [site]="site" 
+                [workcenter]="workcenter"
+                (siteChanged)="changeSite($event)">
                 </app-site-workcenter-shift>
               </mat-tab>
               <mat-tab label="Workcenter Positions">
-                <app-site-workcenter-position  [site]="site" [workcenter]="workcenter">
+                <app-site-workcenter-position  [site]="site" 
+                [workcenter]="workcenter"
+                (siteChanged)="changeSite($event)">
                 </app-site-workcenter-position>
               </mat-tab>
             </mat-tab-group>

@@ -57,6 +57,7 @@ type WorkcenterPositionUpdate struct {
 type NewSiteLaborCode struct {
 	TeamID           string `json:"team"`
 	SiteID           string `json:"siteid"`
+	ReportID         int    `json:"reportid"`
 	ChargeNumber     string `json:"chargeNumber"`
 	Extension        string `json:"extension"`
 	CLIN             string `json:"clin,omitempty"`
@@ -74,6 +75,7 @@ type NewSiteLaborCode struct {
 type UpdateSiteLaborCode struct {
 	TeamID       string `json:"team"`
 	SiteID       string `json:"siteid"`
+	ReportID     int    `json:"reportid"`
 	ChargeNumber string `json:"chargeNumber"`
 	Extension    string `json:"extension"`
 	Field        string `json:"field"`

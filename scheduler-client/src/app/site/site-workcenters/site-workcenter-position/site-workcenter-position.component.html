@@ -18,7 +18,8 @@
         <mat-icon *ngIf="showSortDown">arrow_drop_down</mat-icon>
       </div>
     </div>
-    <button mat-icon-button color="warn" *ngIf="selected !== 'new'">
+    <button mat-icon-button color="warn" *ngIf="selected !== 'new'"
+      (click)="onDeletePosition()">
       <mat-icon>delete</mat-icon>
     </button>
   </div>
@@ -40,7 +41,9 @@
             <mat-error *ngIf="shiftForm.controls['id'].hasError('required')"
             class="error">Required</mat-error>
         </mat-form-field>
-        <button mat-icon-button color="accent">
+        <button mat-icon-button color="accent" 
+          *ngIf="showAddButton()"
+          (click)="onAddPosition()">
           <mat-icon>add</mat-icon>
         </button>
       </div>

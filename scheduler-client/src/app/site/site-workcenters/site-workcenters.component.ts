@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ListItem } from 'src/app/generic/button-list/listitem';
@@ -25,6 +25,7 @@ export class SiteWorkcentersComponent {
   get site(): Site {
     return this._site;
   }
+  @Output() siteChanged = new EventEmitter<Site>();
   workcenters: ListItem[] = [];
   selected: string = '';
   workcenter: Workcenter = new Workcenter();
@@ -123,6 +124,7 @@ export class SiteWorkcentersComponent {
                 const data: SiteResponse | null = resp.body;
                 if (data && data != null && data.site) {
                   this.site = new Site(data.site);
+                  this.siteChanged.emit(new Site(data.site));
                   if (this.site.workcenters) {
                     this.site.workcenters.sort((a,b) => a.compareTo(b));
                     this.selected = this.site.workcenters[0].id
@@ -162,6 +164,7 @@ export class SiteWorkcentersComponent {
             const data: SiteResponse | null = resp.body;
             if (data && data != null && data.site) {
               this.site = new Site(data.site);
+              this.siteChanged.emit(new Site(data.site));
               const site = this.siteService.getSite();
               if (site && data.site.id === site.id) {
                 this.siteService.setSite(new Site(data.site));
@@ -204,6 +207,7 @@ export class SiteWorkcentersComponent {
             const data: SiteResponse | null = resp.body;
             if (data && data != null && data.site) {
               this.site = new Site(data.site);
+              this.siteChanged.emit(new Site(data.site));
               const site = this.siteService.getSite();
               if (site && data.site.id === site.id) {
                 this.siteService.setSite(new Site(data.site));
@@ -238,6 +242,7 @@ export class SiteWorkcentersComponent {
             const data: SiteResponse | null = resp.body;
             if (data && data != null && data.site) {
               this.site = new Site(data.site);
+              this.siteChanged.emit(new Site(data.site));
               if (this.site.workcenters) {
                 this.site.workcenters?.sort((a,b) => a.compareTo(b));
                 const newWc = this.site.workcenters[
@@ -266,5 +271,9 @@ export class SiteWorkcentersComponent {
   onClearClick() {
     this.wcForm.controls['id'].setValue('');
     this.wcForm.controls['name'].setValue('');
+  }
+
+  changeSite(iSite: ISite) {
+    this.siteChanged.emit(new Site(iSite));
   }
 }

@@ -67,7 +67,7 @@ export class Position implements IPosition {
     this.name = (pos) ? pos.name : '';
     this.sort = (pos) ? pos.sort : 0;
     this.assigned = [];
-    if (pos && pos.assigned.length > 0) {
+    if (pos && pos.assigned && pos.assigned.length > 0) {
       pos.assigned.forEach(asgn => {
         this.assigned.push(asgn);
       });

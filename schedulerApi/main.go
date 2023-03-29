@@ -106,19 +106,21 @@ func main() {
 						controllers.DeleteWorkcenterShift)
 				}
 			}
-			lCode := site.Group("/laborcode")
-			{
-				lCode.POST("/", controllers.CreateSiteLaborCode)
-				lCode.PUT("/", controllers.UpdateSiteLaborCode)
-				lCode.DELETE("/:teamid/:siteid/:chgno/:ext",
-					controllers.DeleteSiteLaborCode)
-			}
+
 			rpt := site.Group("/forecast")
 			{
 				rpt.POST("/", controllers.CreateSiteForecastReport)
 				rpt.PUT("/", controllers.UpdateSiteForecastReport)
 				rpt.DELETE("/:teamid/:siteid/:rptid",
 					controllers.DeleteSiteForecastReport)
+
+				lCode := rpt.Group("/laborcode")
+				{
+					lCode.POST("/", controllers.CreateSiteLaborCode)
+					lCode.PUT("/", controllers.UpdateSiteLaborCode)
+					lCode.DELETE("/:teamid/:siteid/:reportid/:chgno/:ext",
+						controllers.DeleteSiteLaborCode)
+				}
 			}
 		}
 

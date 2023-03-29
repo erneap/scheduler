@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ListItem } from 'src/app/generic/button-list/listitem';
@@ -35,6 +35,7 @@ export class SiteWorkcenterShiftComponent {
   get workcenter(): Workcenter {
     return this._workcenter;
   }
+  @Output() siteChanged = new EventEmitter<Site>();
   shifts: ListItem[] = [];
   selected: string = 'new';
   shift: Shift = new Shift();
@@ -139,6 +140,7 @@ export class SiteWorkcenterShiftComponent {
           if (site) {
             if (site.id === data.site.id) {
               this.site = new Site(data.site);
+              this.siteChanged.emit(new Site(data.site));
               this.siteService.setSite(new Site(data.site));
               if (this.site.workcenters) {
                 this.site.workcenters.forEach(wc => {
@@ -224,6 +226,7 @@ export class SiteWorkcenterShiftComponent {
             if (site) {
               if (site.id === data.site.id) {
                 this.site = new Site(data.site);
+                this.siteChanged.emit(new Site(data.site));
                 this.siteService.setSite(new Site(data.site));
                 if (this.site.workcenters) {
                   this.site.workcenters.forEach(wc => {
@@ -268,6 +271,7 @@ export class SiteWorkcenterShiftComponent {
             if (site) {
               if (site.id === data.site.id) {
                 this.site = new Site(data.site);
+                this.siteChanged.emit(new Site(data.site));
                 this.siteService.setSite(new Site(data.site));
                 if (this.site.workcenters) {
                   this.site.workcenters.forEach(wc => {
@@ -321,6 +325,7 @@ export class SiteWorkcenterShiftComponent {
               if (site) {
                 if (site.id === data.site.id) {
                   this.site = new Site(data.site);
+                  this.siteChanged.emit(new Site(data.site));
                   this.siteService.setSite(new Site(data.site));
                   if (this.site.workcenters) {
                     this.site.workcenters.forEach(wc => {

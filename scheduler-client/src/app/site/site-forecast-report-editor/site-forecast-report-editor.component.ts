@@ -1,4 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ListItem } from 'src/app/generic/button-list/listitem';
+import { ISite, Site } from 'src/app/models/sites/site';
+import { SiteResponse } from 'src/app/models/web/siteWeb';
+import { AuthService } from 'src/app/services/auth.service';
+import { DialogService } from 'src/app/services/dialog-service.service';
+import { SiteService } from 'src/app/services/site.service';
+import { TeamService } from 'src/app/services/team.service';
 
 @Component({
   selector: 'app-site-forecast-report-editor',
@@ -6,5 +14,149 @@ import { Component } from '@angular/core';
   styleUrls: ['./site-forecast-report-editor.component.scss']
 })
 export class SiteForecastReportEditorComponent {
+  private _site: Site = new Site();
+  @Input()
+  public set site(iSite: ISite) {
+    this._site = new Site(iSite);
+    this.setReports();
+  }
+  get site(): Site {
+    return this._site;
+  }
+  @Output() siteChanged = new EventEmitter<Site>();
+  teamid: string;
+  reports: ListItem[] = [];
+  selected: string = 'new';
+  showSortUp: boolean = true;
+  showSortDown: boolean = true;
+  reportForm: FormGroup;
 
+  constructor(
+    protected authService: AuthService,
+    protected dialogService: DialogService,
+    protected siteService: SiteService,
+    protected teamService: TeamService,
+    private fb: FormBuilder
+  ) {
+    const team = this.teamService.getTeam();
+    if (team) {
+      this.teamid = team.id
+    } else {
+      this.teamid = '';
+    }
+    this.reportForm = this.fb.group({
+      name: ['', [Validators.required]],
+      start: [new Date(), [Validators.required]],
+      end: [new Date(), [Validators.required]]
+    });
+  }
+
+  setReports() {
+    this.reports = [];
+    this.reports.push(new ListItem('new', 'Create New Report'));
+    let now = new Date();
+    now = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+    if (this.site.forecasts) {
+      this.site.forecasts.forEach(rpt => {
+        if (rpt.endDate.getTime() > now.getTime()) {
+          const label = `${rpt.name} (${this.getDate(rpt.startDate)}-`
+            + `${this.getDate(rpt.endDate)})`;
+          this.reports.push(new ListItem(`${rpt.id}`, label));
+        }
+      });
+    }
+  }
+
+  setReport() {
+    if (this.selected !== 'new') {
+      if (this.site.forecasts) {
+        this.site.forecasts.forEach(rpt => {
+          if (this.selected === `${rpt.id}`) {
+            this.reportForm.controls['name'].setValue(rpt.name);
+            this.reportForm.controls['start'].setValue(rpt.startDate);
+            this.reportForm.controls['end'].setValue(rpt.endDate);
+          }
+        });
+      }
+    } else {
+      this.reportForm.controls['name'].setValue('');
+      this.reportForm.controls['start'].setValue(new Date());
+      this.reportForm.controls['end'].setValue(new Date());
+    }
+  }
+  
+  getButtonStyle(id: string): string {
+    if (id.toLowerCase() === this.selected.toLowerCase()) {
+      return "employee active";
+    }
+    return "employee";
+  }
+
+  getDate(date: Date): string {
+    const months: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+      'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  onSelectReport(wid: string) {
+    this.selected = wid;
+    this.setReport();
+  }
+
+  onChange(field: string) {
+    if (this.selected !== 'new') {
+      const value = this.reportForm.controls[field].value;
+      if (value !== null) {
+        let outputValue = '';
+        if (field === 'start' || field === 'end') {
+          outputValue = this.getDateString(value);
+        } else {
+          outputValue = value;
+        }
+        this.authService.statusMessage = "Updating Forecast Report";
+        this.dialogService.showSpinner();
+        this.siteService.updateForecastReport(this.teamid, this.site.id, 
+          Number(this.selected), field, outputValue).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: SiteResponse | null = resp.body;
+            if (data && data != null && data.site) {
+              this.site = new Site(data.site);
+              this.siteChanged.emit(new Site(data.site));
+              if (this.site.forecasts) {
+                this.site.forecasts.sort((a,b) => a.compareTo(b));
+                this.setReports();
+              }
+              const site = this.siteService.getSite();
+              if (site && data.site.id === site.id) {
+                this.siteService.setSite(new Site(data.site));
+              }
+              this.teamService.setSelectedSite(new Site(data.site));
+            }
+            this.authService.statusMessage = "Retrieval complete"
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.error.exception;
+          }
+        });
+      }
+    }
+  }
+
+  getDateString(date: Date): string {
+    let answer = `${date.getFullYear()}-`;
+    if (date.getMonth() < 9) {
+      answer += '0';
+    }
+    answer += `${date.getMonth() + 1}-`;
+    if (date.getDate() < 10) {
+      answer += '0';
+    }
+    answer += `${date.getDate()}`;
+    return answer;
+  }
 }

@@ -151,6 +151,9 @@ func UpdateSite(c *gin.Context) {
 	}
 
 	site.Name = data.Name
+	site.UtcOffset = data.Offset
+	site.ShowMids = data.UseMids
+
 	err = services.UpdateSite(data.TeamID, *site)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
@@ -748,88 +751,93 @@ func CreateSiteLaborCode(c *gin.Context) {
 		return
 	}
 
-	found := false
-	for l, lCode := range site.LaborCodes {
-		if strings.EqualFold(lCode.ChargeNumber, data.ChargeNumber) &&
-			strings.EqualFold(lCode.Extension, data.Extension) {
-			found = true
-			if data.CLIN != "" {
-				lCode.CLIN = data.CLIN
+	for r, rpt := range site.ForecastReports {
+		if rpt.ID == data.ReportID {
+			found := false
+			for l, lCode := range rpt.LaborCodes {
+				if strings.EqualFold(lCode.ChargeNumber, data.ChargeNumber) &&
+					strings.EqualFold(lCode.Extension, data.Extension) {
+					found = true
+					if data.CLIN != "" {
+						lCode.CLIN = data.CLIN
+					}
+					if data.SLIN != "" {
+						lCode.SLIN = data.SLIN
+					}
+					if data.Location != "" {
+						lCode.Location = data.Location
+					}
+					if data.WBS != "" {
+						lCode.WBS = data.WBS
+					}
+					if data.MinimumEmployees != "" {
+						min, _ := strconv.Atoi(data.MinimumEmployees)
+						lCode.MinimumEmployees = min
+					}
+					if data.NotAssignedName != "" {
+						lCode.NotAssignedName = data.NotAssignedName
+					}
+					if data.HoursPerEmployee != "" {
+						hours, _ := strconv.ParseFloat(data.HoursPerEmployee, 64)
+						lCode.HoursPerEmployee = hours
+					}
+					if data.Exercise != "" {
+						lCode.Exercise = strings.EqualFold(data.Exercise, "true")
+					}
+					if data.StartDate != "" {
+						sDate, _ := time.Parse("2006-01-02", data.StartDate)
+						lCode.StartDate = sDate
+					}
+					if data.EndDate != "" {
+						eDate, _ := time.Parse("2006-01-02", data.EndDate)
+						lCode.EndDate = eDate
+					}
+					rpt.LaborCodes[l] = lCode
+				}
 			}
-			if data.SLIN != "" {
-				lCode.SLIN = data.SLIN
+			if !found {
+				lCode := sites.LaborCode{
+					ChargeNumber: data.ChargeNumber,
+					Extension:    data.Extension,
+				}
+				if data.CLIN != "" {
+					lCode.CLIN = data.CLIN
+				}
+				if data.SLIN != "" {
+					lCode.SLIN = data.SLIN
+				}
+				if data.Location != "" {
+					lCode.Location = data.Location
+				}
+				if data.WBS != "" {
+					lCode.WBS = data.WBS
+				}
+				if data.MinimumEmployees != "" {
+					min, _ := strconv.Atoi(data.MinimumEmployees)
+					lCode.MinimumEmployees = min
+				}
+				if data.NotAssignedName != "" {
+					lCode.NotAssignedName = data.NotAssignedName
+				}
+				if data.HoursPerEmployee != "" {
+					hours, _ := strconv.ParseFloat(data.HoursPerEmployee, 64)
+					lCode.HoursPerEmployee = hours
+				}
+				if data.Exercise != "" {
+					lCode.Exercise = strings.EqualFold(data.Exercise, "true")
+				}
+				if data.StartDate != "" {
+					sDate, _ := time.Parse("2006-01-02", data.StartDate)
+					lCode.StartDate = sDate
+				}
+				if data.EndDate != "" {
+					eDate, _ := time.Parse("2006-01-02", data.EndDate)
+					lCode.EndDate = eDate
+				}
+				rpt.LaborCodes = append(rpt.LaborCodes, lCode)
 			}
-			if data.Location != "" {
-				lCode.Location = data.Location
-			}
-			if data.WBS != "" {
-				lCode.WBS = data.WBS
-			}
-			if data.MinimumEmployees != "" {
-				min, _ := strconv.Atoi(data.MinimumEmployees)
-				lCode.MinimumEmployees = min
-			}
-			if data.NotAssignedName != "" {
-				lCode.NotAssignedName = data.NotAssignedName
-			}
-			if data.HoursPerEmployee != "" {
-				hours, _ := strconv.ParseFloat(data.HoursPerEmployee, 64)
-				lCode.HoursPerEmployee = hours
-			}
-			if data.Exercise != "" {
-				lCode.Exercise = strings.EqualFold(data.Exercise, "true")
-			}
-			if data.StartDate != "" {
-				sDate, _ := time.Parse("2006-01-02", data.StartDate)
-				lCode.StartDate = sDate
-			}
-			if data.EndDate != "" {
-				eDate, _ := time.Parse("2006-01-02", data.EndDate)
-				lCode.EndDate = eDate
-			}
-			site.LaborCodes[l] = lCode
+			site.ForecastReports[r] = rpt
 		}
-	}
-	if !found {
-		lCode := sites.LaborCode{
-			ChargeNumber: data.ChargeNumber,
-			Extension:    data.Extension,
-		}
-		if data.CLIN != "" {
-			lCode.CLIN = data.CLIN
-		}
-		if data.SLIN != "" {
-			lCode.SLIN = data.SLIN
-		}
-		if data.Location != "" {
-			lCode.Location = data.Location
-		}
-		if data.WBS != "" {
-			lCode.WBS = data.WBS
-		}
-		if data.MinimumEmployees != "" {
-			min, _ := strconv.Atoi(data.MinimumEmployees)
-			lCode.MinimumEmployees = min
-		}
-		if data.NotAssignedName != "" {
-			lCode.NotAssignedName = data.NotAssignedName
-		}
-		if data.HoursPerEmployee != "" {
-			hours, _ := strconv.ParseFloat(data.HoursPerEmployee, 64)
-			lCode.HoursPerEmployee = hours
-		}
-		if data.Exercise != "" {
-			lCode.Exercise = strings.EqualFold(data.Exercise, "true")
-		}
-		if data.StartDate != "" {
-			sDate, _ := time.Parse("2006-01-02", data.StartDate)
-			lCode.StartDate = sDate
-		}
-		if data.EndDate != "" {
-			eDate, _ := time.Parse("2006-01-02", data.EndDate)
-			lCode.EndDate = eDate
-		}
-		site.LaborCodes = append(site.LaborCodes, lCode)
 	}
 
 	if err = services.UpdateSite(data.TeamID, *site); err != nil {
@@ -862,36 +870,41 @@ func UpdateSiteLaborCode(c *gin.Context) {
 		return
 	}
 
-	for l, lCode := range site.LaborCodes {
-		if strings.EqualFold(lCode.ChargeNumber, data.ChargeNumber) &&
-			strings.EqualFold(lCode.Extension, data.Extension) {
-			switch strings.ToLower(data.Field) {
-			case "clin":
-				lCode.CLIN = data.Value
-			case "slin":
-				lCode.SLIN = data.Value
-			case "location":
-				lCode.Location = data.Value
-			case "wbs":
-				lCode.WBS = data.Value
-			case "minimum", "min", "minimumemployees":
-				min, _ := strconv.Atoi(data.Value)
-				lCode.MinimumEmployees = min
-			case "notassigned", "notassignedname":
-				lCode.NotAssignedName = data.Value
-			case "hours", "hoursperemployee":
-				hours, _ := strconv.ParseFloat(data.Value, 64)
-				lCode.HoursPerEmployee = hours
-			case "exercise":
-				lCode.Exercise = strings.EqualFold(data.Value, "true")
-			case "start", "startdate":
-				tdate, _ := time.Parse("2006-01-02", data.Value)
-				lCode.StartDate = tdate
-			case "end", "enddate":
-				tdate, _ := time.Parse("2006-01-02", data.Value)
-				lCode.EndDate = tdate
+	for r, rpt := range site.ForecastReports {
+		if rpt.ID == data.ReportID {
+			for l, lCode := range rpt.LaborCodes {
+				if strings.EqualFold(lCode.ChargeNumber, data.ChargeNumber) &&
+					strings.EqualFold(lCode.Extension, data.Extension) {
+					switch strings.ToLower(data.Field) {
+					case "clin":
+						lCode.CLIN = data.Value
+					case "slin":
+						lCode.SLIN = data.Value
+					case "location":
+						lCode.Location = data.Value
+					case "wbs":
+						lCode.WBS = data.Value
+					case "minimum", "min", "minimumemployees":
+						min, _ := strconv.Atoi(data.Value)
+						lCode.MinimumEmployees = min
+					case "notassigned", "notassignedname":
+						lCode.NotAssignedName = data.Value
+					case "hours", "hoursperemployee":
+						hours, _ := strconv.ParseFloat(data.Value, 64)
+						lCode.HoursPerEmployee = hours
+					case "exercise":
+						lCode.Exercise = strings.EqualFold(data.Value, "true")
+					case "start", "startdate":
+						tdate, _ := time.Parse("2006-01-02", data.Value)
+						lCode.StartDate = tdate
+					case "end", "enddate":
+						tdate, _ := time.Parse("2006-01-02", data.Value)
+						lCode.EndDate = tdate
+					}
+					rpt.LaborCodes[l] = lCode
+				}
 			}
-			site.LaborCodes[l] = lCode
+			site.ForecastReports[r] = rpt
 		}
 	}
 
@@ -907,6 +920,7 @@ func UpdateSiteLaborCode(c *gin.Context) {
 func DeleteSiteLaborCode(c *gin.Context) {
 	teamID := c.Param("teamid")
 	siteID := c.Param("siteid")
+	rptID, _ := strconv.Atoi(c.Param("reportid"))
 	chgNo := c.Param("chgno")
 	ext := c.Param("ext")
 
@@ -922,15 +936,20 @@ func DeleteSiteLaborCode(c *gin.Context) {
 		return
 	}
 
-	pos := -1
-	for l, lCode := range site.LaborCodes {
-		if strings.EqualFold(lCode.ChargeNumber, chgNo) &&
-			strings.EqualFold(lCode.Extension, ext) {
-			pos = l
+	for r, rpt := range site.ForecastReports {
+		if rpt.ID == rptID {
+			pos := -1
+			for l, lCode := range rpt.LaborCodes {
+				if strings.EqualFold(lCode.ChargeNumber, chgNo) &&
+					strings.EqualFold(lCode.Extension, ext) {
+					pos = l
+				}
+			}
+			if pos >= 0 {
+				rpt.LaborCodes = append(rpt.LaborCodes[:pos], rpt.LaborCodes[pos+1:]...)
+			}
+			site.ForecastReports[r] = rpt
 		}
-	}
-	if pos >= 0 {
-		site.LaborCodes = append(site.LaborCodes[:pos], site.LaborCodes[pos+1:]...)
 	}
 
 	if err = services.UpdateSite(teamID, *site); err != nil {

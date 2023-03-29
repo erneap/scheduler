@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Site } from '../models/sites/site';
+import { ISite, Site } from '../models/sites/site';
 import { SiteResponse } from '../models/web/siteWeb';
 import { AuthService } from '../services/auth.service';
 import { DialogService } from '../services/dialog-service.service';
@@ -61,5 +61,9 @@ export class SiteComponent {
         this.site = new Site(site);
       }
     }
+  }
+
+  onChangedSite(iSite: ISite) {
+    this.site = new Site(iSite);
   }
 }
