@@ -54,6 +54,25 @@
                   <mat-error *ngIf="reportForm.controls['end'].hasError('required')">Invalid end date</mat-error>
                 </mat-form-field>
               </div>
+              <div class="flexlayout column topleft" style="padding-top: 5px;">
+                <div>Select Sub-Period Ending Day:</div>
+                <mat-radio-group formControlName="period" 
+                  (change)="onChange('period')"
+                  class="flexlayout column center" 
+                  style="background-color: white;border: black 1px solid;padding-right:10px;">
+                  <div class="flexlayout row center">
+                    <mat-radio-button value="0">Sunday</mat-radio-button>
+                    <mat-radio-button value="1">Monday</mat-radio-button>
+                    <mat-radio-button value="2">Tuesday</mat-radio-button>
+                    <mat-radio-button value="3">Wednesday</mat-radio-button>
+                  </div>
+                  <div class="flexlayout row center">
+                    <mat-radio-button value="4">Thursday</mat-radio-button>
+                    <mat-radio-button value="5">Friday</mat-radio-button>
+                    <mat-radio-button value="6">Saturday</mat-radio-button>
+                  </div>
+                </mat-radio-group>
+              </div>
               <div class="fxLayout-row-center" style="gap: 10px;">
                 <button mat-raised-button color="accent"
                   *ngIf="this.reportForm.valid && this.selected === 'new'">Add</button>

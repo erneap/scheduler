@@ -193,7 +193,7 @@ export class SiteService extends CacheService {
   }
 
   addForecastReport(teamid: string, siteid: string, name: string, start: Date, 
-  end: Date): Observable<HttpResponse<SiteResponse>> {
+  end: Date, period: number): Observable<HttpResponse<SiteResponse>> {
     const url = '/scheduler/api/v1/site/forecast';
     const data: CreateSiteForecast = {
       team: teamid,
@@ -201,6 +201,7 @@ export class SiteService extends CacheService {
       name: name,
       startdate: start,
       enddate: end,
+      period: period,
     }
     return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
   }

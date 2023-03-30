@@ -41,11 +41,17 @@ func (c ByForecastReport) Less(i, j int) bool {
 }
 func (c ByForecastReport) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
-func (r *ForecastReport) ChangePeriodsStart(sDate time.Time) {
+func (r *ForecastReport) ChangePeriodsStart(weekday int) {
 	end := time.Date(r.EndDate.Year(), r.EndDate.Month(), r.EndDate.Day(), 0, 0,
 		0, 0, time.UTC)
-	for end.Weekday() != sDate.Weekday() {
+	for int(end.Weekday()) != weekday {
 		end = end.AddDate(0, 0, 1)
+	}
+	end = end.AddDate(0, 0, 1)
+	start := time.Date(r.StartDate.Year(), r.StartDate.Month(), r.StartDate.Day(),
+		0, 0, 0, 0, time.UTC)
+	for int(start.Weekday()) != weekday {
+		start = start.AddDate(0, 0, 1)
 	}
 
 	// clear the monthly periods of the forecast
@@ -54,30 +60,21 @@ func (r *ForecastReport) ChangePeriodsStart(sDate time.Time) {
 		r.Periods[i] = prds
 	}
 
-	var prd *ForecastPeriod
-	pos := -1
-	for sDate.Before(end) && sDate.Equal(end) {
-		pos = -1
-		if prd == nil {
-			prd = &r.Periods[0]
-			pos = 0
-		} else {
-			for i := 0; i < len(r.Periods)-1; i++ {
-				if r.Periods[i].Month.Before(sDate) && r.Periods[i+1].Month.After(sDate) {
-					prd = &r.Periods[i]
-					pos = i
-				}
-			}
-			if sDate.After(r.Periods[len(r.Periods)-1].Month) {
-				prd = &r.Periods[len(r.Periods)-1]
-				pos = len(r.Periods) - 1
+	for start.Before(end) {
+		found := false
+		for p, prd := range r.Periods {
+			if prd.Month.Year() == start.Year() && prd.Month.Month() == start.Month() {
+				prd.Periods = append(prd.Periods, start)
+				found = true
+				r.Periods[p] = prd
 			}
 		}
-		if prd != nil {
-			prd.Periods = append(prd.Periods, sDate)
-			r.Periods[pos] = *prd
+		if !found {
+			prd := r.Periods[len(r.Periods)-1]
+			prd.Periods = append(prd.Periods, start)
+			r.Periods[len(r.Periods)-1] = prd
 		}
-		sDate = sDate.AddDate(0, 0, 7)
+		start = start.AddDate(0, 0, 7)
 	}
 }
 

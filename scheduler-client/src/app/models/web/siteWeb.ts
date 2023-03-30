@@ -84,6 +84,7 @@ export interface CreateSiteForecast {
   name: string;
   startdate: Date;
   enddate: Date;
+  period: number;
 }
 
 export interface UpdateSiteForecast {

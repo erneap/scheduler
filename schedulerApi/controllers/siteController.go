@@ -1007,7 +1007,7 @@ func CreateSiteForecastReport(c *gin.Context) {
 			period := sites.ForecastPeriod{
 				Month: start,
 			}
-			for start.Weekday() != time.Friday {
+			for start.Weekday() != time.Weekday(data.Period) {
 				start = start.AddDate(0, 0, 1)
 			}
 			for start.Before(end) {
@@ -1090,9 +1090,9 @@ func UpdateSiteForecastReport(c *gin.Context) {
 					rpt.LaborCodes = append(rpt.LaborCodes[:found],
 						rpt.LaborCodes[found+1:]...)
 				}
-			case "resetperiods":
-				tDate, _ := time.Parse("2006-01-02", data.Value)
-				rpt.ChangePeriodsStart(tDate)
+			case "period":
+				weekday, _ := strconv.Atoi(data.Value)
+				rpt.ChangePeriodsStart(weekday)
 			case "moveperiod":
 				parts := strings.Split(data.Value, "|")
 				fromDate, _ := time.Parse("2006-01-02", parts[0])

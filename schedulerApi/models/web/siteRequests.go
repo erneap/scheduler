@@ -88,6 +88,7 @@ type CreateSiteForecast struct {
 	Name      string    `json:"name"`
 	StartDate time.Time `json:"startdate"`
 	EndDate   time.Time `json:"enddate"`
+	Period    int       `json:"period"`
 }
 
 type UpdateSiteForecast struct {

@@ -30,6 +30,7 @@ export class SiteForecastReportEditorComponent {
   showSortUp: boolean = true;
   showSortDown: boolean = true;
   reportForm: FormGroup;
+  weekdays: string[];
 
   constructor(
     protected authService: AuthService,
@@ -47,8 +48,11 @@ export class SiteForecastReportEditorComponent {
     this.reportForm = this.fb.group({
       name: ['', [Validators.required]],
       start: [new Date(), [Validators.required]],
-      end: [new Date(), [Validators.required]]
+      end: [new Date(), [Validators.required]],
+      period: ["0", [Validators.required]]
     });
+    this.weekdays = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+      'Friday', 'Saturday'];
   }
 
   setReports() {
@@ -72,9 +76,17 @@ export class SiteForecastReportEditorComponent {
       if (this.site.forecasts) {
         this.site.forecasts.forEach(rpt => {
           if (this.selected === `${rpt.id}`) {
+            let weekday = 0;
+            if (rpt.periods && rpt.periods.length > 0) {
+              const prd = rpt.periods[0];
+              if (prd.periods && prd.periods.length > 0) {
+                weekday = prd.periods[0].getDay();
+              }
+            }
             this.reportForm.controls['name'].setValue(rpt.name);
             this.reportForm.controls['start'].setValue(rpt.startDate);
             this.reportForm.controls['end'].setValue(rpt.endDate);
+            this.reportForm.controls['period'].setValue(`${weekday}`);
           }
         });
       }
@@ -82,6 +94,7 @@ export class SiteForecastReportEditorComponent {
       this.reportForm.controls['name'].setValue('');
       this.reportForm.controls['start'].setValue(new Date());
       this.reportForm.controls['end'].setValue(new Date());
+      this.reportForm.controls['period'].setValue('5');
     }
   }
   

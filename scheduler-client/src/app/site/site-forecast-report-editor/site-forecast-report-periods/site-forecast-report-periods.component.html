@@ -1,0 +1,9 @@
+<div class="flexlayout column top" style="background-color: white;">
+  <div class="flexlayout row center">
+    <div class="list">
+      <div *ngFor="let item of periods"
+      [class]="getButtonStyle(item.id)"
+      >{{item.label}}</div>
+    </div>
+  </div>
+</div>

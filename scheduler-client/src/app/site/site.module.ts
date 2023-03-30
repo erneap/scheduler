@@ -9,6 +9,7 @@ import { SiteBasicInformationComponent } from './site-basic-information/site-bas
 import { SiteForecastReportEditorComponent } from './site-forecast-report-editor/site-forecast-report-editor.component';
 import { SiteWorkcenterShiftComponent } from './site-workcenters/site-workcenter-shift/site-workcenter-shift.component';
 import { SiteWorkcenterPositionComponent } from './site-workcenters/site-workcenter-position/site-workcenter-position.component';
+import { SiteForecastReportPeriodsComponent } from './site-forecast-report-editor/site-forecast-report-periods/site-forecast-report-periods.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { SiteWorkcenterPositionComponent } from './site-workcenters/site-workcen
        SiteBasicInformationComponent,
        SiteForecastReportEditorComponent,
        SiteWorkcenterShiftComponent,
-       SiteWorkcenterPositionComponent
+       SiteWorkcenterPositionComponent,
+       SiteForecastReportPeriodsComponent
   ],
   imports: [
     CommonModule,
