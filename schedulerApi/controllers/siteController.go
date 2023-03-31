@@ -1093,12 +1093,11 @@ func UpdateSiteForecastReport(c *gin.Context) {
 			case "period":
 				weekday, _ := strconv.Atoi(data.Value)
 				rpt.ChangePeriodsStart(weekday)
-			case "moveperiod":
+			case "move", "moveperiod":
 				parts := strings.Split(data.Value, "|")
 				fromDate, _ := time.Parse("2006-01-02", parts[0])
 				toDate, _ := time.Parse("2006-01-02", parts[1])
-				prdDate, _ := time.Parse("2006-01-02", parts[2])
-				rpt.MovePeriodBetweenMonths(fromDate, toDate, prdDate)
+				rpt.MovePeriodBetweenMonths(fromDate, toDate)
 			}
 			site.ForecastReports[r] = rpt
 		}

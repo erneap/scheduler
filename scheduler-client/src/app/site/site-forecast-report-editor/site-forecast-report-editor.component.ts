@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ListItem } from 'src/app/generic/button-list/listitem';
+import { ForecastReport, IForecastReport } from 'src/app/models/sites/forecastreport';
 import { ISite, Site } from 'src/app/models/sites/site';
 import { SiteResponse } from 'src/app/models/web/siteWeb';
 import { AuthService } from 'src/app/services/auth.service';
@@ -26,6 +27,7 @@ export class SiteForecastReportEditorComponent {
   @Output() siteChanged = new EventEmitter<Site>();
   teamid: string;
   reports: ListItem[] = [];
+  report: ForecastReport = new ForecastReport();
   selected: string = 'new';
   showSortUp: boolean = true;
   showSortDown: boolean = true;
@@ -76,6 +78,7 @@ export class SiteForecastReportEditorComponent {
       if (this.site.forecasts) {
         this.site.forecasts.forEach(rpt => {
           if (this.selected === `${rpt.id}`) {
+            this.report = new ForecastReport(rpt);
             let weekday = 0;
             if (rpt.periods && rpt.periods.length > 0) {
               const prd = rpt.periods[0];
@@ -91,6 +94,7 @@ export class SiteForecastReportEditorComponent {
         });
       }
     } else {
+      this.report = new ForecastReport();
       this.reportForm.controls['name'].setValue('');
       this.reportForm.controls['start'].setValue(new Date());
       this.reportForm.controls['end'].setValue(new Date());
@@ -171,5 +175,17 @@ export class SiteForecastReportEditorComponent {
     }
     answer += `${date.getDate()}`;
     return answer;
+  }
+
+  onSiteChanged(site: Site) {
+    this.site = site;
+    this.siteChanged.emit(new Site(site))
+    if (this.site.forecasts) {
+      this.site.forecasts.forEach(rpt => {
+        if (`${rpt.id}` === this.selected) {
+          this.report = new ForecastReport(rpt);
+        }
+      });
+    }
   }
 }

@@ -3,16 +3,16 @@
     <mat-card-header>
       <div class="flexlayout row center">
         <div class="flexlayout column topleft">
-          <div class="headline">Site Editor</div>
+          <div class="headline">Site Forecast Reports Editor</div>
           <div class="subheadline">Site: {{site.name}}</div>
         </div>
       </div>
     </mat-card-header>
     <mat-card-content style="padding-right: 25px;">
-      <div class="flexlayout row top" style="gap: 10px;">
+      <div class="flexlayout row top" style="gap: 20px;">
         <div class="flexlayout column topleft">
           <div class="flexlayout row center" style="width: 100%;">
-            <div class="subheadline" style="color: white;">Forecast Reports</div>
+            <h3>Forecast Report List</h3>
             <span class="flex-spacer"></span>
             <button mat-icon-button color="accent"
               *ngIf="selected !== 'new' && selected !== ''"
@@ -82,6 +82,13 @@
             </form>
           </div>
         </div>
+        <app-site-forecast-report-periods [site]="site" [report]="report"
+          *ngIf="selected !== 'new'">
+        </app-site-forecast-report-periods>
+        <app-site-forecast-report-labor-codes
+          [site]="site" [report]="report"
+          *ngIf="selected !== 'new'">
+        </app-site-forecast-report-labor-codes>
       </div>
     </mat-card-content>
   </mat-card>

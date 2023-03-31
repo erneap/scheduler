@@ -18,6 +18,14 @@ func (c ByForecastPeriod) Less(i, j int) bool {
 }
 func (c ByForecastPeriod) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
+type ByDate []time.Time
+
+func (c ByDate) Len() int { return len(c) }
+func (c ByDate) Less(i, j int) bool {
+	return c[i].Before(c[j])
+}
+func (c ByDate) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+
 type ForecastReport struct {
 	ID         int              `json:"id" bson:"id"`
 	Name       string           `json:"name" bson:"name"`
@@ -70,44 +78,62 @@ func (r *ForecastReport) ChangePeriodsStart(weekday int) {
 			}
 		}
 		if !found {
-			prd := r.Periods[len(r.Periods)-1]
+			month := time.Date(start.Year(), start.Month(), 1, 0, 0, 0, 0, time.UTC)
+			prd := ForecastPeriod{
+				Month: month,
+			}
 			prd.Periods = append(prd.Periods, start)
-			r.Periods[len(r.Periods)-1] = prd
+			r.Periods = append(r.Periods, prd)
 		}
 		start = start.AddDate(0, 0, 7)
 	}
+	r.removeUnusedPeriods()
 }
 
-func (r *ForecastReport) MovePeriodBetweenMonths(from, to, oPrd time.Time) {
-	var fromPrd *ForecastPeriod
-	var toPrd *ForecastPeriod
+func (r *ForecastReport) MovePeriodBetweenMonths(from, to time.Time) {
+	var fromPrd ForecastPeriod
+	var toPrd ForecastPeriod
 	fromPos := -1
 	toPos := -1
+	sort.Sort(ByForecastPeriod(r.Periods))
 	for i, prd := range r.Periods {
 		if prd.Month.Equal(from) {
 			fromPos = i
-			fromPrd = &prd
+			fromPrd = prd
 		} else if prd.Month.Equal(to) {
 			toPos = i
-			toPrd = &prd
+			toPrd = prd
 		}
 	}
-	toPrd.Periods = append(toPrd.Periods, oPrd)
-	sort.Slice(toPrd.Periods, func(i, j int) bool {
-		return toPrd.Periods[i].Before(toPrd.Periods[j])
-	})
-	pos := -1
-	for i, prd := range fromPrd.Periods {
-		if prd.Equal(oPrd) {
-			pos = i
+	if toPos < 0 {
+		toPrd = ForecastPeriod{
+			Month: to,
+		}
+		r.Periods = append(r.Periods, toPrd)
+		toPos = len(r.Periods) - 1
+	}
+
+	sort.Sort(ByDate(fromPrd.Periods))
+	if from.Before(to) {
+		dPrd := fromPrd.Periods[len(fromPrd.Periods)-1]
+		fromPrd.Periods = fromPrd.Periods[:len(fromPrd.Periods)-1]
+		toPrd.Periods = append(toPrd.Periods, dPrd)
+	} else {
+		dPrd := fromPrd.Periods[0]
+		fromPrd.Periods = fromPrd.Periods[1:]
+		toPrd.Periods = append(toPrd.Periods, dPrd)
+	}
+	sort.Sort(ByDate(toPrd.Periods))
+	r.Periods[fromPos] = fromPrd
+	r.Periods[toPos] = toPrd
+	sort.Sort(ByForecastPeriod(r.Periods))
+	r.removeUnusedPeriods()
+}
+
+func (r *ForecastReport) removeUnusedPeriods() {
+	for p := len(r.Periods) - 1; p >= 0; p-- {
+		if len(r.Periods[p].Periods) == 0 {
+			r.Periods = append(r.Periods[:p], r.Periods[p+1:]...)
 		}
 	}
-	if pos >= 0 {
-		fromPrd.Periods = append(fromPrd.Periods[:pos], fromPrd.Periods[pos+1:]...)
-		sort.Slice(fromPrd.Periods, func(i, j int) bool {
-			return fromPrd.Periods[i].Before(fromPrd.Periods[j])
-		})
-	}
-	r.Periods[fromPos] = *fromPrd
-	r.Periods[toPos] = *toPrd
 }
