@@ -6,9 +6,11 @@ import { ISite, Site } from '../models/sites/site';
 import { IUser, User } from '../models/users/user';
 import { NewSiteRequest, NewSiteWorkcenter, SiteResponse, SiteWorkcenterUpdate,
   NewWorkcenterPosition, WorkcenterPositionUpdate, CreateSiteForecast,
-  UpdateSiteForecast } 
+  UpdateSiteForecast, 
+  UpdateSiteLaborCode} 
   from '../models/web/siteWeb';
 import { CacheService } from './cache.service';
+import { NewSiteLaborCode } from '../models/web/siteWeb';
 
 @Injectable({
   providedIn: 'root'
@@ -216,6 +218,44 @@ export class SiteService extends CacheService {
       field: field,
       value: value,
     }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  deleteForecastReport(teamid: string, siteid: string, reportid: number):
+    Observable<HttpResponse<SiteResponse>> {
+    const url = `/scheduler/api/v1/site/forecast/${teamid}/${siteid}/${reportid}`;
+    return this.httpClient.delete<SiteResponse>(url, {observe: 'response'});
+  }
+
+  createReportLaborCode(teamid: string, siteid: string, reportid: number,
+    chargeNumber: string, extension: string, start: string, end: string):
+    Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site/forecast/laborcode';
+    const data: NewSiteLaborCode = {
+      team: teamid,
+      siteid: siteid,
+      reportid: reportid,
+      chargeNumber: chargeNumber,
+      extension: extension,
+      startDate: start,
+      endDate: end,
+    };
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'})
+  }
+
+  updateReportLaborCode(teamid: string, siteid: string, reportid: number,
+    chargeNumber: string, extension: string, field: string, value: string):
+    Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site/forecast/laborcode';
+    const data: UpdateSiteLaborCode = {
+      team: teamid,
+      siteid: siteid,
+      reportid: reportid,
+      chargeNumber: chargeNumber,
+      extension: extension,
+      field: field,
+      value: value,
+    };
     return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
   }
 }
