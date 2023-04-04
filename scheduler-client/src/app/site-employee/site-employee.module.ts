@@ -52,6 +52,9 @@ import { UserAccountDialogComponent } from './site-employee-editor/user-account-
     EmployeeModule,
     FormsModule,
     ReactiveFormsModule
+  ],
+  exports: [
+    SiteEmployeeComponent,
   ]
 })
 export class SiteEmployeeModule { }

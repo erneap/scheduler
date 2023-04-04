@@ -35,12 +35,12 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="flexlayout row center" style="padding-top: 5px;"
-      *ngIf="selected !== 'new'">
+    <div class="flexlayout row center" style="padding-top: 5px;">
       <div class="formField">
         <mat-form-field class="fieldWidth" appearance="fill">
           <mat-label>CLIN</mat-label>
-          <input matInput formControlName="clin" (blur)="onUpdateLaborCode('clin')">
+          <input matInput formControlName="clin" 
+            (blur)="onUpdateLaborCode('clin')">
         </mat-form-field>
       </div>
       <div class="formField">
@@ -50,8 +50,7 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="flexlayout row center" style="padding-top: 5px;"
-      *ngIf="selected !== 'new'">
+    <div class="flexlayout row center" style="padding-top: 5px;">
       <div class="formField">
         <mat-form-field class="fieldWidth" appearance="fill">
           <mat-label>WBS</mat-label>
@@ -66,8 +65,7 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="flexlayout row center" style="padding-top: 5px;"
-      *ngIf="selected !== 'new'">
+    <div class="flexlayout row center" style="padding-top: 5px;">
       <div class="formField">
         <mat-form-field class="fieldWidth" appearance="fill">
           <mat-label>Number of Slots</mat-label>
@@ -83,8 +81,7 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="flexlayout row center" style="padding-top: 5px;"
-      *ngIf="selected !== 'new'">
+    <div class="flexlayout row center" style="padding-top: 5px;">
       <div class="formField">
         <mat-form-field class="fieldWidth" appearance="fill">
           <mat-label>Empty Slot Name</mat-label>
@@ -106,10 +103,10 @@
             (dateChange)="onUpdateLaborCode('startDate')">
           <input matEndDate placeholder="End Date" formControlName="endDate"
             (dateChange)="onUpdateLaborCode('endDate')">
-          <mat-hint>MM/DD/YYYY - MM/DD/YYYY</mat-hint>
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-date-range-input>
+        <mat-hint>MM/DD/YYYY - MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
       </mat-form-field>
     </div>
     <div class="flexlayout row center" style="gap: 10px;"

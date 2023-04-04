@@ -1,0 +1,81 @@
+import { Component } from '@angular/core';
+import { ListItem } from 'src/app/generic/button-list/listitem';
+import { Site } from 'src/app/models/sites/site';
+import { Team } from 'src/app/models/teams/team';
+import { SiteResponse } from 'src/app/models/web/siteWeb';
+import { AuthService } from 'src/app/services/auth.service';
+import { DialogService } from 'src/app/services/dialog-service.service';
+import { SiteService } from 'src/app/services/site.service';
+import { TeamService } from 'src/app/services/team.service';
+
+@Component({
+  selector: 'app-team-site-editor',
+  templateUrl: './team-site-editor.component.html',
+  styleUrls: ['./team-site-editor.component.scss']
+})
+export class TeamSiteEditorComponent {
+  team: Team;
+  selected: string = 'new';
+  site: Site;
+  sites: ListItem[] = [];
+
+  constructor(
+    protected authService: AuthService,
+    protected dialogService: DialogService,
+    protected siteService: SiteService,
+    protected teamService: TeamService
+  ) {
+    const iTeam = this.teamService.getTeam();
+    if (iTeam) {
+      this.team = new Team(iTeam);
+    } else {
+      this.team = new Team();
+    }
+    this.setSites();
+    const iSite = this.siteService.getSite();
+    if (iSite) {
+      this.site = new Site(iSite);
+      this.selected = this.site.id;
+    } else {
+      this.site = new Site();
+    }
+  }
+
+  setSites() {
+    this.sites = [];
+    if (this.team.sites) {
+      this.team.sites = this.team.sites.sort((a,b) => a.compareTo(b));
+      this.team.sites.forEach(iSite => {
+        this.sites.push()
+      });
+    }
+  }
+
+  onSelect() {
+    const iSite = this.teamService.getSelectedSite(this.selected);
+    if (iSite) {
+      this.site = new Site(iSite);
+    } else {
+      this.authService.statusMessage = "Retrieving requested site";
+      this.dialogService.showSpinner();
+      this.teamService.retrieveSelectedSite(this.team.id, this.selected).subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.site) {
+            this.site = new Site(data.site);
+            this.teamService.setSelectedSite(data.site)
+          }
+          this.authService.statusMessage = "Retrieval complete"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      })
+    }
+  }
+}

@@ -2,12 +2,15 @@ import { Injectable } from '@angular/core';
 import { CacheService } from './cache.service';
 import { ITeam, Team } from '../models/teams/team';
 import { ISite, Site } from '../models/sites/site';
+import { Observable, of } from 'rxjs';
+import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
+import { SiteResponse } from '../models/web/siteWeb';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeamService extends CacheService {
-  constructor() {
+  constructor(protected httpClient: HttpClient) {
     super();
   }
 
@@ -26,14 +29,20 @@ export class TeamService extends CacheService {
 
   setSelectedSite(isite: ISite) {
     const site = new Site(isite);
-    this.setItem('current-site', site);
+    const iSite = this.getItem<ISite>(site.id);
+    this.setItem(site.id, site);
   }
 
-  getSelectedSite() : Site | undefined {
-    const iSite = this.getItem<ISite>('current-site');
+  getSelectedSite(siteid: string) : ISite | undefined {
+    const iSite = this.getItem<ISite>(siteid);
     if (iSite) {
-      return new Site(iSite);
+      return iSite;
     }
     return undefined;
+  }
+
+  retrieveSelectedSite(teamid: string, siteid: string): Observable<HttpResponse<SiteResponse>> {
+    const url = `/scheduler/api/v1/site/${teamid}/${siteid}/true`;
+    return this.httpClient.get<SiteResponse>(url, {observe: 'response'});
   }
 }

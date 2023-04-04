@@ -34,7 +34,6 @@ export class SiteEmployeeEditorComponent {
 
   employeeChanged(emp: Employee) {
     this.employee = new Employee(emp);
-    console.log(emp);
     if (emp.name.first === '') {
       const site = this.siteService.getSite();
       if (site) {

@@ -1000,23 +1000,7 @@ func CreateSiteForecastReport(c *gin.Context) {
 			StartDate: data.StartDate,
 			EndDate:   data.EndDate,
 		}
-		start := time.Date(data.StartDate.Year(), data.StartDate.Month(), 1, 0, 0,
-			0, 0, time.UTC)
-		for start.Before(data.EndDate) {
-			end := start.AddDate(0, 1, 0)
-			period := sites.ForecastPeriod{
-				Month: start,
-			}
-			for start.Weekday() != time.Weekday(data.Period) {
-				start = start.AddDate(0, 0, 1)
-			}
-			for start.Before(end) {
-				period.Periods = append(period.Periods, start)
-				start = start.AddDate(0, 0, 7)
-			}
-			rpt.Periods = append(rpt.Periods, period)
-			start = end
-		}
+		rpt.ChangePeriodsStart(data.Period)
 		site.ForecastReports = append(site.ForecastReports, rpt)
 	}
 

@@ -6,6 +6,7 @@ import { NewEmployeeComponent } from './site-employee/new-employee/new-employee.
 import { SiteEmployeeComponent } from './site-employee/site-employee.component';
 import { NewSiteComponent } from './site/new-site/new-site.component';
 import { SiteComponent } from './site/site.component';
+import { TeamSiteEditorComponent } from './team/team-site-editor/team-site-editor.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -22,6 +23,7 @@ const routes: Routes = [
   { path: 'siteemployees', component: SiteEmployeeComponent},
   { path: 'newsite', component: NewSiteComponent },
   { path: 'siteeditor', component: SiteComponent},
+  { path: 'team/siteeditor', component: TeamSiteEditorComponent},
   { path: '**', component: NotFoundComponent}
 ];
 

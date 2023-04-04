@@ -1,0 +1,22 @@
+<div class="flexlayout column topcenter">
+  <div class="flexlayout row center" 
+    style="background-color: #3f51b5; color: white;">
+    <mat-form-field appearance="fill">
+      <mat-label>Site To Edit</mat-label>
+      <mat-select [(ngModel)]="selected" name="site"
+        (selectionChange)="onSelect()">
+        <mat-option *ngFor="let site of sites" [value]="site.id">
+          {{site.label}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <mat-tab-group [backgroundColor]="'primary'">
+    <mat-tab label="Site Editor">
+      <app-site [siteid]="selected"></app-site>
+    </mat-tab>
+    <mat-tab label="Site Employee Editor">
+      <app-site-employee [site]="site"></app-site-employee>
+    </mat-tab>
+  </mat-tab-group>
+</div>

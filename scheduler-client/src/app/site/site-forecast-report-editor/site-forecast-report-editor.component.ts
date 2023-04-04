@@ -188,4 +188,52 @@ export class SiteForecastReportEditorComponent {
       });
     }
   }
+
+  onAddReport() {
+    if (this.reportForm.valid) {
+      const name = this.reportForm.value.name;
+      const start = this.reportForm.value.start;
+      const end = this.reportForm.value.end;
+      this.authService.statusMessage = 'Adding new Forecast Report';
+      this.dialogService.showSpinner();
+      this.siteService.addForecastReport(this.teamid, this.site.id, 
+        name, start, end, Number(this.reportForm.value.period))
+        .subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.site) {
+            this.site = new Site(data.site);
+            this.siteChanged.emit(new Site(data.site));
+            if (this.site.forecasts) {
+              this.site.forecasts.sort((a,b) => a.compareTo(b));
+              this.site.forecasts.forEach(rpt => {
+                if (rpt.name === name 
+                  && rpt.startDate.getFullYear() === start.getFullYear()
+                  && rpt.startDate.getMonth() === start.getMonth()
+                  && rpt.startDate.getDate() === start.getDate()) {
+                  this.selected = `${rpt.id}`;
+                  this.report = new ForecastReport(rpt);
+                }
+              })
+              this.setReports();
+            }
+            const site = this.siteService.getSite();
+            if (site && data.site.id === site.id) {
+              this.siteService.setSite(new Site(data.site));
+            }
+            this.teamService.setSelectedSite(new Site(data.site));
+          }
+          this.authService.statusMessage = "Retrieval complete"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      });
+    }
+  }
 }

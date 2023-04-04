@@ -75,7 +75,8 @@
               </div>
               <div class="fxLayout-row-center" style="gap: 10px;">
                 <button mat-raised-button color="accent"
-                  *ngIf="this.reportForm.valid && this.selected === 'new'">Add</button>
+                  *ngIf="this.reportForm.valid && this.selected === 'new'"
+                  (click)="onAddReport()">Add</button>
                   <button mat-raised-button color="warn"
                     *ngIf="this.reportForm.valid && this.selected === 'new'">Clear</button>
               </div>

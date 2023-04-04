@@ -228,7 +228,9 @@ export class SiteService extends CacheService {
   }
 
   createReportLaborCode(teamid: string, siteid: string, reportid: number,
-    chargeNumber: string, extension: string, start: string, end: string):
+    chargeNumber: string, extension: string, clin: string, slin: string,
+    wbs: string, location: string, mins: number, hours: number, noname: string,
+    exercise: boolean, start: string, end: string):
     Observable<HttpResponse<SiteResponse>> {
     const url = '/scheduler/api/v1/site/forecast/laborcode';
     const data: NewSiteLaborCode = {
@@ -237,6 +239,14 @@ export class SiteService extends CacheService {
       reportid: reportid,
       chargeNumber: chargeNumber,
       extension: extension,
+      clin: clin,
+      slin: slin,
+      location: location,
+      wbs: wbs,
+      minimumEmployees: `${mins}`,
+      hoursPerEmployee: `${hours}`,
+      notAssignedName: noname,
+      exercise: (exercise) ? 'true' : 'false',
       startDate: start,
       endDate: end,
     };

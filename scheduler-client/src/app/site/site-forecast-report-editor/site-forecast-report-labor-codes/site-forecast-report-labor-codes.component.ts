@@ -156,7 +156,11 @@ export class SiteForecastReportLaborCodesComponent {
     this.authService.statusMessage = "Adding new labor code";
     this.dialogService.showSpinner();
     this.siteService.createReportLaborCode(this.teamid, this.site.id, 
-      this.report.id, chgNo, ext, this.getDateString(startDate), 
+      this.report.id, chgNo, ext, this.laborForm.value.clin, 
+      this.laborForm.value.slin, this.laborForm.value.wbs, 
+      this.laborForm.value.location, this.laborForm.value.minumum,
+      this.laborForm.value.hoursPerEmployee, this.laborForm.value.notAssignedName,
+      this.laborForm.value.exercise, this.getDateString(startDate), 
       this.getDateString(endDate)).subscribe({
       next: resp => {
         this.dialogService.closeSpinner();
@@ -222,40 +226,44 @@ export class SiteForecastReportLaborCodesComponent {
       const chgNo = this.laborForm.value.chargeNumber;
       const ext = this.laborForm.value.extension;
 
-      this.authService.statusMessage = "Adding new labor code";
-      this.dialogService.showSpinner();
-      this.siteService.updateReportLaborCode(this.teamid, this.site.id, 
-        this.report.id, chgNo, ext, field, value).subscribe({
-        next: resp => {
-          this.dialogService.closeSpinner();
-          if (resp.headers.get('token') !== null) {
-            this.authService.setToken(resp.headers.get('token') as string);
-          }
-          const data: SiteResponse | null = resp.body;
-          if (data && data != null && data.site) {
-            this.site = new Site(data.site);
-            this.siteChanged.emit(new Site(data.site));
-            if (this.site.forecasts) {
-              this.site.forecasts.forEach(rpt => {
-                if (rpt.id === this.report.id) {
-                  this.report = rpt;
-                  this.setLaborCode();
-                }
-              })
+      console.log(`${chgNo} - ${ext} - ${field} - ${value}`);
+
+      if (value !== '') {
+        this.authService.statusMessage = "Adding new labor code";
+        this.dialogService.showSpinner();
+        this.siteService.updateReportLaborCode(this.teamid, this.site.id, 
+          this.report.id, chgNo, ext, field, value).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
             }
-            const site = this.siteService.getSite();
-            if (site && data.site.id === site.id) {
-              this.siteService.setSite(new Site(data.site));
+            const data: SiteResponse | null = resp.body;
+            if (data && data != null && data.site) {
+              this.site = new Site(data.site);
+              this.siteChanged.emit(new Site(data.site));
+              if (this.site.forecasts) {
+                this.site.forecasts.forEach(rpt => {
+                  if (rpt.id === this.report.id) {
+                    this.report = rpt;
+                    this.setLaborCode();
+                  }
+                })
+              }
+              const site = this.siteService.getSite();
+              if (site && data.site.id === site.id) {
+                this.siteService.setSite(new Site(data.site));
+              }
+              this.teamService.setSelectedSite(new Site(data.site));
             }
-            this.teamService.setSelectedSite(new Site(data.site));
+            this.authService.statusMessage = "Retrieval complete"
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.error.exception;
           }
-          this.authService.statusMessage = "Retrieval complete"
-        },
-        error: err => {
-          this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.error.exception;
-        }
-      });
+        });
+      }
     }
   }
 

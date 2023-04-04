@@ -23,6 +23,7 @@ import { SiteSchedulerModule } from './site-scheduler/site-scheduler.module';
 import { SiteEmployeeModule } from './site-employee/site-employee.module';
 import { GenericModule } from './generic/generic.module';
 import { DeletionConfirmationComponent } from './generic/deletion-confirmation/deletion-confirmation.component';
+import { TeamModule } from './team/team.module';
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import { DeletionConfirmationComponent } from './generic/deletion-confirmation/d
     SiteModule,
     SiteSchedulerModule,
     SiteEmployeeModule,
-    GenericModule
+    GenericModule,
+    TeamModule
   ],
   exports: [
     DeletionConfirmationComponent
