@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Employee, EmployeeLaborCode, IEmployee } from 'src/app/models/employees/employee';
+import { ISite, Site } from 'src/app/models/sites/site';
 import { EmployeeResponse } from 'src/app/models/web/employeeWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
@@ -31,8 +32,15 @@ export class SiteEmployeeLaborCodesComponent {
     } 
     return new Employee();
   }
+  private _site: Site = new Site();
+  @Input()
+  public set site(iSite: ISite) {
+    this._site = new Site(iSite);
+  }
+  get site(): Site {
+    return this._site;
+  }
   @Output() changed = new EventEmitter<Employee>();
-
   laborcodes: LaborCharge[] = [];
   year: number = (new Date()).getFullYear();
 
@@ -49,9 +57,14 @@ export class SiteEmployeeLaborCodesComponent {
     this.laborcodes = [];
     const start = new Date(Date.UTC(this.year, 0, 1));
     const end = new Date(Date.UTC(this.year, 11, 31));
-    const site = this.siteService.getSite();
-    if (site && site.forecasts) {
-      site.forecasts.forEach(fcst => {
+    if (this.site.id === '') {
+      const iSite = this.siteService.getSite();
+      if (iSite) {
+        this.site = new Site(iSite);
+      }
+    }
+    if (this.site && this.site.forecasts) {
+      this.site.forecasts.forEach(fcst => {
         if (fcst.laborCodes) {
           fcst.laborCodes.forEach(lc => {
             if (lc.startDate.getTime() < end.getTime() 
@@ -98,22 +111,6 @@ export class SiteEmployeeLaborCodesComponent {
             if (data.employee && emp && emp.id === data.employee.id) {
               this.empService.setEmployee(data.employee);
             }
-            const site = this.siteService.getSite();
-            if (site && site.employees && site.employees.length && data.employee) {
-              let found = false;
-              for (let i=0; i < site.employees.length && !found; i++) {
-                if (site.employees[i].id === data.employee.id) {
-                  site.employees[i] = new Employee(data.employee);
-                  found = true;
-                }
-              }
-              if (!found) {
-                site.employees.push(new Employee(data.employee));
-              }
-              site.employees.sort((a,b) => a.compareTo(b));
-              this.siteService.setSite(site);
-              this.siteService.setSelectedEmployee(data.employee);
-            }
           }
           this.changed.emit(new Employee(this.employee));
           this.authService.statusMessage = "Update complete";
@@ -140,22 +137,6 @@ export class SiteEmployeeLaborCodesComponent {
             const emp = this.empService.getEmployee();
             if (data.employee && emp && emp.id === data.employee.id) {
               this.empService.setEmployee(data.employee);
-            }
-            const site = this.siteService.getSite();
-            if (site && site.employees && site.employees.length && data.employee) {
-              let found = false;
-              for (let i=0; i < site.employees.length && !found; i++) {
-                if (site.employees[i].id === data.employee.id) {
-                  site.employees[i] = new Employee(data.employee);
-                  found = true;
-                }
-              }
-              if (!found) {
-                site.employees.push(new Employee(data.employee));
-              }
-              site.employees.sort((a,b) => a.compareTo(b));
-              this.siteService.setSite(site);
-              this.siteService.setSelectedEmployee(data.employee);
             }
           }
           this.changed.emit(new Employee(this.employee));

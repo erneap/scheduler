@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ListItem } from '../generic/button-list/listitem';
 import { Employee } from '../models/employees/employee';
@@ -24,9 +24,10 @@ export class SiteEmployeeComponent {
   get site(): Site {
     return this._site;
   }
-  items: ListItem[] = [];
+  @Output() siteChanged = new EventEmitter<Site>();
+  employees: ListItem[] = [];
   activeOnly: boolean = true;
-  selected: string = '';
+  selected: string = 'new';
   employee: Employee = new Employee();
 
   constructor(
@@ -38,67 +39,67 @@ export class SiteEmployeeComponent {
     protected router: Router,
     protected activeRouter: ActivatedRoute
   ) {
-    if (this.site.id === '') {
-      const site = this.siteService.getSite();
-      if (site) {
-        this._site = new Site(site);
-      }
+    const site = this.siteService.getSite();
+    if (site) {
+      this.site = site;
     }
-    this.setEmployees();
-    let iEmp = this.siteService.getSelectedEmployee();
-    if (iEmp) {
-      this.selected = iEmp.id;
-      this.employee = new Employee(iEmp);
-    } else {
-      iEmp = this.empService.getEmployee()
-      if (iEmp) {
-        this.selected = iEmp.id;
-        this.employee = new Employee(iEmp);
-      }
+    const emp = this.empService.getEmployee();
+    if (emp) {
+      this.employee = new Employee(emp);
+      this.selected = this.employee.id;
     }
-    this.authService.section = 'siteemployees';
   }
 
   setEmployees() {
-    this.items = [];
+    this.employees = [];
+    this.employees.push(new ListItem('new', 'Add New Employee'));
     if (this.site.employees) {
       this.site.employees.forEach(iEmp => {
-        const emp = new Employee(iEmp);
-        if ((emp.isActive() && this.activeOnly) || !this.activeOnly) {
-          this.items.push(new ListItem(emp.id, emp.name.getLastFirst()));
+        const emp = new Employee(iEmp)
+        if ((this.activeOnly && emp.isActive()) || !this.activeOnly) {
+          this.employees.push(new ListItem(emp.id, emp.name.getLastFirst()));
+        } 
+      });
+    }
+  }
+
+  getListStyle(): string {
+    const screenHeight = window.innerHeight;
+    let listHeight = (this.employees.length * 30) + 70;
+    if ((screenHeight - 40) < listHeight) {
+      listHeight = screenHeight - 40;
+    }
+    return `height: ${listHeight}px;`;
+  }
+
+  onSelect(id: string) {
+    this.selected = id;
+    if (this.site.employees) {
+      this.site.employees.forEach(iEmp => {
+        if (iEmp.id === this.selected) {
+          this.employee = new Employee(iEmp);
         }
       });
     }
   }
 
-  setActiveOnly(checked: boolean) {
-    this.activeOnly = checked;
-    this.setEmployees();
-  }
-
-  onSelect(eid: string) {
-    this.selected = eid;
-    const site = this.siteService.getSite();
-    if (site) {
-      if (site.employees) {
-        site.employees.forEach(iEmp => {
-          if (iEmp.id === eid) {
-            this.employee = new Employee(iEmp);
-            this.siteService.setSelectedEmployee(iEmp);
-          }
-        });
-      }
-    }
-  }
-
-  getButtonStyle(id: string): string {
-    if (id.toLowerCase() === this.selected.toLowerCase()) {
+  getButtonClass(id: string) {
+    if (this.selected === id) {
       return "employee active";
     }
     return "employee";
   }
 
-  siteChanged(site: Site) {
+  changeActiveOnly() {
     this.setEmployees();
+  }
+
+  siteUpdated(site: Site) {
+    this.siteChanged.emit(site);
+    this.setEmployees();
+  }
+
+  newEmployeeChange(id: string) {
+    this.selected = id;
   }
 }

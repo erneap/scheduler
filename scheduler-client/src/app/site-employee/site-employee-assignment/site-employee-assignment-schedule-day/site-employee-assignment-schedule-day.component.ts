@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { IWorkday, Workday } from 'src/app/models/employees/assignments';
+import { ISite, Site } from 'src/app/models/sites/site';
 import { Workcenter } from 'src/app/models/sites/workcenter';
 import { Workcode } from 'src/app/models/teams/workcode';
 import { ChangeAssignmentRequest } from 'src/app/models/web/employeeWeb';
@@ -21,6 +22,15 @@ export class SiteEmployeeAssignmentScheduleDayComponent {
   }
   get workday(): Workday {
     return this._workday;
+  }
+  private _site: Site = new Site();
+  @Input()
+  public set site(iSite: ISite) {
+    this._site = new Site(iSite);
+    this.setWorkcenters();
+  }
+  get site(): Site {
+    return this._site;
   }
   @Output() changedate = new EventEmitter<string>();
   workCodes: Workcode[] = [];
@@ -45,18 +55,25 @@ export class SiteEmployeeAssignmentScheduleDayComponent {
         }
       });
     }
-    this.workcenters = [];
     const site = this.siteService.getSite();
-    if (site && site.workcenters && site.workcenters.length > 0) {
-      site.workcenters.forEach(wc => {
-        this.workcenters.push(new Workcenter(wc));
-      });
+    if (site) {
+      this.site = site;
+      this.setWorkcenters();
     }
     this.dayForm = this.fb.group({
       code: '',
       workcenter: '',
       hours: '',
     });
+  }
+
+  setWorkcenters() {
+    this.workcenters = [];
+    if (this.site.workcenters) {
+      this.site.workcenters.forEach(wc => {
+        this.workcenters.push(new Workcenter(wc));
+      })
+    }
   }
 
   setDay() {

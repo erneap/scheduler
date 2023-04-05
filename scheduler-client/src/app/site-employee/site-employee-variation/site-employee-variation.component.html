@@ -52,6 +52,7 @@
       </form>
       <div class="fxLayout-row-center">
         <app-site-employee-assignment-schedule [schedule]="schedule"
+          [site]="site"
           (change)="updateSchedule($event)">
         </app-site-employee-assignment-schedule>
       </div>

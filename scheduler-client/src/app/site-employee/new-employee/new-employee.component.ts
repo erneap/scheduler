@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Assignment, Schedule } from 'src/app/models/employees/assignments';
 import { Employee, EmployeeLaborCode } from 'src/app/models/employees/employee';
 import { AnnualLeave } from 'src/app/models/employees/leave';
 import { LaborCode } from 'src/app/models/sites/laborcode';
+import { ISite, Site } from 'src/app/models/sites/site';
 import { Workcenter } from 'src/app/models/sites/workcenter';
 import { Company } from 'src/app/models/teams/company';
 import { MustMatchValidator } from 'src/app/models/validators/must-match-validator.directive';
@@ -22,11 +23,24 @@ import { TeamService } from 'src/app/services/team.service';
   styleUrls: ['./new-employee.component.scss']
 })
 export class NewEmployeeComponent {
+  private _site: Site = new Site();
+  @Input()
+  public set site(iSite: ISite) {
+    this._site = new Site(iSite);
+    this.siteid = this._site.id;
+    this.setLaborCodes();
+    this.setWorkcenters();
+  }
+  get site(): Site {
+    return this._site;
+  }
+  @Output() siteChanged = new EventEmitter<Site>();
+  @Output() changeEmployee = new EventEmitter<string>();
   employee: Employee = new Employee();
   employeeForm: FormGroup;
   companies: Company[] = [];
-  laborcodes: EmployeeLaborCode[];
-  workcenters: Workcenter[];
+  laborcodes: EmployeeLaborCode[] = [];
+  workcenters: Workcenter[] = [];
   schedule: Schedule;
   teamid: string = '';
   siteid: string = '';
@@ -49,35 +63,9 @@ export class NewEmployeeComponent {
         this.companies.push(new Company(co));
       });
     }
-    const now = new Date();
     const site = this.siteService.getSite();
-    this.laborcodes = [];
-    this.workcenters = [];
-    if (site) {
-      this.siteid = site.id;
-      if ( site.forecasts && site.forecasts.length > 0) {
-        site.forecasts.forEach(rpt => {
-          if (rpt.startDate.getTime() <= now.getTime() 
-            && rpt.endDate.getTime() >= now.getTime() 
-            && rpt.laborCodes && rpt.laborCodes.length > 0) {
-            rpt.laborCodes.forEach(lc => {
-              if (!lc.exercise) {
-                const labor = new EmployeeLaborCode();
-                labor.chargeNumber = lc.chargeNumber;
-                labor.extension = lc.extension;
-                this.laborcodes.push(labor);
-              }
-            });
-          }
-        });
-        this.laborcodes.sort((a,b) => a.compareTo(b));
-      }
-      if (site.workcenters && site.workcenters.length > 0) {
-        site.workcenters.forEach(wc => {
-          this.workcenters.push(new Workcenter(wc));
-        });
-      }
-    }
+    this.setLaborCodes();
+    this.setWorkcenters();
     if (this.employee.data.assignments.length === 0) {
       const asgmt = new Assignment();
       asgmt.id = 1;
@@ -112,6 +100,43 @@ export class NewEmployeeComponent {
       workcenter: '',
       startdate: new Date(),
     });
+  }
+
+  setLaborCodes() {
+    const now = new Date();
+    this.laborcodes = [];
+    if (this.site) {
+      this.siteid = this.site.id;
+      if ( this.site.forecasts && this.site.forecasts.length > 0) {
+        this.site.forecasts.forEach(rpt => {
+          if (rpt.startDate.getTime() <= now.getTime() 
+            && rpt.endDate.getTime() >= now.getTime() 
+            && rpt.laborCodes && rpt.laborCodes.length > 0) {
+            rpt.laborCodes.forEach(lc => {
+              if (!lc.exercise) {
+                const labor = new EmployeeLaborCode();
+                labor.chargeNumber = lc.chargeNumber;
+                labor.extension = lc.extension;
+                this.laborcodes.push(labor);
+              }
+            });
+          }
+        });
+        this.laborcodes.sort((a,b) => a.compareTo(b));
+      }
+    }
+  }
+
+  setWorkcenters() {
+    this.workcenters = [];
+    if (this.site) {
+      this.siteid = this.site.id;
+      if (this.site.workcenters && this.site.workcenters.length > 0) {
+        this.site.workcenters.forEach(wc => {
+          this.workcenters.push(new Workcenter(wc));
+        });
+      }
+    }
   }
 
   clearForm() {
@@ -274,10 +299,11 @@ export class NewEmployeeComponent {
                 site.employees.push(new Employee(data.employee));
               }
               site.employees.sort((a,b) => a.compareTo(b));
+              this.changeEmployee.emit(data.employee.id);
+              this.siteChanged.emit(site);
               this.siteService.setSite(site);
               this.siteService.setSelectedEmployee(data.employee);
             }
-            this.router.navigateByUrl('/siteemployees');
           }
           this.authService.statusMessage = "Employee Created";
         },

@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { Schedule, Variation } from 'src/app/models/employees/assignments';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
+import { ISite, Site } from 'src/app/models/sites/site';
 import { ChangeAssignmentRequest, EmployeeResponse } from 'src/app/models/web/employeeWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
@@ -24,6 +25,14 @@ export class SiteEmployeeVariationComponent {
   }
   get employee(): Employee {
     return this._employee;
+  }
+  private _site: Site = new Site();
+  @Input()
+  public set site(iSite: ISite) {
+    this._site = new Site(iSite);
+  }
+  get site(): Site {
+    return this._site;
   }
   @Output() changed = new EventEmitter<Employee>();
 
@@ -49,6 +58,10 @@ export class SiteEmployeeVariationComponent {
       end: [new Date(), [Validators.required]],
       mids: false,
     });
+    const iSite = this.siteService.getSite();
+    if (iSite) {
+      this.site = iSite;
+    }
   }
 
   setVariationLists() {

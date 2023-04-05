@@ -23,6 +23,7 @@ import { SiteEmployeeLeaveRequestComponent } from './site-employee-leave-request
 import { SiteEmployeeLeaveBalanceComponent } from './site-employee-leave-balance/site-employee-leave-balance.component';
 import { SiteEmployeeLeaveBalanceYearComponent } from './site-employee-leave-balance/site-employee-leave-balance-year/site-employee-leave-balance-year.component';
 import { UserAccountDialogComponent } from './site-employee-editor/user-account-dialog/user-account-dialog.component';
+import { TeamModule } from '../team/team.module';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,8 @@ import { UserAccountDialogComponent } from './site-employee-editor/user-account-
   ],
   exports: [
     SiteEmployeeComponent,
+    NewEmployeeComponent,
+    SiteEmployeeEditorComponent,
   ]
 })
 export class SiteEmployeeModule { }

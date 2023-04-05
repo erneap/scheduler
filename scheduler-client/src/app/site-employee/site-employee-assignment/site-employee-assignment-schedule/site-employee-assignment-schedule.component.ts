@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { ISchedule, Schedule } from 'src/app/models/employees/assignments';
+import { ISite, Site } from 'src/app/models/sites/site';
 import { ChangeAssignmentRequest } from 'src/app/models/web/employeeWeb';
 import { WorkWeek } from 'src/app/models/web/internalWeb';
 
@@ -20,6 +21,14 @@ export class SiteEmployeeAssignmentScheduleComponent {
   }
   get schedule(): Schedule {
     return this._schedule;
+  }
+  private _site: Site = new Site();
+  @Input()
+  public set site(iSite: ISite) {
+    this._site = new Site(iSite);
+  }
+  get site(): Site {
+    return this._site;
   }
   @Output() change = new EventEmitter<string>();
 

@@ -1,18 +1,4 @@
-<div class="app-container">
-  <div class="employeeNav">
-    <div class="list">
-      <div *ngFor="let item of items"
-      [class]="getButtonStyle(item.id)"
-      (click)="onSelect(item.id)"
-      >{{item.label}}</div>
-    </div>
-    <div class="activeOnly">
-      <mat-checkbox [checked]="activeOnly"
-        (change)="setActiveOnly($event.checked)">
-        <span style="color: white;">Show Active Only</span>
-      </mat-checkbox>
-    </div>
-  </div>
-  <app-site-employee-editor [employee]="employee"
-  (siteChanged)="siteChanged($event)"></app-site-employee-editor>
+<div class="flexlayout column topleft">
+  <app-team-site-employee-editor [site]="site">
+  </app-team-site-employee-editor>
 </div>

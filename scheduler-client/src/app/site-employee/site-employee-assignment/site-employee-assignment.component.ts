@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { Assignment, Schedule } from 'src/app/models/employees/assignments';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
+import { ISite, Site } from 'src/app/models/sites/site';
 import { Workcenter } from 'src/app/models/sites/workcenter';
 import { ChangeAssignmentRequest, EmployeeResponse } from 'src/app/models/web/employeeWeb';
 import { AuthService } from 'src/app/services/auth.service';
@@ -26,6 +27,15 @@ export class SiteEmployeeAssignmentComponent {
   get employee(): Employee {
     return this._employee;
   }
+  private _site: Site = new Site();
+  @Input()
+  public set site(iSite: ISite) {
+    this._site = new Site(iSite);
+    this.setWorkcenters();
+  }
+  get site(): Site {
+    return this._site;
+  }
   @Output() changed = new EventEmitter<Employee>();
   siteID: string = '';
   assignment: Assignment = new Assignment();
@@ -44,15 +54,11 @@ export class SiteEmployeeAssignmentComponent {
     protected dialog: MatDialog,
     private fb: FormBuilder
   ) {
-    const site = this.siteService.getSite();
-    if (site) {
-      this.siteID = site.id;
-      this.workcenters = [];
-      if (site.workcenters && site.workcenters.length > 0) {
-        site.workcenters.forEach(wc => {
-          this.workcenters.push(new Workcenter(wc));
-        });
-      }
+    const iSite = this.siteService.getSite();
+    if (iSite) {
+      this.siteID = iSite.id;
+      this.site = iSite;
+      this.setWorkcenters();
     }
     this.asgmtForm = this.fb.group({
       assignment: '0',
@@ -64,6 +70,15 @@ export class SiteEmployeeAssignmentComponent {
       rotationdays: 0,
     });
     this.setAssignments();
+  }
+
+  setWorkcenters() {
+    this.workcenters = [];
+    if (this.site.workcenters) {
+      this.site.workcenters.forEach(wc => {
+        this.workcenters.push(new Workcenter(wc));
+      })
+    }
   }
 
   setAssignments() {
@@ -210,26 +225,6 @@ export class SiteEmployeeAssignmentComponent {
                   }
                 });
               }
-              const emp = this.empService.getEmployee();
-              if (data.employee && emp && emp.id === data.employee.id) {
-                this.empService.setEmployee(data.employee);
-              }
-              const site = this.siteService.getSite();
-              if (site && site.employees && site.employees.length && data.employee) {
-                let found = false;
-                for (let i=0; i < site.employees.length && !found; i++) {
-                  if (site.employees[i].id === data.employee.id) {
-                    site.employees[i] = new Employee(data.employee);
-                    found = true;
-                  }
-                }
-                if (!found) {
-                  site.employees.push(new Employee(data.employee));
-                }
-                site.employees.sort((a,b) => a.compareTo(b));
-                this.siteService.setSite(site);
-                this.siteService.setSelectedEmployee(data.employee);
-              }
             }
             this.changed.emit(new Employee(this.employee));
             this.authService.statusMessage = "Update complete";
@@ -291,26 +286,6 @@ export class SiteEmployeeAssignmentComponent {
                     }
                   });
                 }
-                const emp = this.empService.getEmployee();
-                if (data.employee && emp && emp.id === data.employee.id) {
-                  this.empService.setEmployee(data.employee);
-                }
-                const site = this.siteService.getSite();
-                if (site && site.employees && site.employees.length && data.employee) {
-                  let found = false;
-                  for (let i=0; i < site.employees.length && !found; i++) {
-                    if (site.employees[i].id === data.employee.id) {
-                      site.employees[i] = new Employee(data.employee);
-                      found = true;
-                    }
-                  }
-                  if (!found) {
-                    site.employees.push(new Employee(data.employee));
-                  }
-                  site.employees.sort((a,b) => a.compareTo(b));
-                  this.siteService.setSite(site);
-                  this.siteService.setSelectedEmployee(data.employee);
-                }
               }
               this.changed.emit(new Employee(this.employee));
               this.authService.statusMessage = "Update complete";
@@ -347,26 +322,6 @@ export class SiteEmployeeAssignmentComponent {
                       });
                     }
                   });
-                }
-                const emp = this.empService.getEmployee();
-                if (data.employee && emp && emp.id === data.employee.id) {
-                  this.empService.setEmployee(data.employee);
-                }
-                const site = this.siteService.getSite();
-                if (site && site.employees && site.employees.length && data.employee) {
-                  let found = false;
-                  for (let i=0; i < site.employees.length && !found; i++) {
-                    if (site.employees[i].id === data.employee.id) {
-                      site.employees[i] = new Employee(data.employee);
-                      found = true;
-                    }
-                  }
-                  if (!found) {
-                    site.employees.push(new Employee(data.employee));
-                  }
-                  site.employees.sort((a,b) => a.compareTo(b));
-                  this.siteService.setSite(site);
-                  this.siteService.setSelectedEmployee(data.employee);
                 }
               }
               this.changed.emit(new Employee(this.employee));
@@ -406,26 +361,6 @@ export class SiteEmployeeAssignmentComponent {
               this.assignment = new Assignment(this.employee.data.assignments[
                 this.employee.data.assignments.length - 1]);
               this.schedule = this.assignment.schedules[0];
-            }
-            const emp = this.empService.getEmployee();
-            if (data.employee && emp && emp.id === data.employee.id) {
-              this.empService.setEmployee(data.employee);
-            }
-            const site = this.siteService.getSite();
-            if (site && site.employees && site.employees.length && data.employee) {
-              let found = false;
-              for (let i=0; i < site.employees.length && !found; i++) {
-                if (site.employees[i].id === data.employee.id) {
-                  site.employees[i] = new Employee(data.employee);
-                  found = true;
-                }
-              }
-              if (!found) {
-                site.employees.push(new Employee(data.employee));
-              }
-              site.employees.sort((a,b) => a.compareTo(b));
-              this.siteService.setSite(site);
-              this.siteService.setSelectedEmployee(data.employee);
             }
           }
           this.changed.emit(new Employee(this.employee));
@@ -472,26 +407,6 @@ export class SiteEmployeeAssignmentComponent {
                   this.assignment = new Assignment(this.employee.data.assignments[
                     this.employee.data.assignments.length - 1]);
                   this.schedule = this.assignment.schedules[0];
-                }
-                const emp = this.empService.getEmployee();
-                if (data.employee && emp && emp.id === data.employee.id) {
-                  this.empService.setEmployee(data.employee);
-                }
-                const site = this.siteService.getSite();
-                if (site && site.employees && site.employees.length && data.employee) {
-                  let found = false;
-                  for (let i=0; i < site.employees.length && !found; i++) {
-                    if (site.employees[i].id === data.employee.id) {
-                      site.employees[i] = new Employee(data.employee);
-                      found = true;
-                    }
-                  }
-                  if (!found) {
-                    site.employees.push(new Employee(data.employee));
-                  }
-                  site.employees.sort((a,b) => a.compareTo(b));
-                  this.siteService.setSite(site);
-                  this.siteService.setSelectedEmployee(data.employee);
                 }
               }
               this.changed.emit(new Employee(this.employee));

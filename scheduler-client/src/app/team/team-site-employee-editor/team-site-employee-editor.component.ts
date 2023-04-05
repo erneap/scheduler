@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ListItem } from 'src/app/generic/button-list/listitem';
-import { Site } from 'src/app/models/sites/site';
+import { Employee } from 'src/app/models/employees/employee';
+import { ISite, Site } from 'src/app/models/sites/site';
 import { Team } from 'src/app/models/teams/team';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
@@ -13,10 +14,21 @@ import { TeamService } from 'src/app/services/team.service';
   styleUrls: ['./team-site-employee-editor.component.scss']
 })
 export class TeamSiteEmployeeEditorComponent {
-  team: Team;
+  private _site: Site = new Site();
+  @Input()
+  public set site(iSite: ISite) {
+    this._site = new Site(iSite);
+    this.setEmployees();
+  }
+  get site(): Site {
+    return this._site;
+  }
+  @Output() siteChanged = new EventEmitter<Site>()
+  teamid: string;
   selected: string = 'new';
-  site?: Site;
-  sites: ListItem[] = [];
+  employees: ListItem[] = [];
+  employee: Employee = new Employee();
+  activeOnly: boolean = true;
 
   constructor(
     protected authService: AuthService,
@@ -26,25 +38,66 @@ export class TeamSiteEmployeeEditorComponent {
   ) {
     const iTeam = this.teamService.getTeam();
     if (iTeam) {
-      this.team = new Team(iTeam);
+      this.teamid = iTeam.id;
     } else {
-      this.team = new Team();
+      this.teamid = '';
     }
-    this.setSites();
     const iSite = this.siteService.getSite();
     if (iSite) {
-      this.site = new Site(iSite);
-      this.selected = this.site.id;
+      this.site = iSite;
     }
   }
 
-  setSites() {
-    this.sites = [];
-    if (this.team.sites) {
-      this.team.sites = this.team.sites.sort((a,b) => a.compareTo(b));
-      this.team.sites.forEach(iSite => {
-        this.sites.push()
+  setEmployees() {
+    this.employees = [];
+    this.employees.push(new ListItem('new', 'Add New Employee'));
+    if (this.site.employees) {
+      this.site.employees.forEach(iEmp => {
+        const emp = new Employee(iEmp)
+        if ((this.activeOnly && emp.isActive()) || !this.activeOnly) {
+          this.employees.push(new ListItem(emp.id, emp.name.getLastFirst()));
+        } 
       });
     }
+  }
+
+  getListStyle(): string {
+    const screenHeight = window.innerHeight;
+    let listHeight = (this.employees.length * 30) + 70;
+    if ((screenHeight - 40) < listHeight) {
+      listHeight = screenHeight - 40;
+    }
+    return `height: ${listHeight}px;`;
+  }
+
+  onSelect(id: string) {
+    this.selected = id;
+    if (this.site.employees) {
+      this.site.employees.forEach(iEmp => {
+        if (iEmp.id === this.selected) {
+          this.employee = new Employee(iEmp);
+        }
+      });
+    }
+  }
+
+  getButtonClass(id: string) {
+    if (this.selected === id) {
+      return "employee active";
+    }
+    return "employee";
+  }
+
+  changeActiveOnly() {
+    this.setEmployees();
+  }
+
+  siteUpdated(site: Site) {
+    this.siteChanged.emit(site);
+    this.setEmployees();
+  }
+
+  newEmployeeChange(id: string) {
+    this.selected = id;
   }
 }
