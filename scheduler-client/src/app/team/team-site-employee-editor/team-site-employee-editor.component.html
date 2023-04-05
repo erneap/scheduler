@@ -18,6 +18,6 @@
     (siteChanged)="siteUpdated($event)" 
     (changeEmployee)="newEmployeeChange($event)"></app-new-employee>
   <app-site-employee-editor [employee]="employee" [site]="site"
-    *ngIf="selected !== 'new'"
+    *ngIf="selected !== 'new'" style="width: 100%;"
     (siteChanged)="siteUpdated($event)"></app-site-employee-editor>
 </div>

@@ -64,8 +64,8 @@ export class TeamSiteEmployeeEditorComponent {
   getListStyle(): string {
     const screenHeight = window.innerHeight;
     let listHeight = (this.employees.length * 30) + 70;
-    if ((screenHeight - 40) < listHeight) {
-      listHeight = screenHeight - 40;
+    if ((screenHeight - 200) < listHeight) {
+      listHeight = screenHeight - 200;
     }
     return `height: ${listHeight}px;`;
   }

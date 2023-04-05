@@ -42,16 +42,19 @@ export class TeamSiteEditorComponent {
   }
 
   setSites() {
+    console.log(this.team);
     this.sites = [];
+    this.sites.push(new ListItem('new', 'Add New Site'))
     if (this.team.sites) {
       this.team.sites = this.team.sites.sort((a,b) => a.compareTo(b));
       this.team.sites.forEach(iSite => {
-        this.sites.push()
+        this.sites.push(new ListItem(iSite.id, iSite.name));
       });
     }
   }
 
-  onSelect() {
+  onSelect(id: string) {
+    this.selected = id;
     const iSite = this.teamService.getSelectedSite(this.selected);
     if (iSite) {
       this.site = new Site(iSite);
@@ -77,5 +80,13 @@ export class TeamSiteEditorComponent {
         }
       })
     }
+  }
+
+  getButtonClass(id: string) {
+    let answer = 'employee';
+    if (this.selected.toLowerCase() === id.toLowerCase()) {
+      answer += ' active';
+    }
+    return answer;
   }
 }

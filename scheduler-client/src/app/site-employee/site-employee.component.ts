@@ -65,9 +65,9 @@ export class SiteEmployeeComponent {
 
   getListStyle(): string {
     const screenHeight = window.innerHeight;
-    let listHeight = (this.employees.length * 30) + 70;
-    if ((screenHeight - 40) < listHeight) {
-      listHeight = screenHeight - 40;
+    let listHeight = (this.employees.length * 30) + 65;
+    if ((screenHeight - 130) < listHeight) {
+      listHeight = screenHeight - 130;
     }
     return `height: ${listHeight}px;`;
   }

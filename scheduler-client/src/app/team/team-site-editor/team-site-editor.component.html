@@ -1,22 +1,21 @@
-<div class="flexlayout column topcenter">
-  <div class="flexlayout row center" 
-    style="background-color: #3f51b5; color: white;">
-    <mat-form-field appearance="fill">
-      <mat-label>Site To Edit</mat-label>
-      <mat-select [(ngModel)]="selected" name="site"
-        (selectionChange)="onSelect()">
-        <mat-option *ngFor="let site of sites" [value]="site.id">
-          {{site.label}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+<div class="app-container">
+  <div class="flexlayout column center">
+    <div class="list">
+      <div *ngFor="let site of sites"
+        [class]="getButtonClass(site.id)"
+        (click)="onSelect(site.id)">
+        {{site.label}}
+      </div>
+    </div>
   </div>
-  <mat-tab-group [backgroundColor]="'primary'">
+  <app-new-site *ngIf="selected === 'new'"></app-new-site>
+  <mat-tab-group [backgroundColor]="'accent'" *ngIf="selected !== 'new'"
+    style="width: 100%;">
     <mat-tab label="Site Editor">
       <app-site [siteid]="selected"></app-site>
     </mat-tab>
     <mat-tab label="Site Employee Editor">
-      <app-team-site-employee-editor [site]="site">
+      <app-team-site-employee-editor [site]="site" style="width: 100%;">
       </app-team-site-employee-editor>
     </mat-tab>
   </mat-tab-group>

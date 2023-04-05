@@ -34,6 +34,7 @@ import { SiteForecastReportLaborCodesComponent } from './site-forecast-report-ed
   ],
   exports: [
     SiteComponent,
+    NewSiteComponent,
   ]
 })
 export class SiteModule { }
