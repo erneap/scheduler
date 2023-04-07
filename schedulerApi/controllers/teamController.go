@@ -191,9 +191,8 @@ func UpdateTeamWorkcode(c *gin.Context) {
 			case "start", "starttime":
 				tTime, _ := strconv.ParseUint(data.Value, 10, 64)
 				wCode.StartTime = tTime
-			case "shift", "shiftcode":
-				tShift, _ := strconv.Atoi(data.Value)
-				wCode.ShiftCode = tShift
+			case "shift", "shiftcode", "premimum":
+				wCode.ShiftCode = data.Value
 			case "isleave", "leave":
 				wCode.IsLeave = strings.EqualFold(data.Value, "true")
 			case "back", "bkg", "backcolor":

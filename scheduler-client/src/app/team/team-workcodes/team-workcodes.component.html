@@ -8,17 +8,18 @@
         <span [style]="getCodeClass(item.id)">{{item.id}}</span> - {{item.label}}
       </div>
     </div>
+    <button mat-icon-button color="warn" *ngIf="selected !== 'new'"
+      matTooltip="Delete selected workcode">
+      <mat-icon>delete</mat-icon>
+    </button>
     <form [formGroup]="codeForm" class="flexlayout column center">
       <div class="flexlayout row center">
-        <mat-form-field class="formField">
+        <mat-form-field class="formField" *ngIf="selected === 'new'">
           <mat-label>Workcode ID</mat-label>
           <input matInput formControlName="id">
           <mat-error *ngIf="codeForm.controls['id'].hasError('required')"
             class="error">ID is required</mat-error>
         </mat-form-field>
-        <button mat-icon-button color="warn">
-          <mat-icon>delete</mat-icon>
-        </button>
       </div>
       <div class="flexlayout row center">
         <mat-form-field class="formFieldWide">
@@ -39,7 +40,7 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="flexlayout row center" *ngIf="!workcode.isLeave">
+      <div class="flexlayout row center">
         <mat-checkbox formControlName="leave">Is Leave</mat-checkbox>
       </div>
       <div class="flexlayout row center" *ngIf="!workcode.isLeave">
@@ -51,9 +52,13 @@
       <div class="flexlayout column center"
         [style]="getFormColorStyle()">
         Color Scheme
-        <input formControlName="colors" style="text-align: center;">
+        <input formControlName="colors" class="colors">
         (Foreground-Background RGB Hex)
       </div>
+      <button mat-raised-button color="accent" style="padding-top: 10px;"
+        *ngIf="selected === 'new' && codeForm.valid">
+        Add
+      </button>
     </form>
   </div>
 </div>

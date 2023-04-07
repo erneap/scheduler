@@ -5,6 +5,7 @@ import { ISite, Site } from '../models/sites/site';
 import { Observable, of } from 'rxjs';
 import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
 import { SiteResponse } from '../models/web/siteWeb';
+import { CreateTeamWorkcodeRequest, UpdateTeamRequest } from '../models/web/teamWeb';
 
 @Injectable({
   providedIn: 'root'
@@ -44,5 +45,34 @@ export class TeamService extends CacheService {
   retrieveSelectedSite(teamid: string, siteid: string): Observable<HttpResponse<SiteResponse>> {
     const url = `/scheduler/api/v1/site/${teamid}/${siteid}/true`;
     return this.httpClient.get<SiteResponse>(url, {observe: 'response'});
+  }
+
+  addTeamWorkcode(team: string, workcode: string, title: string, start: number,
+  isLeave: boolean, premimum: string, text: string, back: string): 
+  Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/vi/team/workcode';
+    const data: CreateTeamWorkcodeRequest = {
+      teamid: team,
+      id: workcode,
+      title: title,
+      start: start,
+      shiftCode: premimum,
+      isLeave: isLeave,
+      textcolor: text,
+      backcolor: back,
+    }
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  updateTeamWorkcode(team: string, workcode: string, field: string, 
+  value: string): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/vi/team/workcode';
+    const data: UpdateTeamRequest = {
+      teamid: team,
+      additionalid: workcode,
+      field: field,
+      value: value,
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
   }
 }

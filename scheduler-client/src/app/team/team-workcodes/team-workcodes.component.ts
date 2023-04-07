@@ -130,4 +130,10 @@ export class TeamWorkcodesComponent {
     console.log(answer);
     return answer;
   }
+
+  onUpdate(field: string) {
+    if (this.selected !== 'new') {
+      const value = this.codeForm.controls[field].value;
+    }
+  }
 }

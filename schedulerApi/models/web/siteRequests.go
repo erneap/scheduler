@@ -116,7 +116,7 @@ type CreateTeamWorkcodeRequest struct {
 	Id        string `json:"id"`
 	Title     string `json:"title"`
 	StartTime uint64 `json:"start"`
-	ShiftCode int    `json:"shiftCode"`
+	ShiftCode string `json:"shiftCode"`
 	IsLeave   bool   `json:"isLeave"`
 	TextColor string `json:"textcolor"`
 	BackColor string `json:"backcolor"`
