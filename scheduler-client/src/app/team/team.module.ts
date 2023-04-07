@@ -6,11 +6,19 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TeamSiteEditorComponent } from './team-site-editor/team-site-editor.component';
 import { SiteModule } from '../site/site.module';
 import { SiteEmployeeModule } from '../site-employee/site-employee.module';
+import { TeamCompanyComponent } from './team-company/team-company.component';
+import { TeamCompanyHolidaysComponent } from './team-company/team-company-holidays/team-company-holidays.component';
+import { TeamWorkcodesComponent } from './team-workcodes/team-workcodes.component';
+import { EditorComponent } from './editor/editor.component';
 
 @NgModule({
   declarations: [
     TeamSiteEmployeeEditorComponent,
-    TeamSiteEditorComponent
+    TeamSiteEditorComponent,
+    TeamCompanyComponent,
+    TeamCompanyHolidaysComponent,
+    TeamWorkcodesComponent,
+    EditorComponent
   ],
   imports: [
     CommonModule,

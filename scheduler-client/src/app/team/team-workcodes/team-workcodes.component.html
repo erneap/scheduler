@@ -1,0 +1,59 @@
+<div class="flexlayout column center">
+  <h3>Edit Team Workcodes</h3>
+  <div class="flexlayout row topcenter" style="border: solid 1px darkblue;">
+    <div class="list">
+      <div *ngFor="let item of workcodes"
+        [class]="getButtonClass(item.id)"
+        (click)="onSelect(item.id)">
+        <span [style]="getCodeClass(item.id)">{{item.id}}</span> - {{item.label}}
+      </div>
+    </div>
+    <form [formGroup]="codeForm" class="flexlayout column center">
+      <div class="flexlayout row center">
+        <mat-form-field class="formField">
+          <mat-label>Workcode ID</mat-label>
+          <input matInput formControlName="id">
+          <mat-error *ngIf="codeForm.controls['id'].hasError('required')"
+            class="error">ID is required</mat-error>
+        </mat-form-field>
+        <button mat-icon-button color="warn">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+      <div class="flexlayout row center">
+        <mat-form-field class="formFieldWide">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title">
+          <mat-error *ngIf="codeForm.controls['title'].hasError('required')"
+            class="error">Title is required</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flexlayout row center" *ngIf="!workcode.isLeave">
+        <mat-form-field class="formFieldWide">
+          <mat-label>Shift Start Hour</mat-label>
+          <mat-select formControlName="start">
+            <mat-option value="0"></mat-option>
+            <mat-option *ngFor="let hour of hours" [value]="hour">
+              {{hour}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="flexlayout row center" *ngIf="!workcode.isLeave">
+        <mat-checkbox formControlName="leave">Is Leave</mat-checkbox>
+      </div>
+      <div class="flexlayout row center" *ngIf="!workcode.isLeave">
+        <mat-form-field class="formFieldWide">
+          <mat-label>Shift Premimum Code</mat-label>
+          <input matInput formControlName="premimum">
+        </mat-form-field>
+      </div>
+      <div class="flexlayout column center"
+        [style]="getFormColorStyle()">
+        Color Scheme
+        <input formControlName="colors" style="text-align: center;">
+        (Foreground-Background RGB Hex)
+      </div>
+    </form>
+  </div>
+</div>

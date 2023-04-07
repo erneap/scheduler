@@ -8,6 +8,7 @@ import { NewSiteComponent } from './site/new-site/new-site.component';
 import { SiteComponent } from './site/site.component';
 import { TeamSiteEditorComponent } from './team/team-site-editor/team-site-editor.component';
 import { TeamSiteEmployeeEditorComponent } from './team/team-site-employee-editor/team-site-employee-editor.component';
+import { EditorComponent } from './team/editor/editor.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -25,6 +26,7 @@ const routes: Routes = [
   { path: 'newsite', component: NewSiteComponent },
   { path: 'siteeditor', component: SiteComponent},
   { path: 'team/siteeditor', component: TeamSiteEditorComponent},
+  { path: 'team/editor', component: EditorComponent },
   { path: '**', component: NotFoundComponent}
 ];
 

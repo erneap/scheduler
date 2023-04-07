@@ -32,7 +32,7 @@ export class Workcode implements IWorkcode {
       if (this.isLeave === other.isLeave) {
         return (this.id < other.id) ? -1 : 1;
       }
-      return (this.isLeave && !other.isLeave) ? -1 : 1;
+      return (this.isLeave && !other.isLeave) ? 1 : -1;
     }
     return -1;
   }
