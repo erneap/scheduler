@@ -199,6 +199,10 @@ func UpdateTeamWorkcode(c *gin.Context) {
 				wCode.BackColor = data.Value
 			case "fore", "text", "textcolor":
 				wCode.TextColor = data.Value
+			case "colors":
+				colors := strings.Split(data.Value, "-")
+				wCode.TextColor = colors[0]
+				wCode.BackColor = colors[1]
 			}
 			team.Workcodes[w] = wCode
 			sort.Sort(sites.ByWorkcode(team.Workcodes))

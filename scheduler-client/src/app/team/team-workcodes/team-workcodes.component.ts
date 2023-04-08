@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ITeam, Team } from '../../models/teams/team';
 import { ListItem } from 'src/app/generic/button-list/listitem';
 import { Workcode } from 'src/app/models/teams/workcode';
@@ -7,6 +7,8 @@ import { DialogService } from 'src/app/services/dialog-service.service';
 import { TeamService } from 'src/app/services/team.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { SiteResponse } from 'src/app/models/web/siteWeb';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 
 @Component({
   selector: 'app-team-workcodes',
@@ -23,6 +25,7 @@ export class TeamWorkcodesComponent {
   get team(): Team {
     return this._team;
   }
+  @Output() teamChanged = new EventEmitter<Team>();
   workcodes: ListItem[] = [];
   selected: string = 'new';
   workcode: Workcode = new Workcode();
@@ -134,6 +137,98 @@ export class TeamWorkcodesComponent {
   onUpdate(field: string) {
     if (this.selected !== 'new') {
       const value = this.codeForm.controls[field].value;
+      this.authService.statusMessage = 'Update Team Workcode';
+      this.dialogService.showSpinner();
+      this.teamService.updateTeamWorkcode(this.team.id, this.selected, field, 
+      value).subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.team) {
+            this.team = new Team(data.team);
+            this.setWorkcode();
+            this.teamService.setTeam(data.team);
+            this.teamChanged.emit(new Team(data.team));
+          }
+          this.authService.statusMessage = "Update complete"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      });
     }
+  }
+
+  onAdd() {
+    this.authService.statusMessage = "Adding team workcode";
+    this.dialogService.showSpinner();
+    const colors = `${this.codeForm.value.colors}`.split("-");
+    this.teamService.addTeamWorkcode(this.team.id, 
+      this.codeForm.value.id,
+      this.codeForm.value.title,
+      Number(this.codeForm.value.start),
+      this.codeForm.value.leave,
+      this.codeForm.value.premimum,
+      colors[0], colors[1]).subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          this.selected = this.codeForm.value.id;
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.team) {
+            this.team = new Team(data.team);
+            this.setWorkcode();
+            this.teamService.setTeam(data.team);
+            this.teamChanged.emit(new Team(data.team));
+          }
+          this.authService.statusMessage = "Addition complete"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+    });
+  }
+
+  onDelete() {
+    const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+      data: {title: 'Confirm Workcode Deletion', 
+      message: 'Are you sure you want to delete this Workcode?'},
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'yes') {
+        this.authService.statusMessage = "Delete team workcode";
+        this.dialogService.showSpinner();
+        this.teamService.deleteTeamWorkcode(this.team.id, this.selected)
+        .subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            this.selected = 'new';
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: SiteResponse | null = resp.body;
+            if (data && data != null && data.team) {
+              this.team = new Team(data.team);
+              this.setWorkcode();
+              this.teamService.setTeam(data.team);
+              this.teamChanged.emit(new Team(data.team));
+            }
+            this.authService.statusMessage = "Addition complete"
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.error.exception;
+          }
+        });
+      }
+    });
   }
 }

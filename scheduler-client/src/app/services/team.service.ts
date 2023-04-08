@@ -75,4 +75,9 @@ export class TeamService extends CacheService {
     }
     return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
   }
+  
+  deleteTeamWorkcode(team: string, workcode: string): Observable<HttpResponse<SiteResponse>> {
+    const url = `/scheduler/api/v1/team/workcode/${team}/${workcode}`;
+    return this.httpClient.delete<SiteResponse>(url, { observe: 'response'});
+  }
 }

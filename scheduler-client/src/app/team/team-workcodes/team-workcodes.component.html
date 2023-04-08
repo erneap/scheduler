@@ -9,7 +9,8 @@
       </div>
     </div>
     <button mat-icon-button color="warn" *ngIf="selected !== 'new'"
-      matTooltip="Delete selected workcode">
+      matTooltip="Delete selected workcode"
+      (click)="onDelete()">
       <mat-icon>delete</mat-icon>
     </button>
     <form [formGroup]="codeForm" class="flexlayout column center">
@@ -24,7 +25,8 @@
       <div class="flexlayout row center">
         <mat-form-field class="formFieldWide">
           <mat-label>Title</mat-label>
-          <input matInput formControlName="title">
+          <input matInput formControlName="title"
+            (blur)="onUpdate('title')">
           <mat-error *ngIf="codeForm.controls['title'].hasError('required')"
             class="error">Title is required</mat-error>
         </mat-form-field>
@@ -32,7 +34,8 @@
       <div class="flexlayout row center" *ngIf="!workcode.isLeave">
         <mat-form-field class="formFieldWide">
           <mat-label>Shift Start Hour</mat-label>
-          <mat-select formControlName="start">
+          <mat-select formControlName="start"
+            (selectionChange)="onUpdate('start')">
             <mat-option value="0"></mat-option>
             <mat-option *ngFor="let hour of hours" [value]="hour">
               {{hour}}
@@ -41,12 +44,14 @@
         </mat-form-field>
       </div>
       <div class="flexlayout row center">
-        <mat-checkbox formControlName="leave">Is Leave</mat-checkbox>
+        <mat-checkbox formControlName="leave"
+          (change)="onUpdate('leave')">Is Leave</mat-checkbox>
       </div>
       <div class="flexlayout row center" *ngIf="!workcode.isLeave">
         <mat-form-field class="formFieldWide">
           <mat-label>Shift Premimum Code</mat-label>
-          <input matInput formControlName="premimum">
+          <input matInput formControlName="premimum"
+            (blur)="onUpdate('premimum')">
         </mat-form-field>
       </div>
       <div class="flexlayout column center"
@@ -56,7 +61,8 @@
         (Foreground-Background RGB Hex)
       </div>
       <button mat-raised-button color="accent" style="padding-top: 10px;"
-        *ngIf="selected === 'new' && codeForm.valid">
+        *ngIf="selected === 'new' && codeForm.valid"
+        (click)="onAdd()">
         Add
       </button>
     </form>
