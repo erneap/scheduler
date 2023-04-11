@@ -1,1 +1,70 @@
-<p>team-company works!</p>
+<div class="flexlayout column center" >
+  <h3>Team Companies</h3>
+  <div class="flexlayout row topcenter" 
+  style="gap: 10px;border: solid 1px black;padding: 5px;">
+    <div class="flexlayout column centertop">
+      <h4>Company Editor</h4>
+      <div class="flexlayout row center">
+        <div class="list">
+          <div *ngFor="let co of companies" [class]="getButtonClass(co.id)"
+            (click)="onSelect(co.id)">{{co.label}}</div>
+        </div>
+        <div class="flexlayout column center"
+          *ngIf="selected !== 'new'">
+          <button mat-icon-button color="warn" matTooltip="Delete Selected Company"
+            (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+        </div>
+      </div>
+      <form [formGroup]="companyForm">
+        <div class="formField" *ngIf="selected === 'new'">
+          <mat-form-field appearance="fill">
+            <mat-label>Company Identifier</mat-label>
+            <input matInput formControlName="id">
+            <mat-error class="error"
+            *ngIf="companyForm.controls['id'].hasError('required')">
+            Required</mat-error>
+            <mat-error class="error"
+            *ngIf="companyForm.controls['id'].hasError('pattern')">
+            Only Lower Case and Numbers</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="formField">
+          <mat-form-field appearance="fill">
+            <mat-label>Company Name</mat-label>
+            <input matInput formControlName="name"
+              (blur)="onUpdate('name')">
+              <mat-error class="error"
+              *ngIf="companyForm.controls['name'].hasError('required')">
+              Required</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="formField">
+          <mat-form-field appearance="fill">
+            <mat-label>Ingest Method</mat-label>
+            <mat-select formControlName="ingest"
+              (selectionChange)="onUpdate('ingest')">
+              <mat-option value="manual">Manual Entry</mat-option>
+              <mat-option value="sap">ADP/SAP Excel Files</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="formField" *ngIf="selected !== 'new'">
+          <mat-checkbox formControlName="holidays"
+            (change)="onUpdate('holidays')">Has Holidays</mat-checkbox>
+        </div>
+        <div class="flexlayout row center"
+        *ngIf="selected === 'new' && companyForm.valid">
+          <button mat-raised-button color="accent"
+            (click)="onAdd()">
+            Add
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="flexlayout column centertop" *ngIf="hasHolidays">
+      <h4>Company Holidays Editor</h4>
+      <app-team-company-holidays [team]="team" [company]="company">
+      </app-team-company-holidays>
+    </div>
+  </div>
+</div>

@@ -123,14 +123,12 @@ export class TeamWorkcodesComponent {
 
   getFormColorStyle(): string {
     let answer = 'background-color: #ffffff;color: #000000;';
-    console.log(this.codeForm.valid);
     if (this.codeForm.controls['colors'].valid) {
       const value: string = this.codeForm.controls['colors'].value
       const colors = value.split('-');
       answer = `background-color: #${colors[1]};`
         + `color: #${colors[0]};`;
     }
-    console.log(answer);
     return answer;
   }
 

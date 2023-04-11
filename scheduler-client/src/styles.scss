@@ -33,6 +33,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     align-items: flex-start;
 }
 
+.centertop {
+    justify-content: flex-start;
+    align-items: center;
+}
+
 .topleft {
     justify-content: flex-start;
     align-items: flex-start;

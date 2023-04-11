@@ -5,7 +5,7 @@ import { ISite, Site } from '../models/sites/site';
 import { Observable, of } from 'rxjs';
 import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
 import { SiteResponse } from '../models/web/siteWeb';
-import { CreateTeamWorkcodeRequest, UpdateTeamRequest } from '../models/web/teamWeb';
+import { CreateTeamCompany, CreateTeamWorkcodeRequest, UpdateTeamRequest } from '../models/web/teamWeb';
 
 @Injectable({
   providedIn: 'root'
@@ -76,8 +76,39 @@ export class TeamService extends CacheService {
     return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
   }
   
-  deleteTeamWorkcode(team: string, workcode: string): Observable<HttpResponse<SiteResponse>> {
+  deleteTeamWorkcode(team: string, workcode: string): 
+    Observable<HttpResponse<SiteResponse>> {
     const url = `/scheduler/api/v1/team/workcode/${team}/${workcode}`;
+    return this.httpClient.delete<SiteResponse>(url, { observe: 'response'});
+  }
+
+  addTeamCompany(team: string, companyid: string, name: string, ingest: string):
+  Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/team/company';
+    const data: CreateTeamCompany = {
+      teamid: team,
+      id: companyid,
+      name: name,
+      ingest: ingest,
+    }
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  updateTeamCompany(team: string, companyid: string, field: string, value: string):
+    Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/team/company';
+    const data: UpdateTeamRequest = {
+      teamid: team,
+      additionalid: companyid,
+      field: field,
+      value: value,
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+  
+  deleteTeamCompany(team: string, company: string): 
+    Observable<HttpResponse<SiteResponse>> {
+    const url = `/scheduler/api/v1/team/company/${team}/${company}`;
     return this.httpClient.delete<SiteResponse>(url, { observe: 'response'});
   }
 }
