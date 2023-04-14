@@ -6,13 +6,14 @@
       <h4>Company Editor</h4>
       <div class="flexlayout row center">
         <div class="list">
-          <div *ngFor="let co of companies" [class]="getButtonClass(co.id)"
+          <div *ngFor="let co of companies" 
+            [class]="getButtonClass(co.id)"
             (click)="onSelect(co.id)">{{co.label}}</div>
         </div>
-        <div class="flexlayout column center"
+        <div class="flexlayout column center sortdiv"
           *ngIf="selected !== 'new'">
-          <button mat-icon-button color="warn" matTooltip="Delete Selected Company"
-            (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+          <mat-icon matTooltip="Delete Company"
+          (click)="onDelete()">delete</mat-icon>
         </div>
       </div>
       <form [formGroup]="companyForm">

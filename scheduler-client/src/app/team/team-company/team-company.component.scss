@@ -4,8 +4,8 @@
   padding: 0;
   margin: 0;
   width: 260px;
-  min-height: 200px;
-  max-height: 200px;
+  min-height: 250px;
+  max-height: 250px;
   border: solid 1px black;
   overflow-y: auto;
 }
@@ -45,4 +45,23 @@
   text-align:center;
   width: 90%;
   font-size: 12pt;
+}
+
+.layout-stretch {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.sortdiv {
+  height: 250px;
+  width: 25px;
+  font-size: 12pt;
+  font-weight: bold;
+  color: red;
+  border: solid 1px white;
+
 }

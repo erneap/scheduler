@@ -150,7 +150,7 @@ export class TeamCompanyHolidaysComponent {
   }
 
   onChangeSort(direction: string) {
-
+    
   }
 
   onUpdate(field: string) {
@@ -207,7 +207,7 @@ export class TeamCompanyHolidaysComponent {
                       }
                     });
                   }
-                  this.selected = `${holType}${maxID}`;
+                  this.onSelect(`${holType}${maxID}`);
                   this.holiday = this.holidayMap.get(this.selected);
                   this.setHoliday()
                 }
