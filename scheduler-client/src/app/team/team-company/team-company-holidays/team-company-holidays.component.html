@@ -12,6 +12,10 @@
         (click)="onChangeSort('up')">
         <mat-icon *ngIf="showSortUp">arrow_drop_up</mat-icon>
       </div>
+      <div class="flexlayout column center deleteDiv"
+        matTooltip="Delete selected holiday">
+        <mat-icon *ngIf="selected !== 'new'">delete</mat-icon>
+      </div>
       <div class="layout-bottom movement"
         matTooltip="Change Order - Move Down"
         (click)="onChangeSort('down')">
@@ -20,15 +24,11 @@
     </div>
   </div>
   <form [formGroup]="holidayForm" class="flexlayout column center">
-    <div class="formField" *ngIf="selected === 'new'">
-      <mat-form-field appearance="fill">
-        <mat-label>Holiday ID</mat-label>
-        <input matInput formControlName="id">
-        <mat-error *ngIf="holidayForm.controls['id'].hasError('required')"
-          class="error">Required</mat-error>
-        <mat-error *ngIf="holidayForm.controls['id'].hasError('pattern')"
-          class="error">Wrong pattern</mat-error>
-      </mat-form-field>
+    <div class="formField">
+      <mat-radio-group formControlName="holtype" >
+        <mat-radio-button value="H">Regular Holiday</mat-radio-button>
+        <mat-radio-button value="F">Floater</mat-radio-button>
+      </mat-radio-group>
     </div>
     <div class="formField">
       <mat-form-field appearance="fill">
@@ -41,7 +41,7 @@
     <div class="employee active">Holiday Actual Dates</div>
     <div class="datelist">
       <div *ngFor="let date of actualDates"
-        [class]="getActualButtonClass(date.id)"
+        class="dates"
       >{{date.label}}</div>
     </div>
     <div class="flexlayout row center">
@@ -53,6 +53,10 @@
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
       </div>
+    </div>
+    <div class="flexlayout row center" 
+      *ngIf="selected === 'new' && holidayForm.valid">
+      <button mat-raised-button color="accent" (click)="onAdd()">Add</button>
     </div>
   </form>
 </div>

@@ -4,9 +4,9 @@ export interface CreateTeamRequest {
 
 export interface UpdateTeamRequest {
   teamid: string;
-  additionalid: string;
+  additionalid?: string;
   holiday?: string;
-  field: string;
+  field?: string;
   value: string;
 }
 

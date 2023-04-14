@@ -32,7 +32,10 @@ export class CompanyHoliday implements ICompanyHoliday {
 
   compareTo(other?: CompanyHoliday): number {
     if (other) {
-      return (this.sort < other.sort) ? -1 : 1;
+      if (this.id.toLowerCase() === other.id.toLowerCase()) {
+        return (this.sort < other.sort) ? -1 : 1
+      }
+      return (this.id.toLowerCase() === 'h') ? -1 : 1;
     }
     return -1;
   }
@@ -73,6 +76,8 @@ export interface ICompany {
   name: string;
   ingest: string;
   ingestPwd: string;
+  ingestPeriod?: number;
+  startDay?: number;
   holidays?: ICompanyHoliday[];
 }
 
@@ -81,6 +86,8 @@ export class Company implements ICompany {
   name: string;
   ingest: string;
   ingestPwd: string;
+  ingestPeriod: number;  // default to weekly
+  startDay: number;      // default to Saturday
   holidays: CompanyHoliday[];
 
   constructor(com?: ICompany) {
@@ -88,6 +95,9 @@ export class Company implements ICompany {
     this.name = (com) ? com.name : '';
     this.ingest = (com) ? com.ingest : '';
     this.ingestPwd = (com) ? com.ingestPwd : '';
+    this.ingestPeriod = (com && com.ingestPeriod && com.ingestPeriod > 0) 
+      ? com.ingestPeriod : 7;
+    this.startDay = (com && com.startDay) ? com.startDay : 6;
     this.holidays = [];
     if (com && com.holidays && com.holidays.length > 0) {
       com.holidays.forEach(hol => {

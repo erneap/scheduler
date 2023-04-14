@@ -48,6 +48,28 @@
             </mat-select>
           </mat-form-field>
         </div>
+        <div class="formField" *ngIf="companyForm.controls['ingest'].value !== 'manual'">
+          <mat-form-field appearance="fill">
+            <mat-label>Ingest Period</mat-label>
+            <mat-select formControlName="period"
+              (selectionChange)="onUpdate('period')">
+              <mat-option value="7">Weekly</mat-option>
+              <mat-option value="14">BiWeekly</mat-option>
+              <mat-option value="15">BiMonthly</mat-option>
+              <mat-option value="30">Monthly</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="formField" *ngIf="companyForm.controls['ingest'].value !== 'manual' && showIngestStart">
+          <mat-form-field appearance="fill">
+            <mat-label>Ingest Start Weekday</mat-label>
+            <mat-select formControlName="start"
+              (selectionChange)="onUpdate('start')">
+              <mat-option *ngFor="let wd of weekdays;let i = index"
+                [value]="i">{{wd}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
         <div class="formField" *ngIf="selected !== 'new'">
           <mat-checkbox formControlName="holidays"
             (change)="onUpdate('holidays')">Has Holidays</mat-checkbox>

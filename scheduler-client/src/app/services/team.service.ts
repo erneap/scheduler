@@ -6,6 +6,7 @@ import { Observable, of } from 'rxjs';
 import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
 import { SiteResponse } from '../models/web/siteWeb';
 import { CreateTeamCompany, CreateTeamWorkcodeRequest, UpdateTeamRequest } from '../models/web/teamWeb';
+import { CreateCompanyHoliday } from '../models/web/teamWeb';
 
 @Injectable({
   providedIn: 'root'
@@ -101,7 +102,7 @@ export class TeamService extends CacheService {
       teamid: team,
       additionalid: companyid,
       field: field,
-      value: value,
+      value: `${value}`,
     }
     return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
   }
@@ -110,5 +111,31 @@ export class TeamService extends CacheService {
     Observable<HttpResponse<SiteResponse>> {
     const url = `/scheduler/api/v1/team/company/${team}/${company}`;
     return this.httpClient.delete<SiteResponse>(url, { observe: 'response'});
+  }
+
+  addTeamCompanyHoliday(team: string, company: string, holtype: string, 
+    name: string, actual: string): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/team/company/holiday';
+    const data: CreateCompanyHoliday = {
+      teamid: team,
+      companyid: company,
+      holidayid: holtype,
+      name: name,
+      actual: actual,
+    }
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  updateTeamCompanyHoliday(team: string, companyid: string, holiday: string, 
+    field: string, value: string): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/team/company/holiday';
+    const data: UpdateTeamRequest = {
+      teamid: team,
+      additionalid: companyid,
+      holiday: holiday,
+      field: field,
+      value: `${value}`,
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
   }
 }

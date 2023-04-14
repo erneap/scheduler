@@ -31,6 +31,9 @@ export class TeamCompanyComponent {
   companyForm: FormGroup;
   company?: Company;
   hasHolidays: boolean = false;
+  showIngestStart: boolean = false;
+  weekdays: string[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+    "Friday", "Saturday"];
 
   constructor(
     protected authService: AuthService,
@@ -47,6 +50,8 @@ export class TeamCompanyComponent {
       id: ['', [Validators.required, Validators.pattern("^[a-z0-9]+")]],
       name: ['', [Validators.required]],
       ingest: ['manual', [Validators.required]],
+      period: "7",
+      start: "6",
       holidays: false,
     })
   }
@@ -89,11 +94,26 @@ export class TeamCompanyComponent {
       this.companyForm.controls['id'].setValue(this.company.id);
       this.companyForm.controls['name'].setValue(this.company.name);
       this.companyForm.controls['ingest'].setValue(this.company.ingest);
-      this.companyForm.controls['holidays'].setValue(this.company.holidays.length > 0);
+      if (this.company.ingestPeriod) {
+        this.companyForm.controls['period'].setValue(`${this.company.ingestPeriod}`);
+        const nPeriod = Number(this.company.ingestPeriod);
+        this.showIngestStart = nPeriod < 15;
+      } else {
+        this.showIngestStart = false;
+        this.companyForm.controls['period'].setValue('30');
+      }
+      if (this.company.startDay) {
+        this.companyForm.controls["start"].setValue(this.company.startDay);
+      } else {
+        this.companyForm.controls["start"].setValue(0);
+      }
+        this.companyForm.controls['holidays'].setValue(this.company.holidays.length > 0);
     } else {
       this.companyForm.controls['id'].setValue('');
       this.companyForm.controls['name'].setValue('');
       this.companyForm.controls['ingest'].setValue('manual');
+      this.companyForm.controls['period'].setValue('30');
+      this.companyForm.controls["start"].setValue(`6`);
       this.companyForm.controls['holidays'].setValue(false);
     }
   }
@@ -167,6 +187,10 @@ export class TeamCompanyComponent {
   }
 
   onUpdate(field: string) {
+    if (field === 'period') {
+      const nPeriod = Number(this.companyForm.controls[field].value);
+      this.showIngestStart = nPeriod < 15;
+    }
     if (this.selected !== 'new' && this.companyForm.controls[field].valid) {
       const value = this.companyForm.controls[field].value;
       if (field !== 'holidays') {

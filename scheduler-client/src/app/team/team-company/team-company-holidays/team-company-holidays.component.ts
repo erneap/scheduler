@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ListItem } from 'src/app/generic/button-list/listitem';
 import { Company, CompanyHoliday, ICompany } from 'src/app/models/teams/company';
 import { ITeam, Team } from 'src/app/models/teams/team';
+import { SiteResponse } from 'src/app/models/web/siteWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
 import { TeamService } from 'src/app/services/team.service';
@@ -38,14 +39,19 @@ export class TeamCompanyHolidaysComponent {
     }
     return new Company();
   }
+  @Output() teamChanged = new EventEmitter<Team>();
   holidays: ListItem[] = [];
+  holidayMap = new Map<string, CompanyHoliday>()
   selected: string = 'new'
+  dateSelected: string;
   holiday?: CompanyHoliday
   holidayForm: FormGroup;
   showSortUp: boolean = false;
   showSortDown: boolean = false;
   actualDates: ListItem[] = [];
   actualSelected: string = '';
+  maxHolidaysSort: number = -1;
+  maxFloaterSort: number = -1;
 
   constructor(
     protected authService: AuthService,
@@ -55,20 +61,31 @@ export class TeamCompanyHolidaysComponent {
     private fb: FormBuilder
   ) {
     this.holidayForm = this.fb.group({
-      id: ['', [Validators.required, Validators.pattern("^[HF][0-9]+$")]],
+      holtype: ['H', [Validators.required]],
       name: ['', [Validators.required]],
-      actual: new Date(),
+      actual: '',
     });
+    const now = new Date();
+    this.dateSelected = `${now.getFullYear()}`;
   }
 
   setHolidays() {
     this.holidays = [];
+    this.holidayMap = new Map<string, CompanyHoliday>()
     this.holidays.push(new ListItem('new', 'Add New Holiday'));
     if (this.company.holidays) {
       const holidays = this.company.holidays.sort((a,b) => a.compareTo(b));
       holidays.forEach(hol => {
-        const label = `${hol.id} - ${hol.name}`;
-        this.holidays.push(new ListItem(hol.id, label));
+        if (hol.id.toLowerCase() === 'h' && this.maxHolidaysSort < hol.sort) {
+          this.maxHolidaysSort = hol.sort;
+        }  
+        if (hol.id.toLowerCase() === 'f' && this.maxFloaterSort < hol.sort) {
+          this.maxFloaterSort = hol.sort;
+        }
+        const id = `${hol.id}${hol.sort}`;
+        this.holidayMap.set(id, hol);
+        const label = `${id} - ${hol.name}`;
+        this.holidays.push(new ListItem(id, label));
       });
     }
   }
@@ -81,38 +98,25 @@ export class TeamCompanyHolidaysComponent {
     return answer;
   }
 
-  getActualButtonClass(id: string) {
-    let answer = 'employee';
-    if (this.selected === id) {
-      answer += ' active';
-    }
-    return answer;
-  }
-
   onSelect(id: string) {
     this.selected = id;
     this.actualDates = [];
     this.showSortDown = false;
     this.showSortUp = false;
-    if (this.company.holidays) {
-      const holidays = this.company.holidays.sort((a,b) => a.compareTo(b));
-      for (let i=0; i < holidays.length; i++) {
-        if (holidays[i].id === id) {
-          this.holiday = holidays[i];
-          if (i > 0) {
-            this.showSortUp = true;
-          }
-          if (i < holidays.length - 1) {
-            this.showSortDown = true;
-          }
-          this.setHoliday();
-        }
+    this.holiday = this.holidayMap.get(id); 
+    if (this.holiday) {
+      if (this.holiday.id.toLowerCase() === 'h') {
+        this.showSortUp = this.holiday.sort > 1;
+        this.showSortDown = this.holiday.sort < this.maxHolidaysSort;
+      } else if (this.holiday.id.toLowerCase() === 'f') {
+        this.showSortUp = this.holiday.sort > 1;
+        this.showSortDown = this.holiday.sort < this.maxFloaterSort;
       }
     } 
     if (id === 'new') {
       this.holiday = undefined;
-      this.setHoliday();
     }
+    this.setHoliday();
   }
 
   getDateString(date: Date): string {
@@ -130,20 +134,95 @@ export class TeamCompanyHolidaysComponent {
         this.actualSelected = `${actuals[0].getTime()}`;
       }
       actuals.forEach(act => {
-        this.actualDates.push(new ListItem(`${act.getTime()}`, 
+        this.actualDates.push(new ListItem(`${act.getFullYear()}`, 
           this.getDateString(act)));
       });
-      this.holidayForm.controls['id'].setValue(this.holiday.id);
+      this.holidayForm.controls['holtype'].setValue(this.holiday.id);
+      this.holidayForm.controls['holtype'].disable();
       this.holidayForm.controls['name'].setValue(this.holiday.name);
       this.holidayForm.controls['actual'].setValue(actuals[0]);
     } else {
-      this.holidayForm.controls['id'].setValue('');
+      this.holidayForm.controls['holtype'].setValue('H');
+      this.holidayForm.controls['holtype'].enable();
       this.holidayForm.controls['name'].setValue('');
-      this.holidayForm.controls['actual'].setValue(new Date());
+      this.holidayForm.controls['actual'].setValue('');
     }
   }
 
   onChangeSort(direction: string) {
 
+  }
+
+  onUpdate(field: string) {
+    if (this.selected !== 'new') {
+      const name = this.holidayForm.value.name;
+      const actual = this.holidayForm.value.actual;
+
+    }
+  }
+
+  getDate(dt: Date): string {
+    let answer = `${dt.getFullYear()}-`;
+    if (dt.getMonth() < 9) {
+      answer += '0';
+    }
+    answer += `${dt.getMonth() + 1}-`;
+    if (dt.getDate() < 10) {
+      answer += '0';
+    }
+    answer += `${dt.getDate()}`;
+    return answer;
+  }
+
+  onAdd() {
+    if (this.selected === 'new' && this.holidayForm.valid) {
+      this.authService.statusMessage = "Adding company holiday"
+      this.dialogService.showSpinner();
+      const actual = this.holidayForm.value.actual;
+      let sActual = '';
+      if (actual !== null) {
+        sActual = this.getDate(new Date(actual));
+      }
+      const holType = this.holidayForm.value.holtype;
+      this.teamService.addTeamCompanyHoliday(this.team.id, this.company.id, 
+      holType, this.holidayForm.value.name, sActual)
+      .subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.team) {
+            this.team = data.team;
+            if (this.team.companies) {
+              this.team.companies.forEach(co => {
+                if (co.id === this.company.id) {
+                  this.company = new Company(co);
+                  let maxID = -1;
+                  if (this.company.holidays) {
+                    this.company.holidays.forEach(hol => {
+                      if (hol.id === holType && maxID < hol.sort) {
+                        maxID = hol.sort;
+                      }
+                    });
+                  }
+                  this.selected = `${holType}${maxID}`;
+                  this.holiday = this.holidayMap.get(this.selected);
+                  this.setHoliday()
+                }
+              });
+            }
+            this.teamService.setTeam(data.team);
+            this.teamChanged.emit(new Team(data.team));
+          }
+          this.authService.statusMessage = "Addition complete";
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      })
+    }
   }
 }

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -307,6 +308,7 @@ func UpdateTeamCompany(c *gin.Context) {
 	var data web.UpdateTeamRequest
 
 	if err := c.ShouldBindJSON(&data); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest,
 			web.SiteResponse{Team: nil, Site: nil, Exception: "Trouble with request"})
 		return
@@ -324,6 +326,7 @@ func UpdateTeamCompany(c *gin.Context) {
 		return
 	}
 
+	fmt.Printf("Field: %s, Value: %s\n", data.Field, data.Value)
 	for c, company := range team.Companies {
 		if strings.EqualFold(company.ID, data.AdditionalID) {
 			switch strings.ToLower(data.Field) {
@@ -333,6 +336,16 @@ func UpdateTeamCompany(c *gin.Context) {
 				company.IngestType = data.Value
 			case "ingestpwd":
 				company.IngestPwd = data.Value
+			case "ingestperiod", "period":
+				iVal, err := strconv.Atoi(data.Value)
+				if err == nil {
+					company.IngestPeriod = iVal
+				}
+			case "ingeststartday", "startday", "start":
+				iVal, err := strconv.Atoi(data.Value)
+				if err == nil {
+					company.IngestStartDay = iVal
+				}
 			}
 			team.Companies[c] = company
 		}
@@ -405,11 +418,11 @@ func CreateCompanyHoliday(c *gin.Context) {
 	}
 
 	found := false
-	sortID := -1
+	maxID := -1
 	for c, company := range team.Companies {
 		if strings.EqualFold(company.ID, data.CompanyID) {
 			for h, holiday := range company.Holidays {
-				if strings.EqualFold(holiday.ID, data.HolidayID) {
+				if strings.EqualFold(holiday.Name, data.Name) {
 					found = true
 					holiday.Name = data.Name
 					if data.Actual != "" {
@@ -426,15 +439,16 @@ func CreateCompanyHoliday(c *gin.Context) {
 					}
 					company.Holidays[h] = holiday
 				}
-				if sortID < int(holiday.SortID) {
-					sortID = int(holiday.SortID)
+				if strings.EqualFold(holiday.ID, data.HolidayID) &&
+					maxID < int(holiday.SortID) {
+					maxID = int(holiday.SortID)
 				}
 			}
 			if !found {
 				holiday := sites.CompanyHoliday{
 					ID:     data.HolidayID,
 					Name:   data.Name,
-					SortID: uint(sortID + 1),
+					SortID: uint(maxID + 1),
 				}
 				if data.Actual != "" {
 					newDate, _ := time.Parse("2006-01-02", data.Actual)
@@ -477,51 +491,60 @@ func UpdateCompanyHoliday(c *gin.Context) {
 		return
 	}
 
+	holID := data.HolidayID[0:1]
+	holSortID, err := strconv.Atoi(data.HolidayID[1:])
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+			Exception: err.Error()})
+		return
+	}
 	for c, company := range team.Companies {
 		if strings.EqualFold(company.ID, data.AdditionalID) {
 			for h, holiday := range company.Holidays {
-				switch strings.ToLower(data.Field) {
-				case "name":
-					holiday.Name = data.Value
-				case "move":
-					tSort := holiday.SortID
-					if strings.ToLower(data.Value[:1]) == "u" {
-						if h > 0 {
-							holiday.SortID = company.Holidays[h-1].SortID
-							company.Holidays[h-1].SortID = tSort
+				if holiday.ID == holID && holiday.SortID == uint(holSortID) {
+					switch strings.ToLower(data.Field) {
+					case "name":
+						holiday.Name = data.Value
+					case "move":
+						tSort := holiday.SortID
+						if strings.ToLower(data.Value[:1]) == "u" {
+							if h > 0 {
+								holiday.SortID = company.Holidays[h-1].SortID
+								company.Holidays[h-1].SortID = tSort
+							}
+						} else {
+							if h < len(company.Holidays)-1 {
+								holiday.SortID = company.Holidays[h+1].SortID
+								company.Holidays[h+1].SortID = tSort
+							}
 						}
-					} else {
-						if h < len(company.Holidays)-1 {
-							holiday.SortID = company.Holidays[h+1].SortID
-							company.Holidays[h+1].SortID = tSort
+					case "addactual", "addactualdate", "actual":
+						tDate, _ := time.Parse("2006-01-02", data.Value)
+						found := false
+						for d, aDate := range holiday.ActualDates {
+							if aDate.Year() == tDate.Year() {
+								found = true
+								holiday.ActualDates[d] = tDate
+							}
+						}
+						if !found {
+							holiday.ActualDates = append(holiday.ActualDates, tDate)
+						}
+					case "removeactual", "removeactualdate":
+						tDate, _ := time.Parse("2006-01-02", data.Value)
+						pos := -1
+						for d, aDate := range holiday.ActualDates {
+							if aDate.Equal(tDate) {
+								pos = d
+							}
+						}
+						if pos >= 0 {
+							holiday.ActualDates = append(holiday.ActualDates[:pos],
+								holiday.ActualDates[pos+1:]...)
 						}
 					}
-				case "addactual", "addactualdate":
-					tDate, _ := time.Parse("2006-01-02", data.Value)
-					found := false
-					for d, aDate := range holiday.ActualDates {
-						if aDate.Year() == tDate.Year() {
-							found = true
-							holiday.ActualDates[d] = tDate
-						}
-					}
-					if !found {
-						holiday.ActualDates = append(holiday.ActualDates, tDate)
-					}
-				case "removeactual", "removeactualdate":
-					tDate, _ := time.Parse("2006-01-02", data.Value)
-					pos := -1
-					for d, aDate := range holiday.ActualDates {
-						if aDate.Equal(tDate) {
-							pos = d
-						}
-					}
-					if pos >= 0 {
-						holiday.ActualDates = append(holiday.ActualDates[:pos],
-							holiday.ActualDates[pos+1:]...)
-					}
+					company.Holidays[h] = holiday
 				}
-				company.Holidays[h] = holiday
 			}
 			sort.Sort(sites.ByCompanyHoliday(company.Holidays))
 			team.Companies[c] = company

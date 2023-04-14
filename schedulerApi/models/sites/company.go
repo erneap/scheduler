@@ -1,6 +1,9 @@
 package sites
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 type CompanyHoliday struct {
 	ID          string      `json:"id" bson:"id"`
@@ -13,7 +16,10 @@ type ByCompanyHoliday []CompanyHoliday
 
 func (c ByCompanyHoliday) Len() int { return len(c) }
 func (c ByCompanyHoliday) Less(i, j int) bool {
-	return c[i].SortID < c[j].SortID
+	if c[i].ID == c[j].ID {
+		return c[i].SortID < c[j].SortID
+	}
+	return strings.EqualFold(c[i].ID, "H")
 }
 func (c ByCompanyHoliday) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
@@ -29,11 +35,13 @@ func (ch *CompanyHoliday) GetActual(year int) *time.Time {
 }
 
 type Company struct {
-	ID         string           `json:"id" bson:"id"`
-	Name       string           `json:"name" bson:"name"`
-	IngestType string           `json:"ingest" bson:"ingest"`
-	IngestPwd  string           `json:"ingestPwd" bson:"ingestPwd"`
-	Holidays   []CompanyHoliday `json:"holidays,omitempty" bson:"holidays,omitempty"`
+	ID             string           `json:"id" bson:"id"`
+	Name           string           `json:"name" bson:"name"`
+	IngestType     string           `json:"ingest" bson:"ingest"`
+	IngestPeriod   int              `json:"ingestPeriod,omitempty" bson:"ingestPeriod,omitempty"`
+	IngestStartDay int              `json:"startDay,omitempty" bson:"startDay,omitempty"`
+	IngestPwd      string           `json:"ingestPwd" bson:"ingestPwd"`
+	Holidays       []CompanyHoliday `json:"holidays,omitempty" bson:"holidays,omitempty"`
 }
 
 type ByCompany []Company
