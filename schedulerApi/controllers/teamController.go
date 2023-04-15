@@ -500,6 +500,7 @@ func UpdateCompanyHoliday(c *gin.Context) {
 	}
 	for c, company := range team.Companies {
 		if strings.EqualFold(company.ID, data.AdditionalID) {
+			sort.Sort(sites.ByCompanyHoliday(company.Holidays))
 			for h, holiday := range company.Holidays {
 				if holiday.ID == holID && holiday.SortID == uint(holSortID) {
 					switch strings.ToLower(data.Field) {
@@ -509,13 +510,21 @@ func UpdateCompanyHoliday(c *gin.Context) {
 						tSort := holiday.SortID
 						if strings.ToLower(data.Value[:1]) == "u" {
 							if h > 0 {
-								holiday.SortID = company.Holidays[h-1].SortID
-								company.Holidays[h-1].SortID = tSort
+								holiday2 := company.Holidays[h-1]
+								if holiday2.ID == holID {
+									holiday.SortID = holiday2.SortID
+									holiday2.SortID = tSort
+									company.Holidays[h-1] = holiday2
+								}
 							}
-						} else {
+						} else if strings.ToLower(data.Value[:1]) == "d" {
 							if h < len(company.Holidays)-1 {
-								holiday.SortID = company.Holidays[h+1].SortID
-								company.Holidays[h+1].SortID = tSort
+								holiday2 := company.Holidays[h+1]
+								if holiday2.ID == holID {
+									holiday.SortID = holiday2.SortID
+									holiday2.SortID = tSort
+									company.Holidays[h+1] = holiday2
+								}
 							}
 						}
 					case "addactual", "addactualdate", "actual":
@@ -565,6 +574,14 @@ func DeleteCompanyHoliday(c *gin.Context) {
 	companyID := c.Param("companyid")
 	holidayID := c.Param("holidayid")
 
+	holID := holidayID[0:1]
+	holSortID, err := strconv.Atoi(holidayID[1:])
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+			Exception: err.Error()})
+		return
+	}
+
 	team, err := services.GetTeam(teamID)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -581,13 +598,26 @@ func DeleteCompanyHoliday(c *gin.Context) {
 	for c, company := range team.Companies {
 		if strings.EqualFold(company.ID, companyID) {
 			for h, holiday := range company.Holidays {
-				if strings.EqualFold(holiday.ID, holidayID) {
+				if strings.EqualFold(holiday.ID, holID) &&
+					holiday.SortID == uint(holSortID) {
 					pos = h
 				}
 			}
 			if pos >= 0 {
 				company.Holidays = append(company.Holidays[:pos],
 					company.Holidays[pos+1:]...)
+			}
+			sort.Sort(sites.ByCompanyHoliday(company.Holidays))
+			holID = ""
+			sortID := 0
+			for h, hol := range company.Holidays {
+				if hol.ID != holID {
+					holID = hol.ID
+					sortID = 0
+				}
+				sortID++
+				hol.SortID = uint(sortID)
+				company.Holidays[h] = hol
 			}
 			team.Companies[c] = company
 		}

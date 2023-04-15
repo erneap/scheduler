@@ -48,6 +48,15 @@ export class TeamService extends CacheService {
     return this.httpClient.get<SiteResponse>(url, {observe: 'response'});
   }
 
+  updateTeam(teamid: string, name: string): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/team'
+    const data: UpdateTeamRequest = {
+      teamid: teamid,
+      value: name,
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+
   addTeamWorkcode(team: string, workcode: string, title: string, start: number,
   isLeave: boolean, premimum: string, text: string, back: string): 
   Observable<HttpResponse<SiteResponse>> {
@@ -137,5 +146,12 @@ export class TeamService extends CacheService {
       value: `${value}`,
     }
     return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  deleteTeamCompanyHoliday(team: string, company: string, holiday: string): 
+    Observable<HttpResponse<SiteResponse>> {
+    const url = `/scheduler/api/v1/team/company/holiday/${team}/${company}`
+      + `/${holiday}`;
+    return this.httpClient.delete<SiteResponse>(url, { observe: 'response'});
   }
 }

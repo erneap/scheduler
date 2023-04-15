@@ -14,7 +14,8 @@
       </div>
       <div class="flexlayout column center deleteDiv"
         matTooltip="Delete selected holiday">
-        <mat-icon *ngIf="selected !== 'new'">delete</mat-icon>
+        <mat-icon *ngIf="selected !== 'new'"
+          (click)="onDelete()">delete</mat-icon>
       </div>
       <div class="layout-bottom movement"
         matTooltip="Change Order - Move Down"
@@ -33,7 +34,8 @@
     <div class="formField">
       <mat-form-field appearance="fill">
         <mat-label>Holiday Name</mat-label>
-        <input matInput formControlName="name">
+        <input matInput formControlName="name"
+          (blur)="onUpdate('name')">
         <mat-error *ngIf="holidayForm.controls['name'].hasError('required')"
           class="error">Required</mat-error>
       </mat-form-field>
@@ -48,7 +50,8 @@
       <div class="formField">
         <mat-form-field appearance="fill">
           <mat-label>Holiday Actual Date</mat-label>
-          <input matInput formControlName="actual" [matDatepicker]="picker">
+          <input matInput formControlName="actual" [matDatepicker]="picker"
+            (dateChange)="onUpdate('actual')">
           <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>

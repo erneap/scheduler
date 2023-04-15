@@ -1,0 +1,83 @@
+
+<div class="flexlayout column topcenter">
+  <form [formGroup]="editorForm">
+    <div class="fxLayout-row-center">
+      <div class="formFieldWide">
+        <mat-form-field class="fieldWidthWide">
+          <mat-label>Request Dates</mat-label>
+          <mat-date-range-input
+            [rangePicker]="picker">
+            <input matStartDate placeholder="Start Date"
+              formControlName="start" (dateChange)="processChange('start')">
+            <input matEndDate placeholder="End Date"
+              formControlName="end" (dateChange)="processChange('end')">
+          </mat-date-range-input>
+          <mat-hint>Include Time Off</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+      </div>
+      <div class="formFieldWide">
+        <mat-form-field class="fieldWidthWide">
+          <mat-select formControlName="primarycode"
+            (selectionChange)="processChange('code')">
+            <mat-option *ngFor="let wc of leaveList" [value]="wc.id">
+              {{wc.title}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div> 
+      <button mat-icon-button  
+        *ngIf="editorForm.valid"
+        matTooltip="Add/Update Leave Request"
+        (click)="processNewRequest()">
+        <mat-icon>add</mat-icon>
+      </button> 
+      <button mat-icon-button color="accent"
+          *ngIf="request.id !== ''"
+          matTooltip="Delete Current Leave Request"
+          (click)="deleteRequest()">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-icon-button
+          matTooltip="Clear editor"
+          (click)="clearRequest()">
+          <mat-icon>deselect</mat-icon>
+        </button>
+    </div>
+    <div class="flexlayout row center" *ngIf="approver">
+      <button mat-raised-button color="accent" 
+        matTooltip="Supervisor Approve Leave Request">
+        Approve Request
+      </button>
+    </div>
+  </form>
+  <div *ngIf="request.id !== ''" style="padding-bottom: 10px;">
+    <div class="fxLayout-column-center">
+      <div class="fxLayout-row-center">
+        <div class="label">Created On:</div>
+        <div class="label">{{getCurrentLeaveRequestDate()}}</div>
+      </div>
+      <div class="fxLayout-row-center">
+        <div class="label">Current Status:</div>
+        <div class="label">{{request.status.toUpperCase()}}</div>
+      </div>
+      <div class="fxLayout-row-center">
+        <div class="label">Approved By:</div>
+        <div class="label">{{getApprovedBy()}}</div>
+      </div>
+      <div class="fxLayout-row-center">
+        <div class="label">Approval Date:</div>
+        <div class="label">{{getApprovedDate()}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="fxLayout-row-center" *ngIf="request.id !== ''">
+    <app-leave-request-calendar [leaveCodes]="leaveList" 
+      [startdate]="request.startdate"
+      [enddate]="request.enddate"
+      [leavedays]="request.requesteddays"
+      (changed)="processDayChange($event)">
+    </app-leave-request-calendar>
+  </div>
+</div>
