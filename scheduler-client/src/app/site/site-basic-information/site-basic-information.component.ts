@@ -91,6 +91,10 @@ export class SiteBasicInformationComponent {
               this.siteService.setSite(new Site(data.site));
             }
             this.teamService.setSelectedSite(new Site(data.site));
+            const iTeam = this.teamService.getTeam();
+            if (iTeam) {
+              this.authService.setWebLabel(iTeam.name, this.site.name);
+            }
           }
           this.authService.statusMessage = "Update complete"
         },

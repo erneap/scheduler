@@ -12,7 +12,7 @@
   <mat-tab-group [backgroundColor]="'accent'" *ngIf="selected !== 'new'"
     style="width: 100%;">
     <mat-tab label="Site Editor">
-      <app-site [siteid]="selected"></app-site>
+      <app-site [site]="site"></app-site>
     </mat-tab>
     <mat-tab label="Site Employee Editor">
       <app-team-site-employee-editor [site]="site" style="width: 100%;">

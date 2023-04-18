@@ -45,14 +45,9 @@
           <mat-icon>deselect</mat-icon>
         </button>
     </div>
-    <div class="flexlayout row center" *ngIf="approver">
-      <button mat-raised-button color="accent" 
-        matTooltip="Supervisor Approve Leave Request">
-        Approve Request
-      </button>
-    </div>
   </form>
-  <div *ngIf="request.id !== ''" style="padding-bottom: 10px;">
+  <div *ngIf="request.id !== ''" style="padding-bottom: 10px;"
+    class="flexlayout row center">
     <div class="fxLayout-column-center">
       <div class="fxLayout-row-center">
         <div class="label">Created On:</div>
@@ -70,6 +65,13 @@
         <div class="label">Approval Date:</div>
         <div class="label">{{getApprovedDate()}}</div>
       </div>
+    </div>
+    <div class="flexlayout row center" *ngIf="approver" style="padding-left: 50px;">
+      <button mat-raised-button color="accent" 
+        matTooltip="Supervisor Approve Leave Request"
+        (click)="approveLeaveRequest()">
+        Approve Request
+      </button>
     </div>
   </div>
   <div class="fxLayout-row-center" *ngIf="request.id !== ''">

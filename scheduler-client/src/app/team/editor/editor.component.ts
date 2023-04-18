@@ -4,6 +4,7 @@ import { ITeam, Team } from 'src/app/models/teams/team';
 import { SiteResponse } from 'src/app/models/web/siteWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
+import { SiteService } from 'src/app/services/site.service';
 import { TeamService } from 'src/app/services/team.service';
 
 @Component({
@@ -26,6 +27,7 @@ export class EditorComponent {
   constructor(
     protected authService: AuthService,
     protected dialogService: DialogService,
+    protected siteService: SiteService,
     protected teamService: TeamService,
     private fb: FormBuilder
   ) {
@@ -53,6 +55,12 @@ export class EditorComponent {
         if (data && data != null && data.team) {
           this.team = data.team;
           this.teamService.setTeam(data.team);
+          const iSite = this.siteService.getSite();
+          if (iSite) {
+            this.authService.setWebLabel(this.team.name, iSite.name);
+          } else {
+            this.authService.setWebLabel(this.team.name, '');
+          }
         }
       },
       error: err => {

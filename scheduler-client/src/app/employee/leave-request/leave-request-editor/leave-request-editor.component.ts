@@ -83,6 +83,7 @@ export class LeaveRequestEditorComponent {
     const tEmp = this.authService.getUser();
     if (tEmp) {
       if (this.request.id !== '' && this.employee.id !== tEmp.id 
+        && this.request.approvedby === ''
         && (this.authService.hasRole('scheduler')
         || this.authService.hasRole('siteleader'))) {
         this.approver = true;
@@ -161,21 +162,20 @@ export class LeaveRequestEditorComponent {
             if (data && data !== null) {
               if (data.employee) {
                 this.employee = data.employee;
-              }
-              this.setCurrent();
-              const emp = this.empService.getEmployee();
-              if (data.employee && emp && emp.id === data.employee.id) {
-                this.empService.setEmployee(data.employee);
-              }
-              const site = this.siteService.getSite();
-              if (site && site.employees && site.employees.length && data.employee) {
-                let found = false;
-                for (let i=0; i < site.employees.length && !found; i++) {
-                  if (site.employees[i].id === data.employee.id) {
-                    site.employees[i] = new Employee(data.employee);
-                  }
+                if (this.employee.data.requests) {
+                  this.employee.data.requests.forEach(req => {
+                    if (req.startdate.getFullYear() === start.getFullYear()
+                      && req.startdate.getMonth() === start.getMonth()
+                      && req.startdate.getDate() === start.getDate()
+                      && req.enddate.getFullYear() === end.getFullYear()
+                      && req.enddate.getMonth() === end.getMonth()
+                      && req.enddate.getDate() === end.getDate()) {
+                        this.request = new LeaveRequest(req);
+                      }
+                  });
                 }
               }
+              this.setCurrent();
             }
             this.authService.statusMessage = "Leave Request processing complete";
             this.changed.emit(new Employee(this.employee));
@@ -230,19 +230,6 @@ export class LeaveRequestEditorComponent {
                 });
               }
               this.setCurrent();
-              const emp = this.empService.getEmployee();
-              if (data.employee && emp && emp.id === data.employee.id) {
-                this.empService.setEmployee(data.employee);
-              }
-              const site = this.siteService.getSite();
-              if (site && site.employees && site.employees.length && data.employee) {
-                let found = false;
-                for (let i=0; i < site.employees.length && !found; i++) {
-                  if (site.employees[i].id === data.employee.id) {
-                    site.employees[i] = new Employee(data.employee);
-                  }
-                }
-              }
             }
             this.authService.statusMessage = "Update complete";
             this.changed.emit(new Employee(this.employee));
@@ -277,19 +264,6 @@ export class LeaveRequestEditorComponent {
                 });
               }
               this.setCurrent();
-              const emp = this.empService.getEmployee();
-              if (data.employee && emp && emp.id === data.employee.id) {
-                this.empService.setEmployee(data.employee);
-              }
-              const site = this.siteService.getSite();
-              if (site && site.employees && site.employees.length && data.employee) {
-                let found = false;
-                for (let i=0; i < site.employees.length && !found; i++) {
-                  if (site.employees[i].id === data.employee.id) {
-                    site.employees[i] = new Employee(data.employee);
-                  }
-                }
-              }
             }
             this.authService.statusMessage = "Update complete";
             this.changed.emit(new Employee(this.employee));
@@ -332,19 +306,6 @@ export class LeaveRequestEditorComponent {
                     });
                   }
                   this.setCurrent();
-                  const emp = this.empService.getEmployee();
-                  if (data.employee && emp && emp.id === data.employee.id) {
-                    this.empService.setEmployee(data.employee);
-                  }
-                  const site = this.siteService.getSite();
-                  if (site && site.employees && site.employees.length && data.employee) {
-                    let found = false;
-                    for (let i=0; i < site.employees.length && !found; i++) {
-                      if (site.employees[i].id === data.employee.id) {
-                        site.employees[i] = new Employee(data.employee);
-                      }
-                    }
-                  }
                 }
                 this.authService.statusMessage = "Deletion Complete";
                 this.changed.emit(new Employee(this.employee));
@@ -364,5 +325,40 @@ export class LeaveRequestEditorComponent {
     this.editorForm.controls["start"].setValue(new Date())
     this.editorForm.controls["end"].setValue(new Date());
     this.editorForm.controls["primarycode"].setValue('V');
+  }
+
+  approveLeaveRequest() {
+    this.authService.statusMessage = "Approving Leave Request";
+    this.dialogService.showSpinner();
+    const iEmp = this.empService.getEmployee();
+    if (iEmp) {
+      this.empService.updateLeaveRequest(this.employee.id, this.request.id, 
+      "approve", iEmp.id).subscribe({
+        next: (resp) => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: EmployeeResponse | null = resp.body;
+          if (data && data !== null) {
+            if (data.employee) {
+              this.employee = data.employee;
+              this.employee.data.requests.forEach(req => {
+                if (this.request.id === req.id) {
+                  this.request = new LeaveRequest(req)
+                }
+              });
+            }
+            this.setCurrent();
+          }
+          this.authService.statusMessage = "Approval Complete";
+          this.changed.emit(new Employee(this.employee));
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.error.exception;
+        }
+      });
+    }
   }
 }

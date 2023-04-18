@@ -42,7 +42,6 @@ export class TeamSiteEditorComponent {
   }
 
   setSites() {
-    console.log(this.team);
     this.sites = [];
     this.sites.push(new ListItem('new', 'Add New Site'))
     if (this.team.sites) {

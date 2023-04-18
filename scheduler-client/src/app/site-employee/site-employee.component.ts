@@ -8,6 +8,7 @@ import { DialogService } from '../services/dialog-service.service';
 import { EmployeeService } from '../services/employee.service';
 import { SiteService } from '../services/site.service';
 import { TeamService } from '../services/team.service';
+import { Team } from '../models/teams/team';
 
 @Component({
   selector: 'app-site-employee',
@@ -96,6 +97,22 @@ export class SiteEmployeeComponent {
 
   siteUpdated(site: Site) {
     this.siteChanged.emit(site);
+    const iSite = this.siteService.getSite();
+    if (iSite && iSite.id === site.id) {
+      this.siteService.setSite(site)
+    }
+    const iTeam = this.teamService.getTeam();
+    if (iTeam) {
+      const team = new Team(iTeam);
+      if (team.sites) {
+        for (let i=0; i < team.sites.length; i++) {
+          if (team.sites[i].id === site.id) {
+            team.sites[i] = site;
+          }
+        }
+      }
+    }
+    this.site = new Site(site);
     this.setEmployees();
   }
 

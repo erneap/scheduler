@@ -52,6 +52,7 @@ export class LeaveRequestCalendarComponent {
       start = new Date(start.getTime() - (24 * 3600000));
     }
     let end = new Date(this.enddate);
+    end = new Date(end.getTime() + (24 * 3600000));
     while (end.getDay() !== 0) {
       end = new Date(end.getTime() + (24 * 3600000));
     }

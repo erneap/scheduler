@@ -420,14 +420,23 @@ func (e *Employee) UpdateLeaveRequest(request, field, value string,
 				if err != nil {
 					return err
 				}
+				if lvDate.Before(req.StartDate) || lvDate.After(req.EndDate) {
+					req.Status = "REQUESTED"
+					req.ApprovedBy = ""
+					req.ApprovalDate = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+				}
 				req.StartDate = lvDate
-				req.Status = "REQUESTED"
 				// reset the leave dates
 				req.SetLeaveDays(e, offset)
 			case "enddate", "end":
 				lvDate, err := time.Parse("2006-01-02", value)
 				if err != nil {
 					return err
+				}
+				if lvDate.Before(req.StartDate) || lvDate.After(req.EndDate) {
+					req.Status = "REQUESTED"
+					req.ApprovedBy = ""
+					req.ApprovalDate = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 				}
 				req.EndDate = lvDate
 				req.Status = "REQUESTED"
@@ -446,10 +455,20 @@ func (e *Employee) UpdateLeaveRequest(request, field, value string,
 				if err != nil {
 					return nil
 				}
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0,
+					time.UTC)
+				end = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0,
+					time.UTC)
+				if start.Before(req.StartDate) || start.After(req.EndDate) ||
+					end.Before(req.StartDate) || end.After(req.EndDate) {
+					req.Status = "REQUESTED"
+					req.ApprovalDate = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+					req.ApprovedBy = ""
+				}
 				req.StartDate = time.Date(start.Year(), start.Month(), start.Day(), 0,
-					0, 0, 0, time.Local)
+					0, 0, 0, time.UTC)
 				req.EndDate = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0,
-					time.Local)
+					time.UTC)
 				req.SetLeaveDays(e, offset)
 			case "approve":
 				req.ApprovedBy = value

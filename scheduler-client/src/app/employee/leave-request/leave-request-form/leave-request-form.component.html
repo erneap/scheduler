@@ -1,15 +1,12 @@
 <div class="flexlayout row topcenter" style="gap: 25px;">
   <div class="flexlayout column topleft">
     <h3>Current Leave Requests</h3>
-    <div class="lrList">
-      <ng-container *ngIf="currentLeaveRequests.length > 0">
-        <button mat-raised-button *ngFor="let req of currentLeaveRequests"
-        (click)="this.setDisplayedLeaveRequest(req.id)"
-        >{{this.getDateString(req.startdate)}} - {{this.getDateString(req.enddate)}}</button>
-      </ng-container>
-      <ng-container *ngIf="currentLeaveRequests.length <= 0">
-        No Leave Requests
-      </ng-container>
+    <div class="list">
+      <div *ngFor="let item of currentLeaveRequests" 
+        [class]="getButtonClass(item.id)"
+        (click)="setSelected(item.id)">
+        {{getDateString(item.startdate)}} - {{getDateString(item.enddate)}}
+      </div>
     </div>
   </div>
   <app-leave-request-editor [employee]="employee" 

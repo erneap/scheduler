@@ -47,7 +47,7 @@ export class SiteEmployeeEditorComponent {
 
   employeeChanged(emp: Employee) {
     this.employee = new Employee(emp);
-    if (emp.name.first === '') {
+    if (emp.name.first !== '') {
       let found = false;
       const iEmp = this.empService.getEmployee();
       if ( iEmp && iEmp.id === this.employee.id) {
