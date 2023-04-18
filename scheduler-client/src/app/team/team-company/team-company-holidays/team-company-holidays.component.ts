@@ -153,7 +153,8 @@ export class TeamCompanyHolidaysComponent {
   onChangeSort(direction: string) {
     if (this.selected !== 'new') {
       if ((direction.substring(0,1).toLowerCase() === 'u' && this.showSortUp)
-        || (direction.substring(0,1).toLowerCase() === 'd' && this.showSortDown)) {      this.authService.statusMessage = 'Updating Company holiday';
+        || (direction.substring(0,1).toLowerCase() === 'd' && this.showSortDown)) {      
+        this.authService.statusMessage = 'Updating Company holiday';
         this.dialogService.showSpinner();
         this.teamService.updateTeamCompanyHoliday(this.team.id, this.company.id,
         this.selected, 'move', direction).subscribe({
