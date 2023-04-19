@@ -1,39 +1,47 @@
 package controllers
 
 import (
-	"log"
+	"net/http"
+	"strings"
 
+	"github.com/erneap/scheduler/schedulerApi/converters"
+	"github.com/erneap/scheduler/schedulerApi/models/web"
+	"github.com/erneap/scheduler/schedulerApi/services"
 	"github.com/gin-gonic/gin"
-	"github.com/xuri/excelize/v2"
 )
 
 func ingestFiles(c *gin.Context) {
 	form, _ := c.MultipartForm()
+	teamid := form.Value["team"][0]
+	companyid := form.Value["company"][0]
+
+	team, err := services.GetTeam(teamid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+			Exception: "Team not found"})
+		return
+	}
+
+	ingestType := "manual"
+	startDay := 0
+	period := 7
+	for _, co := range team.Companies {
+		if co.ID == companyid {
+			ingestType = co.IngestType
+			startDay = co.IngestStartDay
+			period = co.IngestPeriod
+		}
+	}
+
 	files := form.File["ingest"]
-	for _, file := range files {
-		readerFile, _ := file.Open()
-		f, err := excelize.OpenReader(readerFile)
-		if err != nil {
-			log.Println(err)
+	switch strings.ToLower(ingestType) {
+	case "sap":
+		sapIngest := converters.SAPIngest{
+			Start:  startDay,
+			Period: period,
 		}
-		sheetName := f.GetSheetName(0)
-
-		columns := make(map[string]int)
-
-		rows, err := f.GetRows(sheetName)
-		if err != nil {
-			log.Println(err)
-		}
-		//var startDate time.Time
-		//var endDate time.Time
-		for i, row := range rows {
-			if i == 0 {
-				for j, colCell := range row {
-					columns[colCell] = j
-				}
-			} else {
-
-			}
+		for _, f := range files {
+			sapIngest.Files = append(sapIngest.Files, f)
 		}
 	}
 }
