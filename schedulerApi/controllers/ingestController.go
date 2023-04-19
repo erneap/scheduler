@@ -39,9 +39,8 @@ func ingestFiles(c *gin.Context) {
 		sapIngest := converters.SAPIngest{
 			Start:  startDay,
 			Period: period,
+			Files:  files,
 		}
-		for _, f := range files {
-			sapIngest.Files = append(sapIngest.Files, f)
-		}
+		sapIngest.Process()
 	}
 }
