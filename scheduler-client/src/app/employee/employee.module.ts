@@ -57,7 +57,8 @@ import { LeaveRequestEditorComponent } from './leave-request/leave-request-edito
   exports: [
     PtoHolidayChartComponent,
     EmployeeProfileFormComponent,
-    LeaveRequestFormComponent
+    LeaveRequestFormComponent,
+    LeaveRequestEditorComponent
   ]
 })
 export class EmployeeModule { }

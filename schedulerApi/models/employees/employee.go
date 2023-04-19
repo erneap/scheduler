@@ -424,10 +424,37 @@ func (e *Employee) UpdateLeaveRequest(request, field, value string,
 					req.Status = "REQUESTED"
 					req.ApprovedBy = ""
 					req.ApprovalDate = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+					startPos := -1
+					endPos := -1
+					sort.Sort(ByLeaveDay(e.Data.Leaves))
+					for i, lv := range e.Data.Leaves {
+						if lv.RequestID == req.ID {
+							if startPos < 0 {
+								startPos = i
+							} else {
+								endPos = i
+							}
+						}
+					}
+					if startPos >= 0 {
+						if endPos < 0 {
+							endPos = startPos
+						}
+						endPos++
+						if endPos > len(e.Data.Leaves) {
+
+						} else {
+							e.Data.Leaves = append(e.Data.Leaves[:startPos],
+								e.Data.Leaves[endPos:]...)
+						}
+					}
 				}
 				req.StartDate = lvDate
 				// reset the leave dates
 				req.SetLeaveDays(e, offset)
+				if req.Status == "APPROVED" {
+					e.ChangeApprovedLeaveDates(req)
+				}
 			case "enddate", "end":
 				lvDate, err := time.Parse("2006-01-02", value)
 				if err != nil {
@@ -437,11 +464,38 @@ func (e *Employee) UpdateLeaveRequest(request, field, value string,
 					req.Status = "REQUESTED"
 					req.ApprovedBy = ""
 					req.ApprovalDate = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+					startPos := -1
+					endPos := -1
+					sort.Sort(ByLeaveDay(e.Data.Leaves))
+					for i, lv := range e.Data.Leaves {
+						if lv.RequestID == req.ID {
+							if startPos < 0 {
+								startPos = i
+							} else {
+								endPos = i
+							}
+						}
+					}
+					if startPos >= 0 {
+						if endPos < 0 {
+							endPos = startPos
+						}
+						endPos++
+						if endPos > len(e.Data.Leaves) {
+
+						} else {
+							e.Data.Leaves = append(e.Data.Leaves[:startPos],
+								e.Data.Leaves[endPos:]...)
+						}
+					}
 				}
 				req.EndDate = lvDate
 				req.Status = "REQUESTED"
 				// reset the leave dates
 				req.SetLeaveDays(e, offset)
+				if req.Status == "APPROVED" {
+					e.ChangeApprovedLeaveDates(req)
+				}
 			case "code", "primarycode":
 				req.PrimaryCode = value
 				log.Println(req.PrimaryCode)
@@ -464,60 +518,44 @@ func (e *Employee) UpdateLeaveRequest(request, field, value string,
 					req.Status = "REQUESTED"
 					req.ApprovalDate = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 					req.ApprovedBy = ""
+					startPos := -1
+					endPos := -1
+					sort.Sort(ByLeaveDay(e.Data.Leaves))
+					for i, lv := range e.Data.Leaves {
+						if lv.RequestID == req.ID {
+							if startPos < 0 {
+								startPos = i
+							} else {
+								endPos = i
+							}
+						}
+					}
+					if startPos >= 0 {
+						if endPos < 0 {
+							endPos = startPos
+						}
+						endPos++
+						if endPos > len(e.Data.Leaves) {
+
+						} else {
+							e.Data.Leaves = append(e.Data.Leaves[:startPos],
+								e.Data.Leaves[endPos:]...)
+						}
+					}
 				}
 				req.StartDate = time.Date(start.Year(), start.Month(), start.Day(), 0,
 					0, 0, 0, time.UTC)
 				req.EndDate = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0,
 					time.UTC)
 				req.SetLeaveDays(e, offset)
+				if req.Status == "APPROVED" {
+					e.ChangeApprovedLeaveDates(req)
+				}
 			case "approve":
 				req.ApprovedBy = value
 				req.ApprovalDate = time.Now().UTC()
 				req.Status = "APPROVED"
-				var deletes []int
-				for _, rLv := range req.RequestedDays {
-					found := false
-					for j, lv := range e.Data.Leaves {
-						if lv.LeaveDate.Equal(rLv.LeaveDate) {
-							found = true
-							if rLv.Code != "" && !found {
-								if lv.Status != "ACTUAL" {
-									lv.Code = rLv.Code
-									lv.Hours = rLv.Hours
-									lv.Status = "APPROVED"
-									lv.RequestID = rLv.RequestID
-									e.Data.Leaves[j] = lv
-								}
-								if !found {
-									rLv.Status = "APPROVED"
-									e.Data.Leaves = append(e.Data.Leaves, rLv)
-									if strings.ToLower(rLv.Code) == "h" && rLv.Hours == 8.0 {
-										std := e.GetStandardWorkday(rLv.LeaveDate)
-										if std > rLv.Hours {
-											lv := LeaveDay{
-												LeaveDate: rLv.LeaveDate,
-												Code:      "V",
-												Hours:     std - rLv.Hours,
-												Status:    "APPROVED",
-												RequestID: req.ID,
-											}
-											e.Data.Leaves = append(e.Data.Leaves, lv)
-										}
-									}
-								}
-							} else if !found {
-								deletes = append(deletes, j)
-							}
-						}
-					}
-				}
-				if len(deletes) > 0 {
-					for i := len(deletes) - 1; i >= 0; i-- {
-						e.Data.Leaves = append(e.Data.Leaves[:deletes[i]],
-							e.Data.Leaves[deletes[i]-1:]...)
-					}
-				}
-				sort.Sort(ByLeaveDay(e.Data.Leaves))
+				e.ChangeApprovedLeaveDates(req)
 			case "day", "requestday":
 				fmt.Println(value)
 				parts := strings.Split(value, "|")
@@ -553,6 +591,44 @@ func (e *Employee) UpdateLeaveRequest(request, field, value string,
 		}
 	}
 	return nil
+}
+
+func (e *Employee) ChangeApprovedLeaveDates(lr LeaveRequest) {
+	// approved leave affects the leave listing, so we will
+	// remove old leaves for the period then add the new ones
+	startPos := -1
+	endPos := -1
+	maxId := -1
+	sort.Sort(ByLeaveDay(e.Data.Leaves))
+	for i, lv := range e.Data.Leaves {
+		if (lv.LeaveDate.After(lr.StartDate) || lv.LeaveDate.Equal(lr.StartDate)) &&
+			(lv.LeaveDate.Before(lr.EndDate) || lv.LeaveDate.Equal(lr.EndDate)) {
+			if startPos < 0 {
+				startPos = i
+			} else {
+				endPos = i
+			}
+		}
+		if maxId < lv.ID {
+			maxId = lv.ID
+		}
+	}
+	if startPos > 0 {
+		if endPos < 0 {
+			endPos = startPos
+		}
+		endPos++
+		e.Data.Leaves = append(e.Data.Leaves[:startPos], e.Data.Leaves[endPos:]...)
+	}
+
+	// now add the leave request's leave days to the leave list
+	for _, lv := range lr.RequestedDays {
+		maxId++
+		lv.ID = maxId
+		lv.Status = lr.Status
+		e.Data.Leaves = append(e.Data.Leaves, lv)
+	}
+	sort.Sort(ByLeaveDay(e.Data.Leaves))
 }
 
 func (e *Employee) DeleteLeaveRequest(request string) error {

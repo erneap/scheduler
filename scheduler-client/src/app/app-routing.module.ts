@@ -9,6 +9,7 @@ import { SiteComponent } from './site/site.component';
 import { TeamSiteEditorComponent } from './team/team-site-editor/team-site-editor.component';
 import { TeamSiteEmployeeEditorComponent } from './team/team-site-employee-editor/team-site-employee-editor.component';
 import { EditorComponent } from './team/editor/editor.component';
+import { SiteEmployeeLeaveRequestApproverComponent } from './site-employee/site-employee-leave-request-approver/site-employee-leave-request-approver.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -23,6 +24,7 @@ const routes: Routes = [
   },
   { path: 'newemployee', component: NewEmployeeComponent },
   { path: 'siteemployees', component: SiteEmployeeComponent },
+  { path: 'siteleaveapprover', component: SiteEmployeeLeaveRequestApproverComponent },
   { path: 'newsite', component: NewSiteComponent },
   { path: 'siteeditor', component: SiteComponent},
   { path: 'team/siteeditor', component: TeamSiteEditorComponent},

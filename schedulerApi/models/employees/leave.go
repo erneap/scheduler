@@ -83,48 +83,22 @@ func (lr *LeaveRequest) SetLeaveDays(emp *Employee, offset float64) {
 	timeZone := time.FixedZone(zoneID, int(offset*60*60))
 	sDate := time.Date(lr.StartDate.Year(), lr.StartDate.Month(),
 		lr.StartDate.Day(), 0, 0, 0, 0, timeZone)
-	sort.Sort(ByLeaveDay(lr.RequestedDays))
-	endPos := -1
-	for i, lv := range lr.RequestedDays {
-		if lv.LeaveDate.Before(lr.StartDate) {
-			endPos = i
-		}
-	}
-	if endPos >= 0 {
-		lr.RequestedDays = lr.RequestedDays[:endPos+1]
-	}
-	endPos = -1
-	for i, lv := range lr.RequestedDays {
-		if endPos < 0 && lv.LeaveDate.After(lr.EndDate) {
-			endPos = i
-		}
-	}
-	if endPos >= 0 {
-		lr.RequestedDays = lr.RequestedDays[:endPos]
-	}
+	lr.RequestedDays = lr.RequestedDays[:0]
 	for sDate.Before(lr.EndDate) || sDate.Equal(lr.EndDate) {
-		found := false
-		for _, lv := range lr.RequestedDays {
-			if lv.LeaveDate.Equal(sDate) {
-				found = true
+		wd := emp.GetWorkday(sDate, offset)
+		if wd.Code != "" {
+			hours := wd.Hours
+			if lr.PrimaryCode == "H" {
+				hours = 8.0
 			}
-		}
-		if !found {
-			wd := emp.GetWorkday(sDate, offset)
-			if wd.Code != "" {
-				hours := wd.Hours
-				if lr.PrimaryCode == "H" {
-					hours = 8.0
-				}
-				lv := LeaveDay{
-					LeaveDate: sDate,
-					Code:      lr.PrimaryCode,
-					Hours:     hours,
-					Status:    "REQUESTED",
-					RequestID: lr.ID,
-				}
-				lr.RequestedDays = append(lr.RequestedDays, lv)
+			lv := LeaveDay{
+				LeaveDate: sDate,
+				Code:      lr.PrimaryCode,
+				Hours:     hours,
+				Status:    "REQUESTED",
+				RequestID: lr.ID,
 			}
+			lr.RequestedDays = append(lr.RequestedDays, lv)
 		}
 		sDate = sDate.AddDate(0, 0, 1)
 	}

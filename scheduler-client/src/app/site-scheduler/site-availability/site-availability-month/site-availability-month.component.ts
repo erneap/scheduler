@@ -39,7 +39,8 @@ export class SiteAvailabilityMonthComponent {
     this.monthStyle = `width: ${monthWidth}px;`;
     this.monthLabel = `${this.months[this.month.getMonth()]} ${this.month.getFullYear()}`;
     this.dates = [];
-    let start = new Date(this.month.getFullYear(), this.month.getMonth(), 1);
+    let start = new Date(Date.UTC(this.month.getFullYear(), 
+      this.month.getMonth(), 1));
     while (start.getMonth() === this.month.getMonth()) {
       this.dates.push(new Date(start));
       start = new Date(start.getTime() + (24 * 3600000));
