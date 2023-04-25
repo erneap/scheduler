@@ -67,9 +67,9 @@ func (s *SAPIngest) ProcessFile(file *multipart.FileHeader) ([]ingest.ExcelRow, 
 						0, time.UTC)
 				}
 				companyID := row[columns["Personnel no."]]
-				chargeNo := row[columns["Charge Number"]]
-				premimum := row[columns["Prem. no."]]
-				extension := row[columns["Ext."]]
+				chargeNo := strings.TrimSpace(row[columns["Charge Number"]])
+				premimum := strings.TrimSpace(row[columns["Prem. no."]])
+				extension := strings.TrimSpace(row[columns["Ext."]])
 				hours := ParseFloat(row[columns["Hours"]])
 				// check to see if ingest row is for a leave type record
 				if strings.Contains(strings.ToLower(description), "leave") ||
