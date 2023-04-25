@@ -154,6 +154,12 @@ func main() {
 				}
 			}
 		}
+
+		ingest := api.Group("/ingest", middleware.CheckJWT())
+		{
+			ingest.POST("/", middleware.CheckRoles("scheduler", roles),
+				controllers.IngestFiles)
+		}
 	}
 
 	// listen on port 3000

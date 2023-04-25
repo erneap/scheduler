@@ -10,6 +10,7 @@ import { TeamSiteEditorComponent } from './team/team-site-editor/team-site-edito
 import { TeamSiteEmployeeEditorComponent } from './team/team-site-employee-editor/team-site-employee-editor.component';
 import { EditorComponent } from './team/editor/editor.component';
 import { SiteEmployeeLeaveRequestApproverComponent } from './site-employee/site-employee-leave-request-approver/site-employee-leave-request-approver.component';
+import { FileIngestComponent } from './site-ingest/file-ingest/file-ingest.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -27,6 +28,7 @@ const routes: Routes = [
   { path: 'siteleaveapprover', component: SiteEmployeeLeaveRequestApproverComponent },
   { path: 'newsite', component: NewSiteComponent },
   { path: 'siteeditor', component: SiteComponent},
+  { path: 'ingest/files', component: FileIngestComponent },
   { path: 'team/siteeditor', component: TeamSiteEditorComponent},
   { path: 'team/editor', component: EditorComponent },
   { path: '**', component: NotFoundComponent}

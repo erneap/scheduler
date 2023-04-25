@@ -15,7 +15,7 @@ import (
 // Every service will have functions for completing the CRUD functions
 // the retrieve function will only be for individual employee's year
 
-func CreateEmployeeWork(work employees.EmployeeWorkRecord) error {
+func CreateEmployeeWork(work *employees.EmployeeWorkRecord) error {
 	empWCol := config.GetCollection(config.DB, "scheduler", "employeework")
 
 	filter := bson.M{
@@ -59,7 +59,7 @@ func GetEmployeeWork(id string, year uint) (*employees.EmployeeWorkRecord, error
 	return &eWork, nil
 }
 
-func UpdateEmployeeWork(eWork employees.EmployeeWorkRecord) error {
+func UpdateEmployeeWork(eWork *employees.EmployeeWorkRecord) error {
 	empWCol := config.GetCollection(config.DB, "scheduler", "employeework")
 
 	filter := bson.M{

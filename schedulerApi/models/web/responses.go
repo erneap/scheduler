@@ -25,3 +25,9 @@ type SiteResponse struct {
 	Site      *sites.Site `json:"site,omitempty"`
 	Exception string      `json:"exception"`
 }
+
+type IngestResponse struct {
+	Employees  []employees.Employee `json:"employees"`
+	IngestType string               `json:"ingest"`
+	Exception  string               `json:"exception"`
+}

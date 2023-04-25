@@ -694,3 +694,14 @@ func (e *Employee) DeleteLaborCode(chargeNo, ext string) {
 		}
 	}
 }
+
+func (e *Employee) DeleteLeavesBetweenDates(start, end time.Time) {
+	for i := len(e.Data.Leaves) - 1; i >= 0; i-- {
+		if e.Data.Leaves[i].LeaveDate.Equal(start) ||
+			e.Data.Leaves[i].LeaveDate.Equal(end) ||
+			(e.Data.Leaves[i].LeaveDate.After(start) &&
+				e.Data.Leaves[i].LeaveDate.Before(end)) {
+			e.Data.Leaves = append(e.Data.Leaves[:i], e.Data.Leaves[i+1:]...)
+		}
+	}
+}

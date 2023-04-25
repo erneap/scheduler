@@ -64,24 +64,12 @@ func (c ByEmployeeWorkRecord) Less(i, j int) bool {
 func (c ByEmployeeWorkRecord) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
 func (e *EmployeeWorkRecord) RemoveWork(start, end time.Time) {
-	startPos := -1
-	endPos := -1
 	sort.Sort(ByEmployeeWork(e.Work))
 
-	for i, wk := range e.Work {
-		if startPos < 0 && (wk.DateWorked.Equal(start) || wk.DateWorked.After(start)) &&
-			(wk.DateWorked.Equal(end) || wk.DateWorked.Before(end)) {
-			startPos = i
-		} else if startPos >= 0 && (wk.DateWorked.Equal(start) ||
-			wk.DateWorked.After(start)) && (wk.DateWorked.Equal(end) ||
-			wk.DateWorked.Before(end)) {
-			endPos = i
-		}
-		if startPos >= 0 {
-			if endPos < 0 {
-				endPos = startPos
-			}
-			e.Work = append(e.Work[:startPos], e.Work[endPos+1:]...)
+	for i := len(e.Work) - 1; i >= 0; i-- {
+		if e.Work[i].DateWorked.Equal(start) || e.Work[i].DateWorked.Equal(end) ||
+			(e.Work[i].DateWorked.After(start) && e.Work[i].DateWorked.Before(end)) {
+			e.Work = append(e.Work[:i], e.Work[i+1:]...)
 		}
 	}
 }

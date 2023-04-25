@@ -4,22 +4,34 @@ import (
 	"log"
 	"mime/multipart"
 	"strings"
+	"time"
 
 	"github.com/erneap/scheduler/schedulerApi/models/ingest"
 	"github.com/xuri/excelize/v2"
 )
 
 type SAPIngest struct {
-	Period int
-	Start  int
-	Files  []*multipart.FileHeader
+	Files []*multipart.FileHeader
 }
 
-func (s *SAPIngest) Process() {
-
+func (s *SAPIngest) Process() ([]ingest.ExcelRow, time.Time, time.Time) {
+	start := time.Now()
+	end := time.Now()
+	var records []ingest.ExcelRow
+	for _, file := range s.Files {
+		recs, fStart, fEnd := s.ProcessFile(file)
+		records = append(records, recs...)
+		if fStart.Before(start) {
+			start = fStart
+		}
+		if fEnd.After(end) {
+			end = fEnd
+		}
+	}
+	return records, start, end
 }
 
-func (s *SAPIngest) ProcessFile(file multipart.FileHeader) {
+func (s *SAPIngest) ProcessFile(file *multipart.FileHeader) ([]ingest.ExcelRow, time.Time, time.Time) {
 	readerFile, _ := file.Open()
 	f, err := excelize.OpenReader(readerFile)
 	if err != nil {
@@ -33,8 +45,8 @@ func (s *SAPIngest) ProcessFile(file multipart.FileHeader) {
 	if err != nil {
 		log.Println(err)
 	}
-	//var startDate time.Time
-	//var endDate time.Time
+	startDate := time.Now()
+	endDate := time.Now()
 	var records []ingest.ExcelRow
 	for i, row := range rows {
 		if i == 0 {
@@ -46,11 +58,20 @@ func (s *SAPIngest) ProcessFile(file multipart.FileHeader) {
 			description := row[columns["Charge Number Desc"]]
 			if !strings.Contains(explanation, "Total") {
 				date := ParseDate(row[columns["Date"]])
+				if date.Before(startDate) {
+					startDate = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0,
+						0, time.UTC)
+				}
+				if date.After(endDate) {
+					endDate = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0,
+						0, time.UTC)
+				}
 				companyID := row[columns["Personnel no."]]
 				chargeNo := row[columns["Charge Number"]]
 				premimum := row[columns["Prem. no."]]
 				extension := row[columns["Ext."]]
 				hours := ParseFloat(row[columns["Hours"]])
+				// check to see if ingest row is for a leave type record
 				if strings.Contains(strings.ToLower(description), "leave") ||
 					strings.EqualFold(description, "pto") ||
 					strings.Contains(strings.ToLower(description), "holiday") {
@@ -75,6 +96,8 @@ func (s *SAPIngest) ProcessFile(file multipart.FileHeader) {
 						Hours:     hours,
 					}
 					records = append(records, record)
+					// else if the work record isn't for modified time then add as a work
+					// record
 				} else if !strings.Contains(strings.ToLower(description), "modified") {
 					found := false
 					for r, record := range records {
@@ -101,4 +124,6 @@ func (s *SAPIngest) ProcessFile(file multipart.FileHeader) {
 			}
 		}
 	}
+
+	return records, startDate, endDate
 }

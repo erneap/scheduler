@@ -24,6 +24,7 @@ import { SiteEmployeeModule } from './site-employee/site-employee.module';
 import { GenericModule } from './generic/generic.module';
 import { DeletionConfirmationComponent } from './generic/deletion-confirmation/deletion-confirmation.component';
 import { TeamModule } from './team/team.module';
+import { SiteIngestModule } from './site-ingest/site-ingest.module';
 
 @NgModule({
   declarations: [
@@ -47,6 +48,7 @@ import { TeamModule } from './team/team.module';
     SiteModule,
     SiteSchedulerModule,
     SiteEmployeeModule,
+    SiteIngestModule,
     GenericModule,
     TeamModule
   ],
