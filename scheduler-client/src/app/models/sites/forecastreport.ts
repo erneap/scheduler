@@ -78,4 +78,9 @@ export class ForecastReport implements IForecastReport {
     }
     return -1;
   }
+
+  isActive(dt: Date): boolean {
+    return (dt.getTime() >= this.startDate.getTime() 
+      && dt.getTime() <= this.endDate.getTime());
+  }
 }

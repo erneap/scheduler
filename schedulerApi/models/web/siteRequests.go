@@ -3,6 +3,7 @@ package web
 import (
 	"time"
 
+	"github.com/erneap/scheduler/schedulerApi/models/employees"
 	"github.com/erneap/scheduler/schedulerApi/models/users"
 )
 
@@ -135,4 +136,18 @@ type CreateCompanyHoliday struct {
 	HolidayID string `json:"holidayid"`
 	Name      string `json:"name"`
 	Actual    string `json:"actual,omitempty"`
+}
+
+type IngestChange struct {
+	EmployeeID string              `json:"employeeid"`
+	ChangeType string              `json:"changetype"`
+	Work       *employees.Work     `json:"work,omitempty"`
+	Leave      *employees.LeaveDay `json:"leave,omitempty"`
+}
+
+type ManualIngestChanges struct {
+	TeamID    string         `json:"teamid"`
+	SiteID    string         `json:"siteid"`
+	CompanyID string         `json:"companyid"`
+	Changes   []IngestChange `json:"changes"`
 }

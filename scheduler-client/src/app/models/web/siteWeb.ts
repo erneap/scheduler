@@ -1,3 +1,6 @@
+import { Employee, IEmployee } from "../employees/employee";
+import { LeaveDay } from "../employees/leave";
+import { Work } from "../employees/work";
 import { ISite } from "../sites/site";
 import { ITeam } from "../teams/team";
 import { IUser, User } from "../users/user";
@@ -99,4 +102,35 @@ export interface SiteResponse {
   team?: ITeam;
   site?: ISite;
   exception: string;
+}
+
+export interface IngestResponse {
+  employees: IEmployee[];
+  ingest: string;
+  exception: string
+}
+
+export class IngestChange {
+  employeeid: string;
+  changetype: string;
+  work?: Work;
+  leave?: LeaveDay;
+
+  constructor(empid: string, cType: string, work?: Work, leave?: LeaveDay) {
+    this.employeeid = empid;
+    this.changetype = cType;
+    if (work) {
+      this.work = new Work(work);
+    }
+    if (leave) {
+      this.leave = new LeaveDay(leave);
+    }
+  }
+}
+
+export interface ManualIngestChanges {
+  teamid: string;
+  siteid: string;
+  companyid: string;
+  changes: IngestChange[];
 }

@@ -6,7 +6,11 @@
               </mat-card-title>
       </mat-card-header>
       <mat-card-content class="fxLayout-column-center" style="padding-top: 25px;">
-        <form [formGroup]="ingestForm">
+        <app-site-ingest-month [employees]="employees" [leavecodes]="leavecodes"
+          [ingestType]="ingestType">
+        </app-site-ingest-month>
+        <form [formGroup]="ingestForm" *ngIf="ingestType !== 'manual'"
+          style="padding-top: 25px;">
           <input formControlName="file" id="file" type="file" multiple
               (change)="onFileChange($event)">
 

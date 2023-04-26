@@ -63,3 +63,15 @@ export class WebEmployeeVariation {
     return -1;
   }
 }
+
+export class IngestManualChange {
+  employeeid: string;
+  changedate: Date;
+  changevalue: string;
+
+  constructor(id: string, date: Date, value: string) {
+    this.employeeid = id;
+    this.changedate = new Date(date);
+    this.changevalue = value;
+  }
+}

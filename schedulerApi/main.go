@@ -17,7 +17,7 @@ func main() {
 
 	// add routes
 	router := gin.Default()
-	roles := []string{"ADMIN", "SCHEDULER", "LEADER"}
+	roles := []string{"ADMIN", "SCHEDULER", "siteleader", "companylead"}
 	api := router.Group("/scheduler/api/v1")
 	{
 		users := api.Group("/user")
@@ -157,8 +157,13 @@ func main() {
 
 		ingest := api.Group("/ingest", middleware.CheckJWT())
 		{
+			ingest.GET("/:teamid/:siteid/:company",
+				middleware.CheckRoles("scheduler", roles),
+				controllers.GetIngestEmployees)
 			ingest.POST("/", middleware.CheckRoles("scheduler", roles),
 				controllers.IngestFiles)
+			ingest.PUT("/", middleware.CheckRoles("scheduler", roles),
+				controllers.ManualIngestActions)
 		}
 	}
 

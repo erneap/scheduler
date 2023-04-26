@@ -2,6 +2,7 @@ import { IUser, User } from "../users/user";
 import { Assignment, IAssignment, IVariation, Variation, Workday } from "./assignments";
 import { CompanyInfo, ICompanyInfo } from "./company";
 import { AnnualLeave, IAnnualLeave, ILeaveDay, ILeaveRequest, LeaveDay, LeaveRequest } from "./leave";
+import { IWork, Work } from "./work";
 
 export interface IEmployeeName {
   first: string;
@@ -237,6 +238,7 @@ export interface IEmployee {
   name: IEmployeeName;
   data: IEmployeeData;
   user?: IUser;
+  work?: IWork[];
 }
 
 export class Employee implements IEmployee {
@@ -247,6 +249,7 @@ export class Employee implements IEmployee {
   name: EmployeeName;
   data: EmployeeData;
   user?: User;
+  work?: Work[];
 
   constructor(emp?: IEmployee) {
     this.id = (emp) ? emp.id : '';
@@ -256,6 +259,13 @@ export class Employee implements IEmployee {
     this.name = (emp) ? new EmployeeName(emp.name) : new EmployeeName();
     this.data = (emp) ? new EmployeeData(emp.data) : new EmployeeData();
     this.user = (emp && emp.user) ? new User(emp.user) : undefined;
+    if (emp && emp.work) {
+      this.work = [];
+      emp.work.forEach(wk => {
+        this.work?.push(new Work(wk));
+      });
+      this.work.sort((a,b) => a.compareTo(b));
+    }
   }
 
   compareTo(other?: Employee): number {
@@ -274,5 +284,44 @@ export class Employee implements IEmployee {
   isActive(): boolean {
     const now = new Date();
     return this.data.atSite(this.site, now, now);
+  }
+
+  activeOnDate(month: Date): boolean {
+    let end = new Date(Date.UTC(month.getFullYear(), month.getMonth() + 1, -1))
+    return this.data.atSite(this.site, month, end);
+  }
+
+  getIngestValue(date: Date): string {
+    // the ingest value is determined by work performed.  If a labor code was
+    // charged or a work record is available for the date, this value is shown
+    // as a number.  if the value is zero after checking work, leave is checked
+    // for this date and the higher hours work code is displayed.
+    let work = 0.0;
+    if (this.work && this.work.length > 0) {
+      this.work.forEach(wk => {
+        if (wk.dateWorked.getFullYear() === date.getFullYear() 
+          && wk.dateWorked.getMonth() === date.getMonth()
+          && wk.dateWorked.getDate() === date.getDate()) {
+          work += wk.hours;
+        }
+      });
+    }
+    if (work > 0.0) {
+      return work.toFixed(1);
+    }
+    let code: string = '';
+    let codeHours: number = 0.0;
+    if (this.data.leaves && this.data.leaves.length > 0) {
+      this.data.leaves.forEach(lv => {
+        if (lv.leavedate.getFullYear() === date.getFullYear()
+        && lv.leavedate.getMonth() === date.getMonth()
+        && lv.leavedate.getDate() === date.getDate()
+        && (lv.hours > codeHours || code === '')) {
+          code = lv.code;
+          codeHours = lv.hours;
+        }
+      });
+    }
+    return code;
   }
 }

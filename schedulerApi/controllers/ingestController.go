@@ -16,23 +16,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func getIngestEmployees(c *gin.Context) {
+func GetIngestEmployees(c *gin.Context) {
 	teamid := c.Param("teamid")
 	siteid := c.Param("siteid")
 	companyid := c.Param("company")
 
-	var companyEmployees []employees.Employee
-
-	empls, err := services.GetEmployees(teamid, siteid)
+	companyEmployees, err := getEmployeesAfterIngest(teamid, siteid, companyid)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, web.IngestResponse{Exception: err.Error()})
-		return
-	}
-
-	for _, emp := range empls {
-		if emp.Data.CompanyInfo.Company == companyid {
-			companyEmployees = append(companyEmployees, emp)
-		}
 	}
 
 	team, err := services.GetTeam(teamid)
@@ -51,7 +42,37 @@ func getIngestEmployees(c *gin.Context) {
 	c.JSON(http.StatusOK, web.IngestResponse{
 		Employees:  companyEmployees,
 		IngestType: ingestType,
+		Exception:  "",
 	})
+}
+
+func getEmployeesAfterIngest(team, site, company string) ([]employees.Employee, error) {
+	var companyEmployees []employees.Employee
+	now := time.Now()
+
+	empls, err := services.GetEmployees(team, site)
+	if err != nil {
+		return companyEmployees, err
+	}
+
+	for _, emp := range empls {
+		if emp.Data.CompanyInfo.Company == company {
+			// get work for current and previous years
+			work, err := services.GetEmployeeWork(emp.ID.Hex(), uint(now.Year()))
+			if err == nil && len(work.Work) > 0 {
+				emp.Work = append(emp.Work, work.Work...)
+			}
+			work, err = services.GetEmployeeWork(emp.ID.Hex(), uint(now.Year()-1))
+			if err == nil && len(work.Work) > 0 {
+				emp.Work = append(emp.Work, work.Work...)
+			}
+			sort.Sort(employees.ByEmployeeWork(emp.Work))
+			companyEmployees = append(companyEmployees, emp)
+		}
+	}
+	sort.Sort(employees.ByEmployees(companyEmployees))
+
+	return companyEmployees, nil
 }
 
 func IngestFiles(c *gin.Context) {
@@ -62,7 +83,7 @@ func IngestFiles(c *gin.Context) {
 
 	team, err := services.GetTeam(teamid)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, web.Message{Message: "Team not found"})
+		c.JSON(http.StatusBadRequest, web.IngestResponse{Exception: "Team not found"})
 		return
 	}
 
@@ -207,5 +228,105 @@ func IngestFiles(c *gin.Context) {
 			}
 		}
 	}
-	c.JSON(http.StatusOK, web.Message{Message: "Ingest Complete"})
+
+	companyEmployees, err := getEmployeesAfterIngest(teamid, siteid, companyid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.IngestResponse{Exception: err.Error()})
+	}
+
+	c.JSON(http.StatusOK, web.IngestResponse{
+		Employees:  companyEmployees,
+		IngestType: ingestType,
+		Exception:  "",
+	})
+}
+
+func ManualIngestActions(c *gin.Context) {
+	var data web.ManualIngestChanges
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.SiteResponse{Team: nil, Site: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	// step through each employee change
+	for _, change := range data.Changes {
+		// actions are different based on work or leave
+		parts := strings.Split(change.ChangeType, "-")
+		if parts[1] == "work" {
+			work, err := services.GetEmployeeWork(change.EmployeeID,
+				uint(change.Work.DateWorked.Year()))
+			if err == nil {
+				switch parts[0] {
+				case "delete":
+					for i := len(work.Work) - 1; i >= 0; i-- {
+						wk := work.Work[i]
+						if wk.DateWorked.Equal(change.Work.DateWorked) &&
+							wk.ChargeNumber == change.Work.ChargeNumber &&
+							wk.Extension == change.Work.Extension {
+							work.Work = append(work.Work[:i], work.Work[i+1:]...)
+						}
+					}
+				case "add":
+					work.Work = append(work.Work, *change.Work)
+				case "update":
+					for i, wk := range work.Work {
+						if wk.DateWorked.Equal(change.Work.DateWorked) {
+							wk.Hours = change.Work.Hours
+							work.Work[i] = wk
+						}
+					}
+				}
+				services.UpdateEmployeeWork(work)
+			} else {
+				empID, _ := primitive.ObjectIDFromHex(change.EmployeeID)
+				work = &employees.EmployeeWorkRecord{
+					ID:         primitive.NewObjectID(),
+					EmployeeID: empID,
+					Year:       uint(change.Work.DateWorked.Year()),
+				}
+				if parts[0] == "update" || parts[0] == "add" {
+					work.Work = append(work.Work, *change.Work)
+				}
+				services.CreateEmployeeWork(work)
+			}
+		} else if parts[1] == "leave" {
+			emp, err := services.GetEmployee(change.EmployeeID)
+			if err == nil {
+				switch parts[0] {
+				case "delete":
+					for i := len(emp.Data.Leaves) - 1; i >= 0; i-- {
+						lv := emp.Data.Leaves[i]
+						if lv.LeaveDate.Equal(change.Leave.LeaveDate) {
+							emp.Data.Leaves = append(emp.Data.Leaves[:i],
+								emp.Data.Leaves[i+1:]...)
+						}
+					}
+				case "add":
+					emp.Data.Leaves = append(emp.Data.Leaves, *change.Leave)
+				case "update":
+					for i, lv := range emp.Data.Leaves {
+						if lv.LeaveDate.Equal(change.Leave.LeaveDate) {
+							lv.Code = change.Leave.Code
+							lv.Status = change.Leave.Status
+							emp.Data.Leaves[i] = lv
+						}
+					}
+				}
+				services.UpdateEmployee(emp)
+			}
+		}
+	}
+	companyEmployees, err := getEmployeesAfterIngest(data.TeamID, data.SiteID,
+		data.CompanyID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.IngestResponse{Exception: err.Error()})
+	}
+
+	c.JSON(http.StatusOK, web.IngestResponse{
+		Employees:  companyEmployees,
+		IngestType: "",
+		Exception:  "",
+	})
 }
