@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { Workcode } from 'src/app/models/teams/workcode';
 import { IngestManualChange } from 'src/app/models/web/internalWeb';
@@ -31,31 +33,68 @@ export class SiteIngestMonthComponent {
   
   dates: Date[] = [];
 
-  constructor() {
+  constructor(
+    protected dialog: MatDialog
+  ) {
     const now = new Date();
     this.month = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
     this.changeMonth('set');
   }
 
   changeMonth(direction: string) {
-    const months: string[] = [ "January", "Febuary", "March", "April", "May",
-      "June", "July", "August", "September", "October", "November", "December"];
-    if (direction.toLowerCase() === 'down') {
-      this.month = new Date(Date.UTC(this.month.getFullYear(), 
-        this.month.getMonth() - 1, 1))
-    } else if (direction.toLowerCase() === 'up') {
-      this.month = new Date(Date.UTC(this.month.getFullYear(), 
-        this.month.getMonth() + 1, 1))
-    }
-
-    this.dateLabel = `${months[this.month.getMonth()]} ${this.month.getFullYear()}`;
-    this.showList = [];
-    this.employees.forEach(emp => {
-      if (emp.activeOnDate(this.month)) {
-        this.showList.push(new Employee(emp));
+    if (this.showApprove) {
+      const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+        data: {title: 'Uncommitted Timecard Changes', 
+        message: 'There are changes to the timecard data that has NOT '
+          + "been submitted/approved. Approve Now?"},
+      });
+  
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === 'yes') {
+          this.showApprove = false;
+          this.changed.emit(new IngestManualChange('', this.month, 
+            'approved'));
+        
+          const months: string[] = [ "January", "Febuary", "March", "April", "May",
+            "June", "July", "August", "September", "October", "November", "December"];
+          if (direction.toLowerCase() === 'down') {
+            this.month = new Date(Date.UTC(this.month.getFullYear(), 
+              this.month.getMonth() - 1, 1))
+          } else if (direction.toLowerCase() === 'up') {
+            this.month = new Date(Date.UTC(this.month.getFullYear(), 
+              this.month.getMonth() + 1, 1))
+          }
+    
+          this.dateLabel = `${months[this.month.getMonth()]} ${this.month.getFullYear()}`;
+          this.showList = [];
+          this.employees.forEach(emp => {
+            if (emp.activeOnDate(this.month)) {
+              this.showList.push(new Employee(emp));
+            }
+          });
+          this.setDates();
+        }
+      });
+    } else {
+      const months: string[] = [ "January", "Febuary", "March", "April", "May",
+        "June", "July", "August", "September", "October", "November", "December"];
+      if (direction.toLowerCase() === 'down') {
+        this.month = new Date(Date.UTC(this.month.getFullYear(), 
+          this.month.getMonth() - 1, 1))
+      } else if (direction.toLowerCase() === 'up') {
+        this.month = new Date(Date.UTC(this.month.getFullYear(), 
+          this.month.getMonth() + 1, 1))
       }
-    });
-    this.setDates();
+
+      this.dateLabel = `${months[this.month.getMonth()]} ${this.month.getFullYear()}`;
+      this.showList = [];
+      this.employees.forEach(emp => {
+        if (emp.activeOnDate(this.month)) {
+          this.showList.push(new Employee(emp));
+        }
+      });
+      this.setDates();
+    }
   }
 
   setDates() {

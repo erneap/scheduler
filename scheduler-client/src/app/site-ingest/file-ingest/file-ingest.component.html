@@ -2,12 +2,12 @@
   <mat-card style="background-color: #3f51b5; color: white;">
       <mat-card-header style="text-align: center;">
           <mat-card-title>
-              <div class="mat-headline">Site's File Ingest Upload</div>
+              <div class="mat-headline">Timecard Ingest/Entry</div>
               </mat-card-title>
       </mat-card-header>
       <mat-card-content class="fxLayout-column-center" style="padding-top: 25px;">
         <app-site-ingest-month [employees]="employees" [leavecodes]="leavecodes"
-          [ingestType]="ingestType">
+          [ingestType]="ingestType" (changed)="onChange($event)">
         </app-site-ingest-month>
         <form [formGroup]="ingestForm" *ngIf="ingestType !== 'manual'"
           style="padding-top: 25px;">

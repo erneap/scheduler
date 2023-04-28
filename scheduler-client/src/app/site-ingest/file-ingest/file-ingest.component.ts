@@ -46,6 +46,7 @@ export class FileIngestComponent {
 
   getEmployees() {
     this.leavecodes = [];
+    this.employees = [];
     const iTeam = this.teamService.getTeam();
     if (iTeam) {
       const team = new Team(iTeam);
@@ -59,32 +60,77 @@ export class FileIngestComponent {
     const iEmp = this.empService.getEmployee();
     if (iEmp) {
       const emp = new Employee(iEmp);
-      this.authService.statusMessage = "Retrieving site's employees and ingest type";
-      this.dialogService.showSpinner();
-      this.ingestService.getIngestEmployees(emp.team, emp.site, 
-        emp.data.companyinfo.company).subscribe({
-        next: resp => {
-          this.dialogService.closeSpinner();
-            if (resp.headers.get('token') !== null) {
-              this.authService.setToken(resp.headers.get('token') as string);
+      const iSite = this.siteService.getSite();
+      if (iSite) {
+        const site = new Site(iSite);
+        if (site.employees) {
+          site.employees.forEach(tEmp => {
+            if (tEmp.data.companyinfo.company === emp.data.companyinfo.company) {
+              this.employees.push(new Employee(tEmp));
             }
-            const data: IngestResponse | null = resp.body;
-            if (data && data !== null) {
-              this.authService.statusMessage = "Ingest complete";
-              this.ingestType = data.ingest;
-              this.employees = [];
-              data.employees.forEach(temp => {
-                this.employees.push(new Employee(temp));
-              });
-            }
-            this.ingestForm.controls["file"].setValue('');
-            this.myFiles = [];
-        },
-        error: err => {
-          this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.exception;
+          });
         }
-      });
+      }
+      if (iTeam) {
+        this.ingestType = 'manual';
+        iTeam.companies.forEach(co => {
+          if (co.id === emp.data.companyinfo.company) {
+            this.ingestType = co.ingest;
+          }
+        })
+      }
+      if (this.employees.length <= 0) {
+        this.authService.statusMessage = "Retrieving site's employees and ingest type";
+        this.dialogService.showSpinner();
+        this.ingestService.getIngestEmployees(emp.team, emp.site, 
+          emp.data.companyinfo.company).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+              if (resp.headers.get('token') !== null) {
+                this.authService.setToken(resp.headers.get('token') as string);
+              }
+              const data: IngestResponse | null = resp.body;
+              if (data && data !== null) {
+                this.authService.statusMessage = "Retrieval complete";
+                this.ingestType = data.ingest;
+                this.employees = [];
+                const iSite = this.siteService.getSite();
+                if (iSite) {
+                  const site = new Site(iSite);
+                  if (!site.employees) {
+                    site.employees = [];
+                  }
+                  data.employees.forEach(tEmp => {
+                    this.employees.push(new Employee(tEmp));
+                    if (site.employees) {
+                      let found = false;
+                      for (let e=0; e < site.employees.length && !found; e++) {
+                        if (site.employees[e].id === tEmp.id) {
+                          found = true;
+                          site.employees[e] = new Employee(tEmp);
+                        }
+                      }
+                      if (!found) {
+                        site.employees.push(new Employee(tEmp));
+                      }
+                    }
+                  });
+                  this.siteService.setSite(site);
+                } else {
+                  data.employees.forEach(tEmp => {
+                    this.employees.push(new Employee(tEmp));
+                  });
+                }
+              }
+              this.ingestForm.controls["file"].setValue('');
+              this.myFiles = [];
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.exception;
+          }
+        });
+      }
     }
   }
 
@@ -123,9 +169,33 @@ export class FileIngestComponent {
             if (data && data !== null) {
               this.authService.statusMessage = "Ingest complete";
               this.employees = [];
-              data.employees.forEach(temp => {
-                this.employees.push(new Employee(temp));
-              });
+              const iSite = this.siteService.getSite();
+              if (iSite) {
+                const site = new Site(iSite);
+                if (!site.employees) {
+                  site.employees = [];
+                }
+                data.employees.forEach(tEmp => {
+                  this.employees.push(new Employee(tEmp));
+                  if (site.employees) {
+                    let found = false;
+                    for (let e=0; e < site.employees.length && !found; e++) {
+                      if (site.employees[e].id === tEmp.id) {
+                        found = true;
+                        site.employees[e] = new Employee(tEmp);
+                      }
+                    }
+                    if (!found) {
+                      site.employees.push(new Employee(tEmp));
+                    }
+                  }
+                });
+                this.siteService.setSite(site);
+              } else {
+                data.employees.forEach(tEmp => {
+                  this.employees.push(new Employee(tEmp));
+                });
+              }
             }
             this.ingestForm.controls["file"].setValue('');
             this.myFiles = [];
@@ -139,14 +209,16 @@ export class FileIngestComponent {
   }
 
   onChange(change: IngestManualChange) {
-    if (change.changevalue !== 'approved') {
+    if (change.changevalue === 'empty') {
+      this.manualUpdateList = [];
+    } else if (change.changevalue !== 'approved') {
       // update the employee list with the changed value
       // check to see if the value is a number, if so, its work
       // if not a number, it is leave with hours equals to standard workday
       const numRe = new RegExp("^[0-9]{1,2}(\.[0-9])?$");
       this.employees.forEach(emp => {
         if (emp.id === change.employeeid) {
-          if (change.changevalue === '') {
+          if (change.changevalue === '' || change.changevalue === '0') {
             // this will delete work or leave as necessary
             // check for work on date.
             if (emp.work && emp.work.length > 0) {
@@ -273,6 +345,59 @@ export class FileIngestComponent {
       });
     } else {
       // update changes to database
+      const iEmp = this.empService.getEmployee();
+      if (iEmp) {
+        const emp = new Employee(iEmp);
+        this.authService.statusMessage = "Sending manual timecard updates";
+        this.dialogService.showSpinner();
+        this.ingestService.manualIngest(emp.team, emp.site, 
+          emp.data.companyinfo.company, this.manualUpdateList).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: IngestResponse | null = resp.body;
+            if (data && data !== null) {
+              this.authService.statusMessage = "Ingest complete";
+              this.employees = [];
+              const iSite = this.siteService.getSite();
+              if (iSite) {
+                const site = new Site(iSite);
+                if (!site.employees) {
+                  site.employees = [];
+                }
+                data.employees.forEach(tEmp => {
+                  this.employees.push(new Employee(tEmp));
+                  if (site.employees) {
+                    let found = false;
+                    for (let e=0; e < site.employees.length && !found; e++) {
+                      if (site.employees[e].id === tEmp.id) {
+                        found = true;
+                        site.employees[e] = new Employee(tEmp);
+                      }
+                    }
+                    if (!found) {
+                      site.employees.push(new Employee(tEmp));
+                    }
+                  }
+                });
+                this.siteService.setSite(site);
+              } else {
+                data.employees.forEach(tEmp => {
+                  this.employees.push(new Employee(tEmp));
+                });
+              }
+            }
+            this.ingestForm.controls["file"].setValue('');
+            this.myFiles = [];
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.exception;
+          }
+        })
+      }
     }
   }
 }

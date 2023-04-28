@@ -3,9 +3,12 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/erneap/scheduler/schedulerApi/middleware"
+	"github.com/erneap/scheduler/schedulerApi/models/employees"
 	"github.com/erneap/scheduler/schedulerApi/models/users"
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
@@ -96,8 +99,9 @@ func Login(c *gin.Context) {
 				Token: "", Exception: err.Error()})
 	}
 
-	usrs := services.GetUsers()
+	usrs, err := services.GetUsers()
 
+	now := time.Now()
 	emps, _ := services.GetEmployees(team.ID.Hex(), emp.SiteID)
 	site.Employees = site.Employees[:0]
 	if len(emps) > 0 {
@@ -118,6 +122,15 @@ func Login(c *gin.Context) {
 					emp.User = &user
 				}
 			}
+			work, err := services.GetEmployeeWork(emp.ID.Hex(), uint(now.Year()))
+			if err == nil {
+				emp.Work = append(emp.Work, work.Work...)
+			}
+			work, err = services.GetEmployeeWork(emp.ID.Hex(), uint(now.Year()-1))
+			if err == nil {
+				emp.Work = append(emp.Work, work.Work...)
+			}
+			sort.Sort(employees.ByEmployeeWork(emp.Work))
 			site.Employees = append(site.Employees, emp)
 		}
 	}
@@ -231,4 +244,19 @@ func ChangeUser(c *gin.Context) {
 	tokenString, _ := middleware.CreateToken(user.ID, user.EmailAddress)
 	c.JSON(http.StatusOK, web.AuthenticationResponse{
 		User: user, Token: tokenString, Exception: "", Employee: emp})
+}
+
+func GetAllUsers(c *gin.Context) {
+	users, err := services.GetUsers()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.UsersResponse{
+			Exception: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, web.UsersResponse{
+		Users:     users,
+		Exception: "",
+	})
 }

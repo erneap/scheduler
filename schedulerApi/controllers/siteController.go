@@ -34,7 +34,20 @@ func GetSite(c *gin.Context) {
 	}
 
 	if allEmployees {
+		now := time.Now()
 		emps, _ := services.GetEmployees(teamID, siteID)
+		for e, emp := range emps {
+			work, err := services.GetEmployeeWork(emp.ID.Hex(), uint(now.Year()))
+			if err == nil {
+				emp.Work = append(emp.Work, work.Work...)
+			}
+			work, err = services.GetEmployeeWork(emp.ID.Hex(), uint(now.Year()-1))
+			if err == nil {
+				emp.Work = append(emp.Work, work.Work...)
+			}
+			sort.Sort(employees.ByEmployeeWork(emp.Work))
+			emps[e] = emp
+		}
 		site.Employees = append(site.Employees, emps...)
 		sort.Sort(employees.ByEmployees(site.Employees))
 	}

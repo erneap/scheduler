@@ -101,21 +101,20 @@ func GetUserByEmail(emailAddress string) (*users.User, error) {
 	return &user, nil
 }
 
-func GetUsers() []users.User {
+func GetUsers() ([]users.User, error) {
 	var users []users.User
 
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
 	cursor, err := userCol.Find(context.TODO(), bson.M{})
 	if err != nil {
-		log.Println(err)
-		return users
+		return users, err
 	}
 
 	if err = cursor.All(context.TODO(), &users); err != nil {
-		log.Println(err)
+		return users, err
 	}
-	return users
+	return users, nil
 }
 
 // CRUD Update Function

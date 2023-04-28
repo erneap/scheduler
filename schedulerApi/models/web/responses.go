@@ -31,3 +31,8 @@ type IngestResponse struct {
 	IngestType string               `json:"ingest"`
 	Exception  string               `json:"exception"`
 }
+
+type UsersResponse struct {
+	Users     []users.User `json:"users"`
+	Exception string       `json:"exception"`
+}

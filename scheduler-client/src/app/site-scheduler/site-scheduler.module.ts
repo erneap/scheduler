@@ -13,6 +13,8 @@ import { SiteAvailabilityMonthComponent } from './site-availability/site-availab
 import { SiteAvailabilityShiftComponent } from './site-availability/site-availability-shift/site-availability-shift.component';
 import { SiteAvailabilityDayComponent } from './site-availability/site-availability-day/site-availability-day.component';
 import { SiteMidScheduleComponent } from './site-mid-schedule/site-mid-schedule.component';
+import { SiteIngestMonthLegendCodeComponent } from '../site-ingest/site-ingest-month/site-ingest-month-legend-code/site-ingest-month-legend-code.component';
+import { SiteIngestModule } from '../site-ingest/site-ingest.module';
 
 
 @NgModule({
@@ -31,7 +33,8 @@ import { SiteMidScheduleComponent } from './site-mid-schedule/site-mid-schedule.
   imports: [
     CommonModule,
     SiteSchedulerRoutingModule,
-    MaterialModule
+    MaterialModule,
+    SiteIngestModule,
   ]
 })
 export class SiteSchedulerModule { }

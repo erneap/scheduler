@@ -22,6 +22,8 @@ func main() {
 	{
 		users := api.Group("/user")
 		{
+			users.GET("/", middleware.CheckJWT(),
+				middleware.CheckRole("scheduler", "admin"), controllers.GetAllUsers)
 			users.POST("/login", controllers.Login)
 			users.PUT("/password", middleware.CheckJWT(), controllers.ChangePassword)
 			users.PUT("/changes", middleware.CheckJWT(), controllers.ChangeUser)

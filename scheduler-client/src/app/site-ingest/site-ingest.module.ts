@@ -25,6 +25,9 @@ import { SiteIngestMonthLegendCodeComponent } from './site-ingest-month/site-ing
     MaterialModule,
     FormsModule,
     ReactiveFormsModule
+  ],
+  exports: [
+    SiteIngestMonthLegendCodeComponent,
   ]
 })
 export class SiteIngestModule { }

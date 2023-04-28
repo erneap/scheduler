@@ -7,6 +7,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
+import { UsersResponse } from '../models/web/userWeb';
 
 @Injectable({
   providedIn: 'root'
@@ -172,6 +173,11 @@ export class AuthService extends CacheService {
       password: passwd,
     }
     return this.httpClient.put<Message>(url, data, { observe: 'response'});
+  }
+
+  getAllUsers(): Observable<HttpResponse<UsersResponse>> {
+    const url = '/scheduler/api/v1/user';
+    return this.httpClient.get<UsersResponse>(url, {observe: 'response'});
   }
 }
 

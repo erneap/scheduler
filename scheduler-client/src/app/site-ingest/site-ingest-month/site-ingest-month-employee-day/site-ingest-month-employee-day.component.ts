@@ -62,7 +62,7 @@ export class SiteIngestMonthEmployeeDayComponent {
     const value = this.dayForm.value.changevalue;
     if (numRe.test(value)) {
       this.changed.emit(new IngestManualChange(this.employee.id, this.date, value));
-    } else if (value === '') {
+    } else if (value.trim() === '') {
       this.changed.emit(new IngestManualChange(this.employee.id, this.date, '0'));
     } else {
       let found = false;

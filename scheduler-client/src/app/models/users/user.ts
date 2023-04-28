@@ -50,7 +50,8 @@ export class User implements IUser {
   }
 
   getFullName(): string {
-    if (this.middleName === '') {
+    
+    if (!this.middleName || this.middleName === '') {
       return `${this.firstName} ${this.lastName}`;
     }
     return `${this.firstName} ${this.middleName.substring(0,1)}. ${this.lastName}`;
