@@ -19,7 +19,6 @@ import (
 func GetSite(c *gin.Context) {
 	teamID := c.Param("teamid")
 	siteID := c.Param("siteid")
-	allEmployees := ShowEmployees(c)
 
 	site, err := services.GetSite(teamID, siteID)
 	if err != nil {
@@ -31,25 +30,6 @@ func GetSite(c *gin.Context) {
 				Exception: err.Error()})
 		}
 		return
-	}
-
-	if allEmployees {
-		now := time.Now()
-		emps, _ := services.GetEmployees(teamID, siteID)
-		for e, emp := range emps {
-			work, err := services.GetEmployeeWork(emp.ID.Hex(), uint(now.Year()))
-			if err == nil {
-				emp.Work = append(emp.Work, work.Work...)
-			}
-			work, err = services.GetEmployeeWork(emp.ID.Hex(), uint(now.Year()-1))
-			if err == nil {
-				emp.Work = append(emp.Work, work.Work...)
-			}
-			sort.Sort(employees.ByEmployeeWork(emp.Work))
-			emps[e] = emp
-		}
-		site.Employees = append(site.Employees, emps...)
-		sort.Sort(employees.ByEmployees(site.Employees))
 	}
 	c.JSON(http.StatusOK, web.SiteResponse{Team: nil, Site: site, Exception: ""})
 }
@@ -88,6 +68,7 @@ func CreateSite(c *gin.Context) {
 		ID:     primitive.NewObjectID(),
 		TeamID: teamID,
 		SiteID: site.ID,
+		Email:  data.Leader.EmailAddress,
 		Name: employees.EmployeeName{
 			FirstName:  data.Leader.FirstName,
 			MiddleName: data.Leader.MiddleName,
@@ -101,13 +82,17 @@ func CreateSite(c *gin.Context) {
 		Workcenter:   "leads",
 		StartDate:    time.Now().UTC(),
 		EndDate:      time.Date(9999, 12, 30, 0, 0, 0, 0, time.UTC),
-		RotationDate: time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC),
+		RotationDate: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 		RotationDays: 0,
+	}
+	asgmt.AddSchedule(7)
+	for i := 1; i < 6; i++ {
+		asgmt.Schedules[0].UpdateWorkday(uint(i), "leads", "D", 8)
 	}
 	emp.Data.Assignments = append(emp.Data.Assignments, asgmt)
 
-	empl, _ := services.CreateEmployee(emp, data.Leader.Password, data.TeamID,
-		data.SiteID)
+	empl, _ := services.CreateEmployee(emp, data.Leader.Password,
+		"scheduler-siteleader", data.TeamID, data.SiteID)
 	site.Employees = append(site.Employees, *empl)
 
 	if data.Scheduler != nil {
@@ -129,13 +114,17 @@ func CreateSite(c *gin.Context) {
 			Workcenter:   "leads",
 			StartDate:    time.Now().UTC(),
 			EndDate:      time.Date(9999, 12, 30, 0, 0, 0, 0, time.UTC),
-			RotationDate: time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC),
+			RotationDate: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 			RotationDays: 0,
+		}
+		asgmt.AddSchedule(7)
+		for i := 1; i < 6; i++ {
+			asgmt.Schedules[0].UpdateWorkday(uint(i), "leads", "D", 8)
 		}
 		emp.Data.Assignments = append(emp.Data.Assignments, asgmt)
 
-		empl, _ = services.CreateEmployee(emp, data.Scheduler.Password, data.TeamID,
-			data.SiteID)
+		empl, _ = services.CreateEmployee(emp, data.Scheduler.Password,
+			"scheduler-scheduler", data.TeamID, data.SiteID)
 		site.Employees = append(site.Employees, *empl)
 	}
 

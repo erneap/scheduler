@@ -36,6 +36,7 @@ export class SiteEmployeeLaborCodesComponent {
   @Input()
   public set site(iSite: ISite) {
     this._site = new Site(iSite);
+    this.setLaborCodes();
   }
   get site(): Site {
     return this._site;

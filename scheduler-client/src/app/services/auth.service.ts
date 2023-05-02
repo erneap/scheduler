@@ -179,6 +179,11 @@ export class AuthService extends CacheService {
     const url = '/scheduler/api/v1/user';
     return this.httpClient.get<UsersResponse>(url, {observe: 'response'});
   }
+
+  addUser(user: User): Observable<HttpResponse<UsersResponse>> {
+    const url = '/scheduler/api/v1/user/'
+    return this.httpClient.post<UsersResponse>(url, user, {observe: 'response'});
+  }
 }
 
 export interface IAuthStatus {

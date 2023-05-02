@@ -4,7 +4,7 @@ type Workcode struct {
 	Id        string `json:"id" bson:"id"`
 	Title     string `json:"title" bson:"title"`
 	StartTime uint64 `json:"start" bson:"start"`
-	ShiftCode int    `json:"shiftCode" bson:"shiftCode"`
+	ShiftCode string `json:"shiftCode" bson:"shiftCode"`
 	IsLeave   bool   `json:"isLeave" bson:"isLeave"`
 	TextColor string `json:"textcolor" bson:"textcolor"`
 	BackColor string `json:"backcolor" bson:"backcolor"`

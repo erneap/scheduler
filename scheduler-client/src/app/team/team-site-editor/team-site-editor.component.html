@@ -8,7 +8,8 @@
       </div>
     </div>
   </div>
-  <app-new-site *ngIf="selected === 'new'"></app-new-site>
+  <app-new-site *ngIf="selected === 'new'"
+    (added)="onAdd($event)"></app-new-site>
   <mat-tab-group [backgroundColor]="'accent'" *ngIf="selected !== 'new'"
     style="width: 100%;">
     <mat-tab label="Site Editor">

@@ -21,6 +21,9 @@ export interface UpdateRequest {
 export interface CreateUserAccount {
   id: string;
   emailAddress: string;
+  lastName: string;
+  firstName: string;
+  middleName: string;
   password: string;
 }
 

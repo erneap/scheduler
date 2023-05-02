@@ -175,6 +175,19 @@ func (e *EmployeeConverter) ReadEmployees() {
 				}
 				if !found {
 					emp.ID = primitive.NewObjectID()
+					email := emp.Name.FirstName + "." + emp.Name.LastName + "@" +
+						emp.Data.CompanyInfo.Company + ".com"
+					user := users.User{
+						ID:           emp.ID,
+						EmailAddress: email,
+						FirstName:    emp.Name.FirstName,
+						MiddleName:   emp.Name.MiddleName,
+						LastName:     emp.Name.LastName,
+					}
+					user.SetPassword("ZAQ!1qazZAQ!1qaz")
+
+					userCol := config.GetCollection(config.DB, "authenticate", "users")
+					userCol.InsertOne(context.TODO(), user)
 				}
 				e.Employees = append(e.Employees, emp)
 			}

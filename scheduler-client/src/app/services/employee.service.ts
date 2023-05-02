@@ -88,6 +88,9 @@ export class EmployeeService extends CacheService {
     const data: CreateUserAccount = {
       id: empID,
       emailAddress: email,
+      firstName: '',
+      middleName: '',
+      lastName: '',
       password: password,
     }
     return this.httpClient.post<EmployeeResponse>(url, data, {observe: 'response'});

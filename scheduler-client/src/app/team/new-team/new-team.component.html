@@ -2,7 +2,7 @@
   <mat-card style="background-color: #3f51b5; color: white;">
       <mat-card-header>
         <div class="fxLayout-row-center">
-          <div class="headline">New Site Editor</div>
+          <div class="headline">New Team Editor</div>
           <span class="flex-spacer"></span>
           <button mat-icon-button
             matTooltip="Clear editor">
@@ -14,42 +14,29 @@
           <mat-accordion>
             <mat-expansion-panel expanded="true" style="background-color: lightblue;">
               <mat-expansion-panel-header style="background-color: #3691b0;">
-                <mat-panel-title style="color: white;">Site Basic Information</mat-panel-title>
+                <mat-panel-title style="color: white;">Team Basic Information</mat-panel-title>
               </mat-expansion-panel-header>
               <div class="fxLayout-column-center" style="margin-top: 10px;">
-                <form [formGroup]="siteForm">
+                <form [formGroup]="teamForm">
                   <div class="fxLayout-row-center">
                     <mat-form-field class="formField">
-                      <mat-label>Identifier</mat-label>
+                      <mat-label>Team Identifier</mat-label>
                       <input matInput formControlName="id">
-                      <mat-error *ngIf="this.siteForm.get('id')?.hasError('required')"
+                      <mat-error *ngIf="this.teamForm.get('id')?.hasError('required')"
                         class="error">Required</mat-error>
-                      <mat-error *ngIf="this.siteForm.get('id')?.hasError('pattern')"
+                      <mat-error *ngIf="this.teamForm.get('id')?.hasError('pattern')"
                         class="error">Only lower case letters and numbers allowed</mat-error>
                     </mat-form-field>
                     <mat-form-field class="formField">
-                      <mat-label>Title</mat-label>
-                      <input matInput formControlName="title">
-                      <mat-error *ngIf="this.siteForm.get('title')?.hasError('required')"
+                      <mat-label>Team Name</mat-label>
+                      <input matInput formControlName="name">
+                      <mat-error *ngIf="this.teamForm.get('name')?.hasError('required')"
                         class="error">Required</mat-error>
                     </mat-form-field>
                     <div class="formField">
-                      <mat-checkbox formControlName="mids"
-                        >Use MIDS Rotations</mat-checkbox>
+                      <mat-checkbox formControlName="workcodes"
+                        >Copy Standard Workcodes</mat-checkbox>
                     </div>
-                  </div>
-                  <div class="fxLayout-row-center">
-                    <mat-form-field class="formField">
-                      <mat-label>UTC (Zulu) Offset</mat-label>
-                      <mat-select formControlName="offset">
-                        <mat-option *ngFor="let off of offsets" [value]="off">
-                          {{off.toFixed(1)}}
-                        </mat-option>
-                      </mat-select>
-                      <mat-hint>+/- from Zulu Time</mat-hint>
-                      <mat-error *ngIf="this.siteForm.get('offset')?.hasError('required')"
-                        class="error">Required</mat-error>
-                    </mat-form-field>
                   </div>
                 </form>
               </div>
@@ -57,7 +44,7 @@
             <mat-expansion-panel style="background-color: lightblue;">
               <mat-expansion-panel-header style="background-color: #3691b0;">
                 <mat-panel-title style="color: white;">
-                  Site Lead Information
+                  Initial Team Leader Information
                 </mat-panel-title>
               </mat-expansion-panel-header>
               <div class="fxLayout-column-center" style="margin-top: 10px;">
@@ -122,79 +109,14 @@
                 </form>
               </div>
             </mat-expansion-panel>
-            <mat-expansion-panel style="background-color: lightblue;">
-              <mat-expansion-panel-header style="background-color: #3691b0;">
-                <mat-panel-title style="color: white;">
-                  Site Scheduler Information (Optional)
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <div class="fxLayout-column-center" style="margin-top: 10px;">
-                <form [formGroup]="schedulerForm">
-                  <div class="fxLayout-row-center">
-                    <mat-form-field>
-                      <mat-label>E-mail Address</mat-label>
-                      <input matInput formControlName="email">
-                      <mat-error *ngIf="this.schedulerForm.get('newemail')?.hasError('required')"
-                        class="error">Required</mat-error>
-                    </mat-form-field>
-                  </div>
-                  <div class="fxLayout-row-center">
-                    <div class="formField">
-                      <mat-form-field class="fieldWidth">
-                        <mat-label>First Name</mat-label>
-                        <input matInput formControlName="first">
-                        <mat-error *ngIf="this.schedulerForm.get('first')?.hasError('required')"
-                          class="error">Required</mat-error>
-                      </mat-form-field>
-                    </div>
-                    <div class="formField">
-                      <mat-form-field class="fieldWidth">
-                        <mat-label>Middle Name</mat-label>
-                        <input matInput formControlName="middle">
-                        <mat-hint>Optional</mat-hint>
-                      </mat-form-field>
-                    </div>
-                    <div class="formField">
-                      <mat-form-field class="fieldWidth">
-                        <mat-label>Last Name</mat-label>
-                        <input matInput formControlName="last">
-                        <mat-error *ngIf="this.schedulerForm.get('last')?.hasError('required')"
-                          class="error">Required</mat-error>
-                      </mat-form-field>
-                    </div>
-                  </div>
-                  <div class="fxLayout-row-center">
-                    <div class="formFieldWide">
-                      <mat-form-field class="fieldWidthWide">
-                        <mat-label>New Password</mat-label>
-                        <input matInput type="password" formControlName="password">
-                        <mat-error *ngIf="this.schedulerForm.get('newpassword')?.invalid"
-                          class="error">
-                          {{getPasswordError()}}
-                        </mat-error>
-                      </mat-form-field>
-                    </div>
-                    <div class="formFieldWide">
-                      <mat-form-field class="fieldWidthWide">
-                        <mat-label>Verify New Password</mat-label>
-                        <input matInput type="password" formControlName="password2">
-                        <mat-error *ngIf="this.schedulerForm.get('password2')?.invalid"
-                          class="error">
-                          {{getVerifyError()}}
-                        </mat-error>
-                      </mat-form-field>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </mat-expansion-panel>
           </mat-accordion>
           <div class="fxLayout-row-center" style="padding: 5px 0 5px 0;">
             <button mat-raised-button color="accent"
-              *ngIf="this.siteForm.valid && this.leadForm.valid"
-              matTooltip="Add Site" (click)="addSite()"
+              *ngIf="this.teamForm.valid && this.leadForm.valid"
+              matTooltip="Add Team"
               >Add</button>
           </div>
       </mat-card-content>
   </mat-card>
 </div>
+

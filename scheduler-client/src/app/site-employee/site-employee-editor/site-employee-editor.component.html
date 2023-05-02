@@ -17,15 +17,18 @@
     <mat-tab-group preserveContent="true">
       <mat-tab label="Assigned Labor Codes">
         <app-site-employee-labor-codes [employee]="employee"
+        [site]="site"
           (changed)="employeeChanged($event)">
         </app-site-employee-labor-codes>
       </mat-tab><mat-tab label="Assignments">
         <app-site-employee-assignment [employee]="employee"
+        [site]="site"
           (changed)="employeeChanged($event)"
         ></app-site-employee-assignment>
       </mat-tab>
       <mat-tab label="Variations">
         <app-site-employee-variation [employee]="employee"
+          [site]="site"
           (changed)="employeeChanged($event)"></app-site-employee-variation>
       </mat-tab>
     </mat-tab-group>

@@ -23,7 +23,7 @@ import (
 // Most employees will have a log in account to allow them to view the
 // schedule data.  So a comparison of their possible authentication account is
 // made to ensure their object ID is the same.
-func CreateEmployee(emp employees.Employee, passwd, teamID,
+func CreateEmployee(emp employees.Employee, passwd, workgroup, teamID,
 	siteid string) (*employees.Employee, error) {
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
@@ -81,6 +81,9 @@ func CreateEmployee(emp employees.Employee, passwd, teamID,
 			Workgroups: []string{
 				"scheduler-employee",
 			},
+		}
+		if workgroup != "" {
+			user.Workgroups = append(user.Workgroups, workgroup)
 		}
 		user.SetPassword(passwd)
 		userCol.InsertOne(context.TODO(), user)
@@ -177,6 +180,7 @@ func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 	if err = cursor.All(context.TODO(), &employees); err != nil {
 		log.Println(err)
 	}
+	fmt.Println(len(employees))
 
 	for i, emp := range employees {
 		filter = bson.M{

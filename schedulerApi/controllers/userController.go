@@ -99,7 +99,7 @@ func Login(c *gin.Context) {
 				Token: "", Exception: err.Error()})
 	}
 
-	usrs, err := services.GetUsers()
+	usrs, _ := services.GetUsers()
 
 	now := time.Now()
 	emps, _ := services.GetEmployees(team.ID.Hex(), emp.SiteID)
@@ -111,12 +111,13 @@ func Login(c *gin.Context) {
 				if usr.ID == emp.ID {
 					emp.Email = usr.EmailAddress
 					user := users.User{
-						ID:           usr.ID,
-						EmailAddress: usr.EmailAddress,
-						BadAttempts:  usr.BadAttempts,
-						FirstName:    usr.FirstName,
-						MiddleName:   usr.MiddleName,
-						LastName:     usr.LastName,
+						ID:              usr.ID,
+						EmailAddress:    usr.EmailAddress,
+						BadAttempts:     usr.BadAttempts,
+						FirstName:       usr.FirstName,
+						MiddleName:      usr.MiddleName,
+						LastName:        usr.LastName,
+						PasswordExpires: usr.PasswordExpires,
 					}
 					user.Workgroups = append(user.Workgroups, usr.Workgroups...)
 					emp.User = &user
@@ -257,6 +258,67 @@ func GetAllUsers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, web.UsersResponse{
 		Users:     users,
+		Exception: "",
+	})
+}
+
+func AddUser(c *gin.Context) {
+	var data web.CreateUserAccount
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, web.UsersResponse{
+			Exception: err.Error(),
+		})
+		return
+	}
+
+	// check to see if the user account is already created by comparing email
+	// address then the first and last names, either or will be considered a
+	// match.  Don't create if already present.
+	usrs, err := services.GetUsers()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.UsersResponse{
+			Exception: err.Error(),
+		})
+		return
+	}
+
+	found := false
+	for _, usr := range usrs {
+		if strings.EqualFold(usr.EmailAddress, data.EmailAddress) ||
+			(strings.EqualFold(usr.FirstName, data.FirstName) &&
+				strings.EqualFold(usr.LastName, data.LastName)) {
+			found = true
+		}
+	}
+	if found {
+		c.JSON(http.StatusConflict, web.UsersResponse{
+			Exception: "Duplicate user requested",
+		})
+		return
+	}
+
+	// check for employee by comparing first and last name
+	// attributes.  If exists, use the employee record object id for account.
+	user := users.User{
+		ID:           primitive.NewObjectID(),
+		EmailAddress: data.EmailAddress,
+		FirstName:    data.FirstName,
+		MiddleName:   data.MiddleName,
+		LastName:     data.LastName,
+	}
+	user.SetPassword(data.Password)
+	emp, _ := services.GetEmployeeByName(data.FirstName, data.MiddleName,
+		data.LastName)
+	if emp != nil {
+		user.ID = emp.ID
+	}
+	newUser := services.AddUser(&user)
+	usrs = append(usrs, *newUser)
+	sort.Sort(users.ByUser(usrs))
+
+	c.JSON(http.StatusOK, web.UsersResponse{
+		Users:     usrs,
 		Exception: "",
 	})
 }

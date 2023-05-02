@@ -7,6 +7,7 @@ export interface IUser {
   middleName: string;
   lastName: string;
   workgroups: string[];
+  password?: string;
 }
 
 export class User implements IUser {

@@ -32,6 +32,7 @@ export class SiteEmployeeAssignmentComponent {
   public set site(iSite: ISite) {
     this._site = new Site(iSite);
     this.setWorkcenters();
+    this.setAssignments();
   }
   get site(): Site {
     return this._site;
@@ -54,12 +55,6 @@ export class SiteEmployeeAssignmentComponent {
     protected dialog: MatDialog,
     private fb: FormBuilder
   ) {
-    const iSite = this.siteService.getSite();
-    if (iSite) {
-      this.siteID = iSite.id;
-      this.site = iSite;
-      this.setWorkcenters();
-    }
     this.asgmtForm = this.fb.group({
       assignment: '0',
       workcenter: '',
@@ -69,7 +64,12 @@ export class SiteEmployeeAssignmentComponent {
       rotationdate: new Date(),
       rotationdays: 0,
     });
-    this.setAssignments();
+    const iSite = this.siteService.getSite();
+    if (iSite) {
+      this.siteID = iSite.id;
+      this.site = iSite;
+      this.setWorkcenters();
+    }
   }
 
   setWorkcenters() {
@@ -86,7 +86,7 @@ export class SiteEmployeeAssignmentComponent {
     this.showSchedule = false;
     this.assignment = new Assignment();
     this.employee.data.assignments.forEach(asgmt => {
-      if (asgmt.site.toLowerCase() === this.siteID.toLowerCase()) {
+      if (asgmt.site.toLowerCase() === this.site.id.toLowerCase()) {
         this.assignmentList.push(new Assignment(asgmt));
       }
     });

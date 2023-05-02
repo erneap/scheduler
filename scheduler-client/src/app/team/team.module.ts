@@ -10,6 +10,7 @@ import { TeamCompanyComponent } from './team-company/team-company.component';
 import { TeamCompanyHolidaysComponent } from './team-company/team-company-holidays/team-company-holidays.component';
 import { TeamWorkcodesComponent } from './team-workcodes/team-workcodes.component';
 import { EditorComponent } from './editor/editor.component';
+import { NewTeamComponent } from './new-team/new-team.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { EditorComponent } from './editor/editor.component';
     TeamCompanyComponent,
     TeamCompanyHolidaysComponent,
     TeamWorkcodesComponent,
-    EditorComponent
+    EditorComponent,
+    NewTeamComponent
   ],
   imports: [
     CommonModule,

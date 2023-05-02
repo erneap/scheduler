@@ -5,8 +5,9 @@ import { ISite, Site } from '../models/sites/site';
 import { Observable, of } from 'rxjs';
 import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
 import { SiteResponse } from '../models/web/siteWeb';
-import { CreateTeamCompany, CreateTeamWorkcodeRequest, UpdateTeamRequest } from '../models/web/teamWeb';
+import { CreateTeamCompany, CreateTeamRequest, CreateTeamWorkcodeRequest, UpdateTeamRequest } from '../models/web/teamWeb';
 import { CreateCompanyHoliday } from '../models/web/teamWeb';
+import { IUser } from '../models/users/user';
 
 @Injectable({
   providedIn: 'root'
@@ -46,6 +47,18 @@ export class TeamService extends CacheService {
   retrieveSelectedSite(teamid: string, siteid: string): Observable<HttpResponse<SiteResponse>> {
     const url = `/scheduler/api/v1/site/${teamid}/${siteid}/true`;
     return this.httpClient.get<SiteResponse>(url, {observe: 'response'});
+  }
+
+  addTeam(id: string, title: string, workcodes: boolean, leader: IUser): 
+    Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/team';
+    const data: CreateTeamRequest = {
+      id: id,
+      name: title,
+      useStdWorkcodes: workcodes,
+      leader: leader,
+    }
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
   }
 
   updateTeam(teamid: string, name: string): Observable<HttpResponse<SiteResponse>> {

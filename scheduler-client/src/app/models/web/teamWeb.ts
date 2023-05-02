@@ -1,5 +1,10 @@
+import { IUser } from "../users/user";
+
 export interface CreateTeamRequest {
+  id: string;
   name: string;
+  useStdWorkcodes: boolean;
+  leader: IUser;
 }
 
 export interface UpdateTeamRequest {

@@ -35,6 +35,9 @@ func (ur *UpdateRequest) BooleanValue() bool {
 type CreateUserAccount struct {
 	ID           string `json:"id"`
 	EmailAddress string `json:"emailAddress"`
+	LastName     string `json:"lastName"`
+	FirstName    string `json:"firstName"`
+	MiddleName   string `json:"middleName"`
 	Password     string `json:"password"`
 }
 

@@ -104,7 +104,7 @@ export class Assignment implements IAssignment {
     this.endDate = (asgmt) ? new Date(asgmt.endDate) 
       : new Date(9999, 11, 30, 23, 59, 59);
     this.schedules = [];
-    if (asgmt && asgmt.schedules.length > 0) {
+    if (asgmt && asgmt.schedules && asgmt.schedules.length > 0) {
       asgmt.schedules.forEach(sch => {
         this.schedules.push(new Schedule(sch));
       });

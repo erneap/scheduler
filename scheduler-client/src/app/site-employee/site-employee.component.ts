@@ -86,9 +86,26 @@ export class SiteEmployeeComponent {
 
   getButtonClass(id: string) {
     if (this.selected === id) {
-      return "employee active";
+      return "employee selected";
+    } else {
+      let answer = "employee ";
+      const now = new Date();
+      if (this.site.employees) {
+        this.site.employees.forEach(iEmp => {
+          if (iEmp.id === id) {
+            const emp = new Employee(iEmp);
+            if (emp.user && emp.user.passwordExpires.getTime() < now.getTime()) {
+              answer += "expired";
+            } else if (emp.user && emp.user.badAttempts > 2) {
+              answer += "locked"
+            } else {
+              answer += "active"
+            }
+          }
+        });
+      }
+      return answer;
     }
-    return "employee";
   }
 
   changeActiveOnly() {

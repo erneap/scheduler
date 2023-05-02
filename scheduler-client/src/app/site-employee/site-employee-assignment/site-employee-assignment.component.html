@@ -25,7 +25,7 @@
                 (selectionChange)="selectAssignment()">
                 <mat-option value="0">New Assignment</mat-option>
                 <mat-option *ngFor="let asgt of assignmentList"
-                  [value]="asgmtID(asgt)">({{siteID.toUpperCase()}}) 
+                  [value]="asgmtID(asgt)">({{site.id.toUpperCase()}}) 
                   {{getDateString(asgt.startDate)}}-{{getDateString(asgt.endDate)}}
                 </mat-option>
               </mat-select>

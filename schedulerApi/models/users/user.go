@@ -19,7 +19,7 @@ type JWTClaim struct {
 type User struct {
 	ID              primitive.ObjectID `json:"id" bson:"_id"`
 	EmailAddress    string             `json:"emailAddress" bson:"emailAddress"`
-	Password        string             `json:"-" bson:"password"`
+	Password        string             `json:"password" bson:"password"`
 	PasswordExpires time.Time          `json:"passwordExpires" bson:"passwordExpires"`
 	BadAttempts     uint               `json:"badAttempts" bson:"badAttempts"`
 	FirstName       string             `json:"firstName" bson:"firstName"`

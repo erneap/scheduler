@@ -6,7 +6,7 @@
       "id": "E",
       "title": "Early Day Shift",
       "start": 5,
-      "shiftCode": 1,
+      "shiftCode": "1",
       "isLeave": false,
       "textcolor": "000000",
       "backcolor": "ffffff"
@@ -15,7 +15,7 @@
       "id": "D",
       "title": "Day Shift",
       "start": 6,
-      "shiftCode": 1,
+      "shiftCode": "1",
       "isLeave": false,
       "textcolor": "000000",
       "backcolor": "ffffff"
@@ -24,7 +24,7 @@
       "id": "A",
       "title": "Activity/Mission Shift",
       "start": 9,
-      "shiftCode": 1,
+      "shiftCode": "1",
       "isLeave": false,
       "textcolor": "cc0000",
       "backcolor": "ffcc00"
@@ -33,7 +33,7 @@
       "id": "O",
       "title": "Office Hours",
       "start": 8,
-      "shiftCode": 1,
+      "shiftCode": "1",
       "isLeave": false,
       "textcolor": "000000",
       "backcolor": "ffffff"
@@ -42,7 +42,7 @@
       "id": "S",
       "title": "Swing Shift",
       "start": 13,
-      "shiftCode": 6,
+      "shiftCode": "6",
       "isLeave": false,
       "textcolor": "000000",
       "backcolor": "ffffff"
@@ -51,7 +51,7 @@
       "id": "L",
       "title": "Late Swing Shift",
       "start": 14,
-      "shiftCode": 6,
+      "shiftCode": "6",
       "isLeave": false,
       "textcolor": "FFFFFF",
       "backcolor": "000000"
@@ -60,7 +60,7 @@
       "id": "M",
       "title": "Mid Shift",
       "start": 10,
-      "shiftCode": 4,
+      "shiftCode": "4",
       "isLeave": false,
       "textcolor": "000000",
       "backcolor": "ffffff"
@@ -69,7 +69,7 @@
       "id": "BR",
       "title": "Bereavement",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "cc0099"
@@ -78,7 +78,7 @@
       "id": "H",
       "title": "Holiday",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "0000ff"
@@ -87,7 +87,7 @@
       "id": "J",
       "title": "Jury Duty",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "000000",
       "backcolor": "ff8000"
@@ -96,7 +96,7 @@
       "id": "LD",
       "title": "Long-Term Disability",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "4d2600"
@@ -105,7 +105,7 @@
       "id": "ML",
       "title": "Military Leave",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "000000",
       "backcolor": "ff9966"
@@ -114,7 +114,7 @@
       "id": "OL",
       "title": "Other Leave",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "99cc00"
@@ -123,7 +123,7 @@
       "id": "PL",
       "title": "Patental Leave",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "000000",
       "backcolor": "ff9999"
@@ -132,7 +132,7 @@
       "id": "SD",
       "title": "Short-Term Disability",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "996633"
@@ -141,7 +141,7 @@
       "id": "T",
       "title": "Temporary Duty",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "ff794d"
@@ -150,19 +150,19 @@
       "id": "UP",
       "title": "FLSA/Unpaid",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "000000"
     },
     {
       "id": "V",
-      "title": "Vacation/PTO",
+      "title": "Holiday",
       "start": 0,
-      "shiftCode": 0,
+      "shiftCode": "0",
       "isLeave": true,
       "textcolor": "FFFFFF",
-      "backcolor": "339933"
+      "backcolor": "3366ff"
     }
   ],
   "companies": [
@@ -245,8 +245,6 @@
     {
       "id": "dgsc",
       "name": "DGS-C",
-      "utcoffset": 9.0,
-      "showMids": false,
       "workcenters": [
         {
           "id": "leads",
@@ -289,24 +287,21 @@
               "name": "Day Shift",
               "sort": 1,
               "associatedCodes": [ "E", "D", "A"],
-              "payCode": 1,
-              "minimums": 2
+              "payCode": 1
             },
             {
               "id": "swings",
               "name": "Swing Shift",
               "sort": 2,
               "associatedCodes": [ "S", "L"],
-              "payCode": 6,
-              "minimums": 2
+              "payCode": 6
             },
             {
               "id": "mids",
               "name": "Midnight Shift",
               "sort": 3,
               "associatedCodes": [ "M"],
-              "payCode": 4,
-              "minimums": 1
+              "payCode": 4
             }
           ]
         },
@@ -320,16 +315,14 @@
               "name": "Day Shift",
               "sort": 1,
               "associatedCodes": [ "E", "D", "A"],
-              "payCode": 1,
-              "minimums": 2
+              "payCode": 1
             },
             {
               "id": "swings",
               "name": "Swing Shift",
               "sort": 2,
               "associatedCodes": [ "S", "L"],
-              "payCode": 6,
-              "minimums": 2
+              "payCode": 6
             }
           ]
         }

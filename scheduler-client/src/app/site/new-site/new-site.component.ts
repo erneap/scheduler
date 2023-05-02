@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Employee } from 'src/app/models/employees/employee';
 import { Site } from 'src/app/models/sites/site';
 import { Company } from 'src/app/models/teams/company';
+import { Team } from 'src/app/models/teams/team';
+import { IUser } from 'src/app/models/users/user';
 import { MustMatchValidator } from 'src/app/models/validators/must-match-validator.directive';
 import { PasswordStrengthValidator } from 'src/app/models/validators/password-strength-validator.directive';
+import { SiteResponse } from 'src/app/models/web/siteWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
 import { EmployeeService } from 'src/app/services/employee.service';
@@ -17,6 +20,7 @@ import { TeamService } from 'src/app/services/team.service';
   styleUrls: ['./new-site.component.scss']
 })
 export class NewSiteComponent {
+  @Output() added = new EventEmitter<Site>();
   site: Site = new Site();
   employee: Employee = new Employee();
   companies: Company[];
@@ -124,5 +128,81 @@ export class NewSiteComponent {
       answer += "Password doesn't match";
     }
     return answer;
+  }
+
+  addSite() {
+    if (this.siteForm.valid && this.leadForm.valid) {
+      const lead: IUser = {
+        id: '',
+        emailAddress: this.leadForm.value.email,
+        firstName: this.leadForm.value.first,
+        middleName: this.leadForm.value.middle,
+        lastName: this.leadForm.value.last,
+        password: this.leadForm.value.password,
+        passwordExpires: new Date(),
+        badAttempts: 0,
+        workgroups: [],
+      }
+      let scheduler: IUser | undefined = undefined
+      if (this.schedulerForm.valid) {
+        scheduler = {
+          id: '',
+          emailAddress: this.schedulerForm.value.email,
+          firstName: this.schedulerForm.value.first,
+          middleName: this.schedulerForm.value.middle,
+          lastName: this.schedulerForm.value.last,
+          password: this.schedulerForm.value.password,
+          passwordExpires: new Date(),
+          badAttempts: 0,
+          workgroups: [],
+        }
+      }
+      const iTeam = this.teamService.getTeam();
+      if (iTeam) {
+        this.authService.statusMessage = "Adding New Site";
+        this.dialogService.showSpinner();
+        this.siteService.AddSite(iTeam.id, this.siteForm.value.id,
+          this.siteForm.value.title, this.siteForm.value.mids, 
+          Number(this.siteForm.value.offset), lead, scheduler).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: SiteResponse | null = resp.body;
+            if (data && data != null && data.site) {
+              this.site = new Site(data.site);
+              const site = this.siteService.getSite();
+              if (site && data.site.id === site.id) {
+                this.siteService.setSite(new Site(data.site));
+              }
+              this.teamService.setSelectedSite(new Site(data.site));
+              const iTeam = this.teamService.getTeam();
+              if (iTeam) {
+                const team = new Team(iTeam);
+                let found = false;
+                for (let i=0; i < team.sites.length && !found; i++) {
+                  if (team.sites[i].id === this.site.id) {
+                    found = true;
+                    team.sites[i] = new Site(this.site);
+                  }
+                }
+                if (!found) {
+                  team.sites.push(new Site(this.site));
+                  team.sites.sort((a,b) => a.compareTo(b));
+                }
+                this.teamService.setTeam(team);
+              }
+            }
+            this.added.emit(this.site);
+            this.authService.statusMessage = "Update complete"
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.error.exception;
+          }
+        });
+      }
+    }
   }
 }

@@ -19,6 +19,7 @@ export class TeamSiteEmployeeEditorComponent {
   public set site(iSite: ISite) {
     this._site = new Site(iSite);
     this.setEmployees();
+    this.selected = 'new'
   }
   get site(): Site {
     return this._site;

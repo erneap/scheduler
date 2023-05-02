@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -74,7 +73,6 @@ func (a *Assignment) AddSchedule(days int) {
 			Hours: 0.0,
 		}
 		sch.Workdays = append(sch.Workdays, wd)
-		fmt.Println("Added: " + strconv.FormatInt(int64(wd.ID), 10))
 	}
 	a.Schedules = append(a.Schedules, sch)
 }

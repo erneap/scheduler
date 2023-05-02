@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ListItem } from 'src/app/generic/button-list/listitem';
-import { Site } from 'src/app/models/sites/site';
+import { ISite, Site } from 'src/app/models/sites/site';
 import { Team } from 'src/app/models/teams/team';
 import { SiteResponse } from 'src/app/models/web/siteWeb';
 import { AuthService } from 'src/app/services/auth.service';
@@ -55,7 +55,7 @@ export class TeamSiteEditorComponent {
   onSelect(id: string) {
     this.selected = id;
     const iSite = this.teamService.getSelectedSite(this.selected);
-    if (iSite) {
+    if (iSite && iSite.id === id) {
       this.site = new Site(iSite);
     } else {
       this.authService.statusMessage = "Retrieving requested site";
@@ -87,5 +87,21 @@ export class TeamSiteEditorComponent {
       answer += ' active';
     }
     return answer;
+  }
+
+  onAdd(site: ISite) {
+    const newSite = new Site(site);
+    let found = false;
+    for (let i=0; i < this.team.sites.length && !found; i++) {
+      if (this.team.sites[i].id === newSite.id) {
+        this.team.sites[i] = newSite;
+        found = true;
+      }
+    }
+    if (!found) {
+      this.team.sites.push(newSite);
+    }
+    this.teamService.setTeam(this.team);
+    this.setSites();
   }
 }
