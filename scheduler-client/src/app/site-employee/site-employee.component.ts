@@ -118,6 +118,7 @@ export class SiteEmployeeComponent {
     if (iSite && iSite.id === site.id) {
       this.siteService.setSite(site)
     }
+    this.teamService.setSelectedSite(site);
     const iTeam = this.teamService.getTeam();
     if (iTeam) {
       const team = new Team(iTeam);

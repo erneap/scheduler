@@ -17,7 +17,7 @@ func main() {
 
 	// add routes
 	router := gin.Default()
-	roles := []string{"ADMIN", "SCHEDULER", "siteleader", "companylead"}
+	roles := []string{"ADMIN", "SCHEDULER", "siteleader", "company", "teamleader"}
 	api := router.Group("/scheduler/api/v1")
 	{
 		users := api.Group("/user")

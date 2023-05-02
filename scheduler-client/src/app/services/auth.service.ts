@@ -101,10 +101,10 @@ export class AuthService extends CacheService {
       if (iUser) {
         const user = new User(iUser);
         this.isScheduler = user.isInGroup("scheduler", "scheduler");
-        this.isSiteLeader = user.isInGroup("scheduler", "sitelead");
-        this.isTeamLeader = user.isInGroup("scheduler", "teamlead")
+        this.isSiteLeader = user.isInGroup("scheduler", "siteleader");
+        this.isTeamLeader = user.isInGroup("scheduler", "teamleader")
         this.isAdmin = user.isInGroup("scheduler", "admin");
-        this.isCompanyLead = user.isInGroup("scheduler", "companylead");
+        this.isCompanyLead = user.isInGroup("scheduler", "company");
         this.isAuthenticated = true;
         return user;
       }

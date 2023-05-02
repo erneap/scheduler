@@ -50,18 +50,18 @@ export class SiteEmployeeProfileComponent {
 
   setEmployeePerms() {
     if (this.employee.user) {
-      this.permForm.controls['employee'].setValue(this.employee.user
-        .isInGroup('scheduler', 'employee'));
-      this.permForm.controls['scheduler'].setValue(this.employee.user
-        .isInGroup('scheduler', 'scheduler'));
-      this.permForm.controls['company'].setValue(this.employee.user
-        .isInGroup('scheduler', 'company'));
-      this.permForm.controls['siteleader'].setValue(this.employee.user
-        .isInGroup('scheduler', 'siteleader'));
-      this.permForm.controls['teamleader'].setValue(this.employee.user
-        .isInGroup('scheduler', 'teamleader'));
-      this.permForm.controls['admin'].setValue(this.employee.user
-        .isInGroup('scheduler', 'admin'));
+      let answer = this.employee.user.isInGroup('scheduler', 'employee');
+      this.permForm.controls['employee'].setValue(answer);
+      answer = this.employee.user.isInGroup('scheduler', 'scheduler');
+      this.permForm.controls['scheduler'].setValue(answer);
+      answer = this.employee.user.isInGroup('scheduler', 'company');
+      this.permForm.controls['company'].setValue(answer);
+      answer = this.employee.user.isInGroup('scheduler', 'siteleader');
+      this.permForm.controls['siteleader'].setValue(answer);
+      answer = this.employee.user.isInGroup('scheduler', 'teamleader');
+      this.permForm.controls['teamleader'].setValue(answer);
+      answer = this.employee.user.isInGroup('scheduler', 'admin');
+      this.permForm.controls['admin'].setValue(answer);
     } else {
       this.permForm.controls['employee'].setValue(false);
       this.permForm.controls['scheduler'].setValue(false);
@@ -102,22 +102,6 @@ export class SiteEmployeeProfileComponent {
                 const emp = this.empService.getEmployee();
                 if (data.employee && emp && emp.id === data.employee.id) {
                   this.empService.setEmployee(data.employee);
-                }
-                const site = this.siteService.getSite();
-                if (site && site.employees && site.employees.length && data.employee) {
-                  let found = false;
-                  for (let i=0; i < site.employees.length && !found; i++) {
-                    if (site.employees[i].id === data.employee.id) {
-                      site.employees[i] = new Employee(data.employee);
-                      found = true;
-                    }
-                  }
-                  if (!found) {
-                    site.employees.push(new Employee(data.employee));
-                  }
-                  site.employees.sort((a,b) => a.compareTo(b));
-                  this.siteService.setSite(site);
-                  this.siteService.setSelectedEmployee(data.employee);
                 }
               }
               this.changed.emit(new Employee(this.employee));

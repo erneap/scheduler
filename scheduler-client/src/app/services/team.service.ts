@@ -89,7 +89,7 @@ export class TeamService extends CacheService {
 
   updateTeamWorkcode(team: string, workcode: string, field: string, 
   value: string): Observable<HttpResponse<SiteResponse>> {
-    const url = '/scheduler/api/vi/team/workcode';
+    const url = '/scheduler/api/vi/team/workcode/';
     const data: UpdateTeamRequest = {
       teamid: team,
       additionalid: workcode,

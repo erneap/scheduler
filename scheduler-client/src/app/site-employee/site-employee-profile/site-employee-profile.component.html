@@ -48,7 +48,7 @@
                 <mat-checkbox formControlName="siteleader" 
                   (change)="updatePermission('siteleader')">Site Leader</mat-checkbox>
                 <mat-checkbox formControlName="teamleader" 
-                  *ngIf="authService.isAdmin" 
+                  *ngIf="authService.isAdmin || authService.isTeamLeader" 
                   (change)="updatePermission('teamleader')">Team Leader</mat-checkbox>
                 <mat-checkbox formControlName="admin" 
                   *ngIf="authService.isAdmin" 

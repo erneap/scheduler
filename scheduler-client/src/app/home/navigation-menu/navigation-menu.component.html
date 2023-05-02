@@ -44,7 +44,7 @@
     </mat-nav-list>
   </mat-expansion-panel>
   <mat-expansion-panel  expanded="true"
-    *ngIf="this.authService.isAdmin">
+    *ngIf="this.authService.isAdmin || authService.isTeamLeader">
     <mat-expansion-panel-header>
       <mat-panel-title>Team Editing</mat-panel-title>
     </mat-expansion-panel-header>

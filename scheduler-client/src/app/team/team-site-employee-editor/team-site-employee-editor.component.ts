@@ -95,6 +95,23 @@ export class TeamSiteEmployeeEditorComponent {
 
   siteUpdated(site: Site) {
     this.siteChanged.emit(site);
+    const iSite = this.siteService.getSite();
+    if (iSite && iSite.id === site.id) {
+      this.siteService.setSite(site)
+    }
+    this.teamService.setSelectedSite(site);
+    const iTeam = this.teamService.getTeam();
+    if (iTeam) {
+      const team = new Team(iTeam);
+      if (team.sites) {
+        for (let i=0; i < team.sites.length; i++) {
+          if (team.sites[i].id === site.id) {
+            team.sites[i] = site;
+          }
+        }
+      }
+    }
+    this.site = new Site(site);
     this.setEmployees();
   }
 

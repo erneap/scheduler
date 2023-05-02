@@ -60,10 +60,9 @@ export class User implements IUser {
 
   isInGroup(app: string, group: string): boolean {
     let answer = false;
+    const testgroup = `${app}-${group}`;
     this.workgroups.forEach(grp => {
-      let parts = grp.split("-");
-      if (parts[0].toLowerCase() === app.toLowerCase()
-        && parts[1].toLowerCase() === group.toLowerCase()) {
+      if (testgroup.toLowerCase() === grp.toLowerCase()) {
         answer = true;
       }
     });

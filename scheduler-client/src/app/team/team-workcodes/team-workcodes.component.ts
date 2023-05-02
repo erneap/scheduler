@@ -137,6 +137,7 @@ export class TeamWorkcodesComponent {
       const value = this.codeForm.controls[field].value;
       this.authService.statusMessage = 'Update Team Workcode';
       this.dialogService.showSpinner();
+      console.log(`${this.team.id} - ${this.selected} - ${field} - ${value}`);
       this.teamService.updateTeamWorkcode(this.team.id, this.selected, field, 
       value).subscribe({
         next: resp => {
