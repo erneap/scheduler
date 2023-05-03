@@ -36,3 +36,8 @@ type UsersResponse struct {
 	Users     []users.User `json:"users"`
 	Exception string       `json:"exception"`
 }
+
+type TeamsResponse struct {
+	Teams     []sites.Team `json:"teams,omitempty"`
+	Exception string       `json:"exception"`
+}

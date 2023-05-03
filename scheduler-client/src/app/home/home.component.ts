@@ -127,7 +127,7 @@ export class HomeComponent {
       error: (err) => {
         this.dialogService.closeSpinner();
         this.loginError = err.error.exception
-        this.authService.statusMessage = err.error.exception;
+        this.authService.statusMessage = err.message;
         this.authService.isAuthenticated = false;
       }
     });

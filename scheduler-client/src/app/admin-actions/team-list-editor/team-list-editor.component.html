@@ -1,0 +1,14 @@
+<div class="flexlayout row topleft">
+  <div class="flexlayout column topleft">
+    <div class="list">
+      <div class="employee" *ngFor="let team of teamList"
+        [class]="getButtonClass(team.id)"
+        (click)="onSelect(team.id)">
+        {{team.label}}
+      </div>
+    </div>
+  </div>
+  <app-new-team *ngIf="selected === 'new'" (added)="changed($event)">
+  </app-new-team>
+  <app-editor [team]="team" *ngIf="selected !== 'new'"></app-editor>
+</div>

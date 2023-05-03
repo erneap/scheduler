@@ -29,6 +29,19 @@ func GetTeam(c *gin.Context) {
 	c.JSON(http.StatusOK, web.SiteResponse{Team: team, Site: nil, Exception: ""})
 }
 
+func GetTeams(c *gin.Context) {
+	teams, err := services.GetTeams()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.TeamsResponse{
+			Exception: err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, web.TeamsResponse{
+		Teams: teams,
+	})
+}
+
 func CreateTeam(c *gin.Context) {
 	var data web.CreateTeamRequest
 

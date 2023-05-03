@@ -29,6 +29,10 @@ import { NewTeamComponent } from './new-team/new-team.component';
     SiteEmployeeModule,
     FormsModule,
     ReactiveFormsModule
+  ],
+  exports: [
+    NewTeamComponent,
+    EditorComponent
   ]
 })
 export class TeamModule { }

@@ -157,7 +157,7 @@ export class SiteWorkcenterShiftComponent {
       },
       error: err => {
         this.dialogService.closeSpinner();
-        this.authService.statusMessage = err.error.exception;
+        this.authService.statusMessage = err.message;
       }
     });
   }
@@ -245,7 +245,7 @@ export class SiteWorkcenterShiftComponent {
         },
         error: err => {
           this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.error.exception;
+          this.authService.statusMessage = err.message;
         }
       });
     }
@@ -291,7 +291,7 @@ export class SiteWorkcenterShiftComponent {
         },
         error: err => {
           this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.error.exception;
+          this.authService.statusMessage = err.message;
         }
       });
     }
@@ -345,7 +345,7 @@ export class SiteWorkcenterShiftComponent {
           },
           error: err => {
             this.dialogService.closeSpinner();
-            this.authService.statusMessage = err.error.exception;
+            this.authService.statusMessage = err.message;
           }
         });
       }

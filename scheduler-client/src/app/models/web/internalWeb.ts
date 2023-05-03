@@ -1,6 +1,9 @@
 import { supportsPassiveEventListeners } from "@angular/cdk/platform";
 import { IVariation, IWorkday, Variation, Workday } from "../employees/assignments";
 import { Employee, IEmployee } from "../employees/employee";
+import { HttpErrorResponse } from "@angular/common/http";
+import { throwError } from "rxjs";
+import { Router } from "@angular/router";
 
 export class WorkWeek {
   private week: Workday[];
@@ -74,4 +77,34 @@ export class IngestManualChange {
     this.changedate = new Date(date);
     this.changevalue = value;
   }
+}
+
+export function handleError(error: HttpErrorResponse) {
+  let message = "";
+  // need to transform HTML error messages to JSON type by extracting only the
+  // body of the message without any other markup.
+  if (error.error.exception) {
+    message = error.error.exception;
+  } else if (typeof(error.error) ===  'string') {
+    if (error.error.indexOf('<body>') >= 0) {
+      let spos = error.error.indexOf('<body>') + 6;
+      let epos = error.error.indexOf('</body>');
+      message = error.error.substring(spos, epos).trim();
+      if (message.indexOf('<pre>') >= 0) {
+        spos = message.indexOf('<pre>') + 5;
+        epos = message.indexOf('</pre>');
+        message = message.substring(spos, epos);
+      }
+    }
+  } else {
+    message = error.error;
+  }
+  if (message !== '') {
+    if (error.status === 0) {
+      message = `Client Error: ${message}`;
+    } else {
+      message = `Server Error: Code: ${error.status} - ${message}`;
+    }
+  }
+  return throwError(() => new Error(message));
 }

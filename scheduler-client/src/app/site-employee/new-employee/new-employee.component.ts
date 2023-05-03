@@ -287,23 +287,22 @@ export class NewEmployeeComponent {
             if (data.employee && emp && emp.id === data.employee.id) {
               this.empService.setEmployee(data.employee);
             }
-            const site = this.siteService.getSite();
-            if (site && site.employees && site.employees.length && data.employee) {
-              let found = false;
-              for (let i=0; i < site.employees.length && !found; i++) {
-                if (site.employees[i].id === data.employee.id) {
-                  site.employees[i] = new Employee(data.employee);
+            let found = false;
+            if (this.site.employees) {
+              for (let i=0; i < this.site.employees.length && !found; i++) {
+                if (this.site.employees[i].id === this.employee.id) {
+                  found = true;
+                  this.site.employees[i] = new Employee(this.employee);
                 }
               }
-              if (!found) {
-                site.employees.push(new Employee(data.employee));
-              }
-              site.employees.sort((a,b) => a.compareTo(b));
-              this.changeEmployee.emit(data.employee.id);
-              this.siteChanged.emit(site);
-              this.siteService.setSite(site);
-              this.siteService.setSelectedEmployee(data.employee);
+            } else {
+              this.site.employees = [];
             }
+            if (!found) {
+              this.site.employees.push(new Employee(this.employee));
+            }
+            this.changeEmployee.emit(this.employee.id);
+            this.siteChanged.emit(this.site);
           }
           this.authService.statusMessage = "Employee Created";
         },

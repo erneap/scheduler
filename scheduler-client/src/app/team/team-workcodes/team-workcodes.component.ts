@@ -137,7 +137,6 @@ export class TeamWorkcodesComponent {
       const value = this.codeForm.controls[field].value;
       this.authService.statusMessage = 'Update Team Workcode';
       this.dialogService.showSpinner();
-      console.log(`${this.team.id} - ${this.selected} - ${field} - ${value}`);
       this.teamService.updateTeamWorkcode(this.team.id, this.selected, field, 
       value).subscribe({
         next: resp => {
@@ -154,9 +153,10 @@ export class TeamWorkcodesComponent {
           }
           this.authService.statusMessage = "Update complete"
         },
-        error: err => {
+        error: (err: Error) => {
+          console.log(err.message);
           this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.error.exception;
+          this.authService.statusMessage = err.message;
         }
       });
     }
@@ -188,9 +188,9 @@ export class TeamWorkcodesComponent {
           }
           this.authService.statusMessage = "Addition complete"
         },
-        error: err => {
+        error: (err: Error) => {
           this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.error.exception;
+          this.authService.statusMessage = err.message;
         }
     });
   }
@@ -224,7 +224,7 @@ export class TeamWorkcodesComponent {
           },
           error: err => {
             this.dialogService.closeSpinner();
-            this.authService.statusMessage = err.error.exception;
+            this.authService.statusMessage = err.message;
           }
         });
       }

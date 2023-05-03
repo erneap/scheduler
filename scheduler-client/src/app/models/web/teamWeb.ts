@@ -1,3 +1,4 @@
+import { ITeam } from "../teams/team";
 import { IUser } from "../users/user";
 
 export interface CreateTeamRequest {
@@ -39,4 +40,9 @@ export interface CreateCompanyHoliday {
   holidayid: string;
   name: string;
   actual?: string;
+}
+
+export interface TeamsResponse {
+  teams: ITeam[];
+  exception: string;
 }

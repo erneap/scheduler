@@ -140,7 +140,7 @@ export class SiteEmployeeCompanyInfoComponent {
         },
         error: (err) => {
           this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.error.exception;
+          this.authService.statusMessage = err.message;
         }
       });
   }

@@ -135,7 +135,7 @@ func main() {
 				controllers.UpdateTeam)
 			team.DELETE("/:teamid", middleware.CheckRoles("scheduler", roles),
 				controllers.DeleteTeam)
-			wcode := team.Group("/workcode", middleware.CheckRoles("schedulers", roles))
+			wcode := team.Group("/workcode", middleware.CheckRoles("scheduler", roles))
 			{
 				wcode.POST("/", controllers.CreateWorkcode)
 				wcode.PUT("/", controllers.UpdateTeamWorkcode)
@@ -166,6 +166,12 @@ func main() {
 				controllers.IngestFiles)
 			ingest.PUT("/", middleware.CheckRoles("scheduler", roles),
 				controllers.ManualIngestActions)
+		}
+
+		admin := api.Group("/admin", middleware.CheckJWT(),
+			middleware.CheckRole("scheduler", "admin"))
+		{
+			admin.GET("/teams", controllers.GetTeams)
 		}
 	}
 

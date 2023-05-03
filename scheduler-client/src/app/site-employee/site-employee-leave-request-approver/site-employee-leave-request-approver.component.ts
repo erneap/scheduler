@@ -112,7 +112,11 @@ export class SiteEmployeeLeaveRequestApproverComponent {
       for (let i=0; i < this.site.employees.length; i++) {
         if (this.site.employees[i].id === emp.id) {
           this.site.employees[i] = emp;
-          this.siteService.setSite(this.site);
+          const iSite = this.siteService.getSite();
+          if (iSite && iSite.id === this.site.id) {
+            this.siteService.setSite(this.site);
+          }
+          this.teamService.setSelectedSite(new Site(this.site));
         }
       }
     }

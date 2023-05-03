@@ -2,18 +2,23 @@ import { Injectable } from '@angular/core';
 import { CacheService } from './cache.service';
 import { ITeam, Team } from '../models/teams/team';
 import { ISite, Site } from '../models/sites/site';
-import { Observable, of } from 'rxjs';
-import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { SiteResponse } from '../models/web/siteWeb';
-import { CreateTeamCompany, CreateTeamRequest, CreateTeamWorkcodeRequest, UpdateTeamRequest } from '../models/web/teamWeb';
+import { CreateTeamCompany, CreateTeamRequest, CreateTeamWorkcodeRequest, TeamsResponse, UpdateTeamRequest } from '../models/web/teamWeb';
 import { CreateCompanyHoliday } from '../models/web/teamWeb';
 import { IUser } from '../models/users/user';
+import { AuthService } from './auth.service';
+import { DialogService } from './dialog-service.service';
+import { handleError } from '../models/web/internalWeb';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeamService extends CacheService {
-  constructor(protected httpClient: HttpClient) {
+  constructor(protected httpClient: HttpClient,
+    protected authService: AuthService,
+    protected dialogService: DialogService) {
     super();
   }
 
@@ -73,7 +78,7 @@ export class TeamService extends CacheService {
   addTeamWorkcode(team: string, workcode: string, title: string, start: number,
   isLeave: boolean, premimum: string, text: string, back: string): 
   Observable<HttpResponse<SiteResponse>> {
-    const url = '/scheduler/api/vi/team/workcode';
+    const url = '/scheduler/api/v1/team/workcode';
     const data: CreateTeamWorkcodeRequest = {
       teamid: team,
       id: workcode,
@@ -89,7 +94,7 @@ export class TeamService extends CacheService {
 
   updateTeamWorkcode(team: string, workcode: string, field: string, 
   value: string): Observable<HttpResponse<SiteResponse>> {
-    const url = '/scheduler/api/vi/team/workcode/';
+    const url = '/scheduler/api/v1/team/workcode/';
     const data: UpdateTeamRequest = {
       teamid: team,
       additionalid: workcode,
@@ -166,5 +171,10 @@ export class TeamService extends CacheService {
     const url = `/scheduler/api/v1/team/company/holiday/${team}/${company}`
       + `/${holiday}`;
     return this.httpClient.delete<SiteResponse>(url, { observe: 'response'});
+  }
+
+  getTeams(): Observable<HttpResponse<TeamsResponse>> {
+    const url = '/scheduler/api/v1/admin/teams';
+    return this.httpClient.get<TeamsResponse>(url, { observe: 'response'});
   }
 }

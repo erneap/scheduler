@@ -34,7 +34,6 @@ export class SiteEmployeeLeaveBalanceComponent {
     return this._site;
   }
   @Output() changed = new EventEmitter<Employee>();
-  @Output() siteChanged = new EventEmitter<Site>();
 
   balances: AnnualLeave[] = [];
 
@@ -81,7 +80,7 @@ export class SiteEmployeeLeaveBalanceComponent {
       },
       error: err => {
         this.dialogService.closeSpinner();
-        this.authService.statusMessage = err.error.exception;
+        this.authService.statusMessage = err.message;
       }
     })
   }
@@ -101,16 +100,17 @@ export class SiteEmployeeLeaveBalanceComponent {
           }
           const data: SiteResponse | null = resp.body;
           if (data && data !== null) {
-            if (data.site) {
-              this.siteService.setSite(data.site);
-              this.siteChanged.emit(new Site(data.site));
+            if (data.site && data.site.employees) {
+              data.site.employees.forEach(emp => {
+                this.changed.emit(new Employee(emp))
+              });
             }
           }
           this.authService.statusMessage = "Update complete";
         },
         error: err => {
           this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.error.exception;
+          this.authService.statusMessage = err.message;
         }
       });
     }

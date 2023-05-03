@@ -157,29 +157,13 @@ export class SiteEmployeeLeaveComponent {
             if (data.employee && emp && emp.id === data.employee.id) {
               this.empService.setEmployee(data.employee);
             }
-            const site = this.siteService.getSite();
-            if (site && site.employees && site.employees.length && data.employee) {
-              let found = false;
-              for (let i=0; i < site.employees.length && !found; i++) {
-                if (site.employees[i].id === data.employee.id) {
-                  site.employees[i] = new Employee(data.employee);
-                  found = true;
-                }
-              }
-              if (!found) {
-                site.employees.push(new Employee(data.employee));
-              }
-              site.employees.sort((a,b) => a.compareTo(b));
-              this.siteService.setSite(site);
-              this.siteService.setSelectedEmployee(data.employee);
-            }
           }
           this.changed.emit(new Employee(this.employee));
           this.authService.statusMessage = "Update complete";
         },
         error: err => {
           this.dialogService.closeSpinner();
-          this.authService.statusMessage = err.error.exception;
+          this.authService.statusMessage = err.message;
         }
       });
   }

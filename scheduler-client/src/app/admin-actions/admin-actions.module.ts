@@ -2,15 +2,19 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { TeamListEditorComponent } from './team-list-editor/team-list-editor.component';
+import { TeamModule } from '../team/team.module';
 
 @NgModule({
   declarations: [
+    TeamListEditorComponent
   ],
   imports: [
     CommonModule,
     MaterialModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TeamModule
   ]
 })
 export class AdminActionsModule { }

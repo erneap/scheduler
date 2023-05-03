@@ -175,7 +175,7 @@ export class SiteEmployeeVariationComponent {
             },
             error: err => {
               this.dialogService.closeSpinner();
-              this.authService.statusMessage = err.error.exception;
+              this.authService.statusMessage = err.message;
             }
           });
         
@@ -250,7 +250,7 @@ export class SiteEmployeeVariationComponent {
           },
           error: err => {
             this.dialogService.closeSpinner();
-            this.authService.statusMessage = err.error.exception;
+            this.authService.statusMessage = err.message;
           }
         });
     }
@@ -322,7 +322,7 @@ export class SiteEmployeeVariationComponent {
           },
           error: err => {
             this.dialogService.closeSpinner();
-            this.authService.statusMessage = err.error.exception;
+            this.authService.statusMessage = err.message;
           }
         });
     } else if (field.toLowerCase() === 'mids') {
@@ -374,7 +374,7 @@ export class SiteEmployeeVariationComponent {
             },
             error: err => {
               this.dialogService.closeSpinner();
-              this.authService.statusMessage = err.error.exception;
+              this.authService.statusMessage = err.message;
             }
           });
       }
