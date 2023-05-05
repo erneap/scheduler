@@ -13,6 +13,9 @@ export class EmployeeScheduleDayComponent {
   private _month: Date = new Date();
   @Input() 
   public set workday(wd: Workday) {
+    if (!wd) {
+      wd = new Workday();
+    }
     this._workday = wd;
     this.setDateClass();
     this.setWorkdayStyle();
@@ -37,7 +40,7 @@ export class EmployeeScheduleDayComponent {
 
   setDateClass() {
     const today = new Date();
-    if (this.workday.date) {
+    if (this.workday && this.workday.date) {
       if (today.getFullYear() === this.workday.date.getFullYear() 
         && today.getMonth() === this.workday.date.getMonth()
         && today.getDate() === this.workday.date.getDate()) {
@@ -54,7 +57,7 @@ export class EmployeeScheduleDayComponent {
   }
 
   setWorkdayStyle() {
-    if (this.workday.code !== "") {
+    if (this.workday && this.workday.code !== "") {
       // find the workcode setting from the team
       const team = this.teamService.getTeam()
       if (team) {
@@ -72,7 +75,7 @@ export class EmployeeScheduleDayComponent {
           }
         }
       }
-    } else if (this.workday.date?.getMonth() !== this.month.getMonth()) {
+    } else if (this.workday?.date?.getMonth() !== this.month.getMonth()) {
       this.workdayStyle = 'background-color: #C0C0C0;color:#000000;';
     } else {
       this.workdayStyle = 'background-color: #FFFFFF;color:#000000;';

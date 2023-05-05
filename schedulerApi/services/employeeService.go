@@ -180,7 +180,39 @@ func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 	if err = cursor.All(context.TODO(), &employees); err != nil {
 		log.Println(err)
 	}
-	fmt.Println(len(employees))
+
+	for i, emp := range employees {
+		filter = bson.M{
+			"_id": emp.ID,
+		}
+		var user users.User
+		userCol.FindOne(context.TODO(), filter).Decode(&user)
+		emp.User = &user
+		employees[i] = emp
+	}
+
+	return employees, nil
+}
+
+func GetEmployeesForTeam(teamid string) ([]employees.Employee, error) {
+	empCol := config.GetCollection(config.DB, "scheduler", "employees")
+	userCol := config.GetCollection(config.DB, "authenticate", "users")
+
+	oTID, _ := primitive.ObjectIDFromHex(teamid)
+	filter := bson.M{
+		"team": oTID,
+	}
+
+	var employees []employees.Employee
+
+	cursor, err := empCol.Find(context.TODO(), filter)
+	if err != nil {
+		return employees[:0], err
+	}
+
+	if err = cursor.All(context.TODO(), &employees); err != nil {
+		log.Println(err)
+	}
 
 	for i, emp := range employees {
 		filter = bson.M{

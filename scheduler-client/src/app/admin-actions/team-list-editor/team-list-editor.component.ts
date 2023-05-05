@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ListItem } from 'src/app/generic/button-list/listitem';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { Team } from 'src/app/models/teams/team';
 import { TeamsResponse } from 'src/app/models/web/teamWeb';
 import { AuthService } from 'src/app/services/auth.service';
@@ -20,7 +22,8 @@ export class TeamListEditorComponent {
   constructor(
     protected authService: AuthService,
     protected dialogService: DialogService,
-    protected teamService: TeamService
+    protected teamService: TeamService,
+    protected dialog: MatDialog
   ) { 
     this.getTeams();
   }
@@ -42,10 +45,12 @@ export class TeamListEditorComponent {
     this.teamService.getTeams().subscribe({
       next: resp => {
         this.dialogService.closeSpinner();
+        this.authService.statusMessage = "Retrieval Complete";
         if (resp.headers.get('token') !== null) {
           this.authService.setToken(resp.headers.get('token') as string);
         }
         const data: TeamsResponse | null = resp.body;
+        this.teams = [];
         if (data && data != null && data.teams) {
           data.teams.forEach(tm => {
             this.teams.push(new Team(tm));
@@ -96,5 +101,43 @@ export class TeamListEditorComponent {
         }
       });
     }
+  }
+
+  onDelete() {
+    const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+      data: {title: 'Confirm Team Deletion', 
+      message: 'Are you sure you want to delete selected team, along '
+        + 'with all associated employees?'},
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'yes') {
+        this.authService.statusMessage = "Deleting Team";
+        this.dialogService.showSpinner();
+        this.teamService.deleteTeam(this.selected).subscribe({
+          next: resp => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = "Deletion Complete";
+            this.selected = 'new';
+            if (resp.headers.get('token') !== null) {
+              this.authService.setToken(resp.headers.get('token') as string);
+            }
+            const data: TeamsResponse | null = resp.body;
+            this.teams = [];
+            if (data && data != null && data.teams) {
+              data.teams.forEach(tm => {
+                this.teams.push(new Team(tm));
+              });
+              this.teams.sort((a,b) => a.compareTo(b));
+              this.setTeamsList();
+            }
+          },
+          error: err => {
+            this.dialogService.closeSpinner();
+            this.authService.statusMessage = err.message;
+          }
+        });
+      }
+    });
   }
 }

@@ -18,7 +18,7 @@ import (
 // teams.
 
 // CRUD Create function
-func CreateTeam(name string) *sites.Team {
+func CreateTeam(name string, useCodes bool) *sites.Team {
 	teamCol := config.GetCollection(config.DB, "scheduler", "teams")
 
 	filter := bson.M{
@@ -34,40 +34,42 @@ func CreateTeam(name string) *sites.Team {
 			Name: name,
 		}
 
-		// get initial work codes from json file
-		var initialTeam sites.Team
-		jsonFile, err := os.Open("initial.json")
-		if err != nil {
-			log.Println(err)
-		}
-
-		log.Println("Opened Initial Data JSON File")
-		defer jsonFile.Close()
-
-		// read all the data of the jsonFile into a byteArray
-		byteArray, err := ioutil.ReadAll(jsonFile)
-		if err != nil {
-			log.Println(err)
-		}
-		jsonString := string(byteArray)
-
-		// unmarshall the json data into the team object
-		err = json.Unmarshal([]byte(jsonString), &initialTeam)
-		if err != nil {
-			log.Println(err)
-		}
-
-		for _, wc := range initialTeam.Workcodes {
-			nwc := sites.Workcode{
-				Id:        wc.Id,
-				Title:     wc.Title,
-				StartTime: wc.StartTime,
-				ShiftCode: wc.ShiftCode,
-				IsLeave:   wc.IsLeave,
-				TextColor: wc.TextColor,
-				BackColor: wc.BackColor,
+		if useCodes {
+			// get initial work codes from json file
+			var initialTeam sites.Team
+			jsonFile, err := os.Open("initial.json")
+			if err != nil {
+				log.Println(err)
 			}
-			team.Workcodes = append(team.Workcodes, nwc)
+
+			log.Println("Opened Initial Data JSON File")
+			defer jsonFile.Close()
+
+			// read all the data of the jsonFile into a byteArray
+			byteArray, err := ioutil.ReadAll(jsonFile)
+			if err != nil {
+				log.Println(err)
+			}
+			jsonString := string(byteArray)
+
+			// unmarshall the json data into the team object
+			err = json.Unmarshal([]byte(jsonString), &initialTeam)
+			if err != nil {
+				log.Println(err)
+			}
+
+			for _, wc := range initialTeam.Workcodes {
+				nwc := sites.Workcode{
+					Id:        wc.Id,
+					Title:     wc.Title,
+					StartTime: wc.StartTime,
+					ShiftCode: wc.ShiftCode,
+					IsLeave:   wc.IsLeave,
+					TextColor: wc.TextColor,
+					BackColor: wc.BackColor,
+				}
+				team.Workcodes = append(team.Workcodes, nwc)
+			}
 		}
 		teamCol.InsertOne(context.TODO(), team)
 	}

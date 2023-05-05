@@ -7,11 +7,11 @@ import { SiteEmployeeComponent } from './site-employee/site-employee.component';
 import { NewSiteComponent } from './site/new-site/new-site.component';
 import { SiteComponent } from './site/site.component';
 import { TeamSiteEditorComponent } from './team/team-site-editor/team-site-editor.component';
-import { TeamSiteEmployeeEditorComponent } from './team/team-site-employee-editor/team-site-employee-editor.component';
-import { EditorComponent } from './team/editor/editor.component';
 import { SiteEmployeeLeaveRequestApproverComponent } from './site-employee/site-employee-leave-request-approver/site-employee-leave-request-approver.component';
 import { FileIngestComponent } from './site-ingest/file-ingest/file-ingest.component';
 import { TeamListEditorComponent } from './admin-actions/team-list-editor/team-list-editor.component';
+import { TeamComponent } from './team/team.component';
+import { DataPurgeComponent } from './admin-actions/data-purge/data-purge.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -31,8 +31,9 @@ const routes: Routes = [
   { path: 'siteeditor', component: SiteComponent},
   { path: 'ingest/files', component: FileIngestComponent },
   { path: 'team/siteeditor', component: TeamSiteEditorComponent},
-  { path: 'team/editor', component: EditorComponent },
+  { path: 'team/editor', component: TeamComponent },
   { path: 'admin/teams', component: TeamListEditorComponent },
+  { path: 'admin/purge', component: DataPurgeComponent },
   { path: '**', component: NotFoundComponent}
 ];
 

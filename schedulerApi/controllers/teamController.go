@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/erneap/scheduler/schedulerApi/models/employees"
 	"github.com/erneap/scheduler/schedulerApi/models/sites"
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
@@ -65,7 +66,22 @@ func CreateTeam(c *gin.Context) {
 		}
 	}
 
-	team := services.CreateTeam(data.Name)
+	team := services.CreateTeam(data.Name, data.UseStdWorkcodes)
+
+	// add team leader from data provided
+	emp := employees.Employee{
+		TeamID: team.ID,
+		SiteID: "leads",
+		Email:  data.Leader.EmailAddress,
+		Name: employees.EmployeeName{
+			FirstName:  data.Leader.FirstName,
+			MiddleName: data.Leader.MiddleName,
+			LastName:   data.Leader.LastName,
+		},
+	}
+	emp.AddAssignment("leads", "leads", time.Now().UTC())
+	services.CreateEmployee(emp, data.Leader.Password, "scheduler-teamleader",
+		team.ID.Hex(), "leads")
 
 	c.JSON(http.StatusOK, web.SiteResponse{Team: team, Site: nil, Exception: ""})
 }
@@ -106,17 +122,35 @@ func DeleteTeam(c *gin.Context) {
 
 	tID, err := primitive.ObjectIDFromHex(teamID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+		c.JSON(http.StatusBadRequest, web.TeamsResponse{Teams: nil,
 			Exception: err.Error()})
+	}
+
+	// get list of employees that are assigned to the team
+	employees, err := services.GetEmployeesForTeam(teamID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.TeamsResponse{Teams: nil,
+			Exception: err.Error()})
+	}
+
+	for _, emp := range employees {
+		services.DeleteEmployee(emp.ID.Hex())
+		services.DeleteUser(emp.ID)
 	}
 
 	err = services.DeleteTeam(tID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+		c.JSON(http.StatusBadRequest, web.TeamsResponse{Teams: nil,
 			Exception: err.Error()})
 	}
 
-	c.Status(http.StatusOK)
+	teams, err := services.GetTeams()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.TeamsResponse{Teams: nil,
+			Exception: err.Error()})
+	}
+
+	c.JSON(http.StatusOK, web.TeamsResponse{Teams: teams, Exception: ""})
 }
 
 func CreateWorkcode(c *gin.Context) {

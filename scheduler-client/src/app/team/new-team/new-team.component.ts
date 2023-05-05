@@ -27,13 +27,12 @@ export class NewTeamComponent {
     private fb: FormBuilder
   ) {
     this.teamForm = this.fb.group({
-      id: ['', [Validators.required]],
       name: ['', [Validators.required]],
       workcodes: true,
       
     });
     this.leadForm = this.fb.group({
-      leaderEmail: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email]],
       first: ['', [Validators.required]],
       middle: '',
       last: ['', [Validators.required]],
@@ -85,7 +84,7 @@ export class NewTeamComponent {
       }
       this.authService.statusMessage = "Adding New Team";
       this.dialogService.showSpinner();
-      this.teamService.addTeam(this.teamForm.value.id, this.teamForm.value.name,
+      this.teamService.addTeam(this.teamForm.value.name,
         this.teamForm.value.workcodes, lead).subscribe({
           next: resp => {
             this.dialogService.closeSpinner();

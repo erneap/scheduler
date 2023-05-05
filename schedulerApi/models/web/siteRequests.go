@@ -101,7 +101,9 @@ type UpdateSiteForecast struct {
 }
 
 type CreateTeamRequest struct {
-	Name string `json:"name"`
+	Name            string     `json:"name"`
+	UseStdWorkcodes bool       `json:"useStdWorkcodes"`
+	Leader          users.User `json:"leader"`
 }
 
 type UpdateTeamRequest struct {

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ITeam, Team } from 'src/app/models/teams/team';
 import { SiteResponse } from 'src/app/models/web/siteWeb';
@@ -8,7 +8,7 @@ import { SiteService } from 'src/app/services/site.service';
 import { TeamService } from 'src/app/services/team.service';
 
 @Component({
-  selector: 'app-editor',
+  selector: 'app-team-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.scss']
 })
@@ -22,6 +22,7 @@ export class EditorComponent {
   get team(): Team {
     return this._team;
   }
+  @Output() changed = new EventEmitter<Team>();
   teamForm: FormGroup;
 
   constructor(
@@ -54,13 +55,17 @@ export class EditorComponent {
         const data: SiteResponse | null = resp.body;
         if (data && data != null && data.team) {
           this.team = data.team;
-          this.teamService.setTeam(data.team);
-          const iSite = this.siteService.getSite();
-          if (iSite) {
-            this.authService.setWebLabel(this.team.name, iSite.name);
-          } else {
-            this.authService.setWebLabel(this.team.name, '');
+          const iTeam = this.teamService.getTeam();
+          if (iTeam && data.team.id === iTeam.id) {
+            this.teamService.setTeam(data.team);
+            const iSite = this.siteService.getSite();
+            if (iSite) {
+              this.authService.setWebLabel(this.team.name, iSite.name);
+            } else {
+              this.authService.setWebLabel(this.team.name, '');
+            }
           }
+          this.changed.emit(new Team(data.team));
         }
       },
       error: err => {

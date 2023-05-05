@@ -166,9 +166,11 @@ func (e *Employee) AddAssignment(site, wkctr string, start time.Time) {
 	// set the current highest or last end date to one day before
 	// this assignment start date
 	sort.Sort(ByAssignment(e.Data.Assignments))
-	lastAsgmt := e.Data.Assignments[len(e.Data.Assignments)-1]
-	lastAsgmt.EndDate = start.AddDate(0, 0, -1)
-	e.Data.Assignments[len(e.Data.Assignments)-1] = lastAsgmt
+	if len(e.Data.Assignments) > 0 {
+		lastAsgmt := e.Data.Assignments[len(e.Data.Assignments)-1]
+		lastAsgmt.EndDate = start.AddDate(0, 0, -1)
+		e.Data.Assignments[len(e.Data.Assignments)-1] = lastAsgmt
+	}
 
 	// create the new assignment
 	newAsgmt := Assignment{

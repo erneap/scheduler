@@ -29,52 +29,35 @@
         style="height: 20px;">Mids Listing</a>
     </mat-nav-list>
   </mat-expansion-panel>
-  <mat-expansion-panel  expanded="true"
+  <mat-expansion-panel 
     *ngIf="this.authService.isScheduler || this.authService.isSiteLeader">
     <mat-expansion-panel-header>
-      <mat-panel-title>Site Editing</mat-panel-title>
+      <mat-panel-title>Editing</mat-panel-title>
     </mat-expansion-panel-header>
     <mat-nav-list>
       <a mat-list-item routerLink="/siteemployees"
+        *ngIf="this.authService.isScheduler || this.authService.isSiteLeader"
       style="height: 20px;">Employee Editor</a>
       <a mat-list-item routerLink="/siteleaveapprover"
+      *ngIf="this.authService.isScheduler || this.authService.isSiteLeader"
       style="height: 20px;">Leave Approval</a>
       <a mat-list-item routerLink="/siteeditor"
+      *ngIf="this.authService.isScheduler || this.authService.isSiteLeader"
       style="height: 20px;">Site Editor</a>
-    </mat-nav-list>
-  </mat-expansion-panel>
-  <mat-expansion-panel  expanded="true"
-    *ngIf="this.authService.isAdmin || authService.isTeamLeader">
-    <mat-expansion-panel-header>
-      <mat-panel-title>Team Editing</mat-panel-title>
-    </mat-expansion-panel-header>
-    <mat-nav-list>
+      <a mat-list-item routerLink="ingest/files"
+      *ngIf="this.authService.isScheduler || this.authService.isSiteLeader"
+      style="height: 20px;">Timecard Ingest/Entry</a>
       <a mat-list-item routerLink="/team/siteeditor"
+      *ngIf="this.authService.isAdmin || this.authService.isTeamLeader"
       style="height: 20px;">Team Sites Editor</a>
       <a mat-list-item routerLink="/team/editor"
+      *ngIf="this.authService.isAdmin || this.authService.isTeamLeader"
       style="height: 20px;">Team Editor</a>
-    </mat-nav-list>
-  </mat-expansion-panel>
-  <mat-expansion-panel 
-    *ngIf="this.authService.isScheduler || this.authService.isSiteLeader || this.authService.isCompanyLead"
-    >
-    <mat-expansion-panel-header>
-      <mat-panel-title>Data Ingest</mat-panel-title>
-    </mat-expansion-panel-header>
-    <mat-nav-list>
-      <a mat-list-item routerLink="ingest/files"
-      style="height: 20px;">Timecard Ingest/Entry</a>
-    </mat-nav-list>
-  </mat-expansion-panel>
-  <mat-expansion-panel 
-    *ngIf="this.authService.isAdmin">
-    <mat-expansion-panel-header>
-      <mat-panel-title>Administrator Actions</mat-panel-title>
-    </mat-expansion-panel-header>
-    <mat-nav-list>
       <a mat-list-item routerLink="admin/teams"
+      *ngIf="this.authService.isAdmin"
       style="height: 20px;">Teams Editor</a>
-      <a mat-list-item
+      <a mat-list-item routerLink="admin/purge"
+      *ngIf="this.authService.isAdmin"
       style="height: 20px;">Data Purge</a>
     </mat-nav-list>
   </mat-expansion-panel>

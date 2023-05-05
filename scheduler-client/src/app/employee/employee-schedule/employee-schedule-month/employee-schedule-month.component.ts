@@ -24,6 +24,7 @@ export class EmployeeScheduleMonthComponent {
   constructor(
     protected employeeService: EmployeeService,
   ) {
+    this.month = new Date();
     this.month = new Date(this.month.getFullYear(), this.month.getMonth(), 1);
     this.setMonth();
   }
@@ -59,7 +60,13 @@ export class EmployeeScheduleMonthComponent {
         this.workweeks.push(workweek);
       }
       if (emp) {
-        const wd = emp.data.getWorkday(emp.site, start);
+        let wd = emp.data.getWorkday(emp.site, start);
+        if (!wd) {
+          wd = new Workday();
+          wd.date = new Date(start);
+        } else if (wd.id === 0) {
+          wd.id = start.getDay();
+        }
         workweek.setWorkday(wd, start)
       } else {
         const wd = new Workday();

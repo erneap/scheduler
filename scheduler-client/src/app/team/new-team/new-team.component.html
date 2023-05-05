@@ -20,14 +20,6 @@
                 <form [formGroup]="teamForm">
                   <div class="fxLayout-row-center">
                     <mat-form-field class="formField">
-                      <mat-label>Team Identifier</mat-label>
-                      <input matInput formControlName="id">
-                      <mat-error *ngIf="this.teamForm.get('id')?.hasError('required')"
-                        class="error">Required</mat-error>
-                      <mat-error *ngIf="this.teamForm.get('id')?.hasError('pattern')"
-                        class="error">Only lower case letters and numbers allowed</mat-error>
-                    </mat-form-field>
-                    <mat-form-field class="formField">
                       <mat-label>Team Name</mat-label>
                       <input matInput formControlName="name">
                       <mat-error *ngIf="this.teamForm.get('name')?.hasError('required')"
@@ -114,6 +106,7 @@
             <button mat-raised-button color="accent"
               *ngIf="this.teamForm.valid && this.leadForm.valid"
               matTooltip="Add Team"
+              (click)="addTeam()"
               >Add</button>
           </div>
       </mat-card-content>

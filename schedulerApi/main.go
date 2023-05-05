@@ -172,6 +172,7 @@ func main() {
 			middleware.CheckRole("scheduler", "admin"))
 		{
 			admin.GET("/teams", controllers.GetTeams)
+			admin.DELETE("/teams/:teamid", controllers.DeleteTeam)
 		}
 	}
 

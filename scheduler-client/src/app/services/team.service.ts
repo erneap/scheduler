@@ -54,11 +54,10 @@ export class TeamService extends CacheService {
     return this.httpClient.get<SiteResponse>(url, {observe: 'response'});
   }
 
-  addTeam(id: string, title: string, workcodes: boolean, leader: IUser): 
+  addTeam(title: string, workcodes: boolean, leader: IUser): 
     Observable<HttpResponse<SiteResponse>> {
     const url = '/scheduler/api/v1/team';
     const data: CreateTeamRequest = {
-      id: id,
       name: title,
       useStdWorkcodes: workcodes,
       leader: leader,
@@ -73,6 +72,11 @@ export class TeamService extends CacheService {
       value: name,
     }
     return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  deleteTeam(teamid: string): Observable<HttpResponse<TeamsResponse>> {
+    const url = `/scheduler/api/v1/admin/teams/${teamid}`;
+    return this.httpClient.delete<TeamsResponse>(url, {observe: 'response'});
   }
 
   addTeamWorkcode(team: string, workcode: string, title: string, start: number,

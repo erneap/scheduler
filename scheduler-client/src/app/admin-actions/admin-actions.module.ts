@@ -4,10 +4,12 @@ import { MaterialModule } from '../material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TeamListEditorComponent } from './team-list-editor/team-list-editor.component';
 import { TeamModule } from '../team/team.module';
+import { DataPurgeComponent } from './data-purge/data-purge.component';
 
 @NgModule({
   declarations: [
-    TeamListEditorComponent
+    TeamListEditorComponent,
+    DataPurgeComponent
   ],
   imports: [
     CommonModule,
