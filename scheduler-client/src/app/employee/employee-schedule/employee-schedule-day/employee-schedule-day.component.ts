@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { IWorkday, Workday } from 'src/app/models/employees/assignments';
+import { Workcenter } from 'src/app/models/sites/workcenter';
 import { Workcode } from 'src/app/models/teams/workcode';
 import { TeamService } from 'src/app/services/team.service';
 
@@ -33,6 +34,7 @@ export class EmployeeScheduleDayComponent {
   get month(): Date {
     return this._month;
   }
+  @Input() workcenters: Workcenter[] = [];
 
   constructor(
     protected teamService: TeamService,
@@ -80,5 +82,18 @@ export class EmployeeScheduleDayComponent {
     } else {
       this.workdayStyle = 'background-color: #FFFFFF;color:#000000;';
     }
+  }
+
+  getWorkcenter(): string {
+    if (this.workday) {
+      let answer = '';
+      this.workcenters.forEach(wc => {
+        if (this.workday.workcenter === wc.id) {
+          answer = wc.name;
+        }
+      });
+      return answer;
+    }
+    return '';
   }
 }

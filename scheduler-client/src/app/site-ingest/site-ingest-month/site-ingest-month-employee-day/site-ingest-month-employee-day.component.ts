@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { Workcode } from 'src/app/models/teams/workcode';
 import { IngestManualChange } from 'src/app/models/web/internalWeb';
+import { IngestChange } from 'src/app/models/web/siteWeb';
 
 @Component({
   selector: 'app-site-ingest-month-employee-day',
@@ -13,6 +14,7 @@ export class SiteIngestMonthEmployeeDayComponent {
   private _employee: Employee = new Employee();
   private _date: Date = new Date();
   private _ingestType: string = 'manual';
+  private _currentValue: string = '';
   @Input() 
   public set employee(iEmp: IEmployee) {
     this._employee = new Employee(iEmp);
@@ -45,26 +47,37 @@ export class SiteIngestMonthEmployeeDayComponent {
   ) {
     this.dayForm = this.fb.group({
       changevalue: ['', [Validators.required]],
-    })
+    });
   }
 
   setInputValue() {
     this.dayForm.controls["changevalue"].setValue(
       this.employee.getIngestValue(this.date));
+    this._currentValue = this.employee.getIngestValue(this.date);
   }
 
   getDisplayValue(): string {
     return this.employee.getIngestValue(this.date);
   }
 
+  getDisplayStyle(): string {
+    let answer = 'color: black;';
+    this.leavecodes.forEach(lc => {
+      if (lc.id.toLowerCase() === this._currentValue.toLowerCase()) {
+        answer = `background-color: #${lc.backcolor};color: #${lc.textcolor};`;
+      }
+    });
+    return answer;
+  }
+
   onChange() {
     const numRe = new RegExp("^[0-9]{1,2}(\.[0-9])?$");
     const value = this.dayForm.value.changevalue;
-    if (numRe.test(value)) {
+    if (numRe.test(value) && value !== this._currentValue) {
       this.changed.emit(new IngestManualChange(this.employee.id, this.date, value));
-    } else if (value.trim() === '') {
+    } else if (value.trim() === '' && value !== this._currentValue) {
       this.changed.emit(new IngestManualChange(this.employee.id, this.date, '0'));
-    } else {
+    } else if (!numRe.test(value) && value.trim() !== '') {
       let found = false;
       this.leavecodes.forEach(wc => {
         if (wc.id === value) {

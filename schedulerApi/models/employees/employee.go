@@ -707,3 +707,30 @@ func (e *Employee) DeleteLeavesBetweenDates(start, end time.Time) {
 		}
 	}
 }
+
+func (e *Employee) GetAssignment(start, end time.Time) (string, string) {
+	assigned := make(map[string]int)
+	current := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0,
+		time.UTC)
+	for current.Before(end) {
+		wd := e.GetWorkday(current, 0.0)
+		label := wd.Workcenter + "-" + wd.Code
+		val, ok := assigned[label]
+		if ok {
+			assigned[label] = val + 1
+		} else {
+			assigned[label] = 1
+		}
+		current = current.AddDate(0, 0, 1)
+	}
+	max := 0
+	answer := ""
+	for k, v := range assigned {
+		if v > max {
+			answer = k
+			max = v
+		}
+	}
+	parts := strings.Split(answer, "-")
+	return parts[0], parts[1]
+}

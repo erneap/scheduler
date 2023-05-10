@@ -289,6 +289,7 @@ func ManualIngestActions(c *gin.Context) {
 				if parts[0] == "update" || parts[0] == "add" {
 					work.Work = append(work.Work, *change.Work)
 				}
+
 				services.CreateEmployeeWork(work)
 			}
 		} else if parts[1] == "leave" {

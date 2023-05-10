@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Workday } from 'src/app/models/employees/assignments';
+import { Workcenter } from 'src/app/models/sites/workcenter';
 import { WorkWeek } from 'src/app/models/web/internalWeb';
 import { EmployeeService } from 'src/app/services/employee.service';
 
@@ -9,6 +10,7 @@ import { EmployeeService } from 'src/app/services/employee.service';
   styleUrls: ['./employee-schedule-month.component.scss']
 })
 export class EmployeeScheduleMonthComponent {
+  @Input() workcenters: Workcenter[] = [];
   months: string[] = new Array("January", "Febuary", "March", "April", "May",
     "June", "July", "August", "September", "October", "November", "December");
 

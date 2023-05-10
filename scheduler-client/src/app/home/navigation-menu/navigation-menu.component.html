@@ -30,7 +30,7 @@
     </mat-nav-list>
   </mat-expansion-panel>
   <mat-expansion-panel 
-    *ngIf="this.authService.isScheduler || this.authService.isSiteLeader">
+    *ngIf="authService.isScheduler || authService.isSiteLeader || authService.isCompanyLead">
     <mat-expansion-panel-header>
       <mat-panel-title>Editing</mat-panel-title>
     </mat-expansion-panel-header>
@@ -45,7 +45,7 @@
       *ngIf="this.authService.isScheduler || this.authService.isSiteLeader"
       style="height: 20px;">Site Editor</a>
       <a mat-list-item routerLink="ingest/files"
-      *ngIf="this.authService.isScheduler || this.authService.isSiteLeader"
+      *ngIf="authService.isScheduler || authService.isSiteLeader || authService.isCompanyLead"
       style="height: 20px;">Timecard Ingest/Entry</a>
       <a mat-list-item routerLink="/team/siteeditor"
       *ngIf="this.authService.isAdmin || this.authService.isTeamLeader"

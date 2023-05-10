@@ -1,12 +1,15 @@
 package sites
 
+import "github.com/erneap/scheduler/schedulerApi/models/employees"
+
 type Shift struct {
-	ID              string   `json:"id" bson:"id"`
-	Name            string   `json:"name" bson:"name"`
-	SortID          uint     `json:"sort" bson:"sort"`
-	AssociatedCodes []string `json:"associatedCodes,omitempty" bson:"associatedCodes,omitempty"`
-	PayCode         uint     `json:"payCode" bson:"payCode"`
-	Minimums        uint     `json:"minimums" bson:"minimums"`
+	ID              string                `json:"id" bson:"id"`
+	Name            string                `json:"name" bson:"name"`
+	SortID          uint                  `json:"sort" bson:"sort"`
+	AssociatedCodes []string              `json:"associatedCodes,omitempty" bson:"associatedCodes,omitempty"`
+	PayCode         uint                  `json:"payCode" bson:"payCode"`
+	Minimums        uint                  `json:"minimums" bson:"minimums"`
+	Employees       []*employees.Employee `json:"-" bson:"_"`
 }
 
 type ByShift []Shift
@@ -18,10 +21,11 @@ func (c ByShift) Less(i, j int) bool {
 func (c ByShift) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
 type Position struct {
-	ID       string   `json:"id" bson:"id"`
-	Name     string   `json:"name" bson:"name"`
-	SortID   uint     `json:"sort" bson:"sort"`
-	Assigned []string `json:"assigned" bson:"assigned"`
+	ID        string                `json:"id" bson:"id"`
+	Name      string                `json:"name" bson:"name"`
+	SortID    uint                  `json:"sort" bson:"sort"`
+	Assigned  []string              `json:"assigned" bson:"assigned"`
+	Employees []*employees.Employee `json:"-" bson:"_"`
 }
 
 type ByPosition []Position
