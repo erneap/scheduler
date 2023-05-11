@@ -2,6 +2,8 @@ package reports
 
 import (
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/erneap/scheduler/schedulerApi/models/employees"
@@ -46,9 +48,7 @@ func (sr *ScheduleReport) Create() (*excelize.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, wc := range site.Workcenters {
-		sr.Workcenters = append(sr.Workcenters, wc)
-	}
+	sr.Workcenters = append(sr.Workcenters, site.Workcenters...)
 	sort.Sort(sites.ByWorkcenter(sr.Workcenters))
 
 	// create styles for display on each monthly sheet
@@ -59,7 +59,10 @@ func (sr *ScheduleReport) Create() (*excelize.File, error) {
 
 	// create monthly schedule for each month of the year
 	for i := 0; i < 12; i++ {
-
+		err = sr.AddMonth(i)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return sr.Report, nil
@@ -92,7 +95,7 @@ func (sr *ScheduleReport) CreateStyles() error {
 			return err
 		}
 		sr.Styles[wc.Id] = style
-		sr.Workcodes[wc.Id] = wc.IsLeave
+		sr.Workcodes[wc.Id] = strings.EqualFold(wc.BackColor, "FFFFFF")
 	}
 
 	style, err := sr.Report.NewStyle(&excelize.Style{
@@ -136,6 +139,23 @@ func (sr *ScheduleReport) CreateStyles() error {
 			{Type: "right", Color: "000000", Style: 1},
 			{Type: "bottom", Color: "000000", Style: 1},
 		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"00E6E6"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 11, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	sr.Styles["evenend"] = style
+
+	style, err = sr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
 		Fill: excelize.Fill{Type: "pattern", Color: []string{"FFFFFF"}, Pattern: 1},
 		Font: &excelize.Font{Bold: true, Size: 11, Color: "000000"},
 		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
@@ -162,7 +182,41 @@ func (sr *ScheduleReport) CreateStyles() error {
 		return err
 	}
 	sr.Styles["month"] = style
+
+	style, err = sr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"000000"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 11, Color: "FFFFFF"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	sr.Styles["workcenter"] = style
 	return nil
+}
+
+func GetColumn(index int) string {
+	answer := ""
+	letters := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	if index > 26 {
+		answer = letters[index : index+1]
+	} else {
+		div := int(index/26) - 1
+		rem := index % 26
+		answer = letters[div:div+1] + letters[rem:rem+1]
+	}
+	return answer
+}
+
+func GetCellID(col, row int) string {
+	return GetColumn(col) + strconv.Itoa(row)
 }
 
 func (sr *ScheduleReport) AddMonth(monthID int) error {
@@ -188,7 +242,7 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 					for _, asgn := range pos.Assigned {
 						if emp.ID.Hex() == asgn {
 							position = true
-							pos.Employees = append(pos.Employees, emp)
+							pos.Employees = append(pos.Employees, *emp)
 						}
 					}
 					if position {
@@ -203,7 +257,7 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 					if wc.ID == wkctr {
 						for s, sft := range wc.Shifts {
 							if sft.ID == shift {
-								sft.Employees = append(sft.Employees, emp)
+								sft.Employees = append(sft.Employees, *emp)
 								wc.Shifts[s] = sft
 								sr.Workcenters[w] = wc
 							}
@@ -222,6 +276,120 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 	sr.Report.SetSheetView(sheetLabel, 0, &options)
 
 	// set all the column widths
+	sr.Report.SetColWidth(sheetLabel, "A", "A", 17.0)
+	endOfMonth := endDate.AddDate(0, 0, -1)
+	endColumn := "AE"
+	switch endOfMonth.Day() {
+	case 28:
+		endColumn = "AC"
+	case 29:
+		endColumn = "AD"
+	case 31:
+		endColumn = "AF"
+	default:
+		endColumn = "AE"
+	}
+	sr.Report.SetColWidth(sheetLabel, "B", endColumn, 2.37)
 
+	// monthly headers to include month label and days of the month
+	style := sr.Styles["month"]
+	sr.Report.SetCellStyle(sheetLabel, GetCellID(0, 1), GetCellID(0, 1), style)
+	sr.Report.SetCellValue(sheetLabel, GetCellID(0, 1), startDate.Format("January"))
+
+	style = sr.Styles["weekday"]
+	sr.Report.SetCellStyle(sheetLabel, GetCellID(0, 2), GetCellID(0, 2), style)
+	sr.Report.SetCellValue(sheetLabel, GetCellID(0, 2), startDate.Format("01/02/2006"))
+
+	current := time.Date(sr.Year, time.Month(monthID), 1, 0, 0, 0, 0, time.UTC)
+	for current.Before(endDate) {
+		styleID := "weekday"
+		if current.Weekday() == time.Saturday || current.Weekday() == time.Sunday {
+			styleID = "weekend"
+		}
+		style = sr.Styles[styleID]
+		sr.Report.SetCellStyle(sheetLabel, GetCellID(current.Day(), 1),
+			GetCellID(current.Day(), 2), style)
+		weekday := current.Format("Mon")
+		sr.Report.SetCellValue(sheetLabel, GetCellID(current.Day(), 1), weekday[0:2])
+		sr.Report.SetCellValue(sheetLabel, GetCellID(current.Day(), 2),
+			strconv.Itoa(current.Day()))
+		current = current.AddDate(0, 0, 1)
+	}
+
+	row := 2
+	for _, wc := range sr.Workcenters {
+		row++
+		style = sr.Styles["workcenter"]
+		sr.Report.SetCellStyle(sheetLabel, GetCellID(0, row),
+			endColumn+strconv.Itoa(row), style)
+		sr.Report.MergeCell(sheetLabel, GetCellID(0, row),
+			endColumn+strconv.Itoa(row))
+		sr.Report.SetCellValue(sheetLabel, GetCellID(0, row), wc.Name)
+		sort.Sort(sites.ByPosition(wc.Positions))
+		sort.Sort(sites.ByShift(wc.Shifts))
+		for _, pos := range wc.Positions {
+			sort.Sort(employees.ByEmployees(pos.Employees))
+			for _, emp := range pos.Employees {
+				row++
+				sr.CreateEmployeeRow(sheetLabel, startDate, endDate, row, &emp)
+			}
+		}
+		for _, sft := range wc.Shifts {
+			sort.Sort(employees.ByEmployees(sft.Employees))
+			for _, emp := range sft.Employees {
+				row++
+				sr.CreateEmployeeRow(sheetLabel, startDate, endDate, row, &emp)
+			}
+		}
+	}
+	printrange := "$A$1:$" + endColumn + "$" + strconv.Itoa(row)
+	if err := sr.Report.SetDefinedName(&excelize.DefinedName{
+		Name:     "_xlnm.Print_Area",
+		RefersTo: sheetLabel + "!" + printrange,
+		Scope:    sheetLabel,
+	}); err != nil {
+		return err
+	}
 	return nil
+}
+
+func (sr *ScheduleReport) CreateEmployeeRow(sheetLabel string,
+	start, end time.Time, row int, emp *employees.Employee) {
+	styleID := "weekday"
+	if row%2 == 0 {
+		styleID = "evenday"
+	}
+	style := sr.Styles[styleID]
+	sr.Report.SetCellStyle(sheetLabel, GetCellID(0, row), GetCellID(0, row), style)
+	sr.Report.SetCellValue(sheetLabel, GetCellID(0, row),
+		emp.Name.LastName+", "+emp.Name.FirstName[0:1])
+
+	current := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0,
+		time.UTC)
+	for current.Before(end) {
+		wd := emp.GetWorkday(current, 0)
+		styleID = "weekday"
+		if wd.Code != "" {
+			if !sr.Workcodes[wd.Code] {
+				styleID = wd.Code
+			}
+		}
+		if styleID == "weekday" {
+			if current.Weekday() == time.Saturday || current.Weekday() == time.Sunday {
+				if row%2 == 0 {
+					styleID = "evenend"
+				} else {
+					styleID = "weekend"
+				}
+			} else {
+				if row%2 == 0 {
+					styleID = "evenday"
+				}
+			}
+		}
+		style = sr.Styles[styleID]
+		cellID := GetCellID(current.Day(), row)
+		sr.Report.SetCellStyle(sheetLabel, cellID, cellID, style)
+		sr.Report.SetCellValue(sheetLabel, cellID, wd.Code)
+	}
 }
