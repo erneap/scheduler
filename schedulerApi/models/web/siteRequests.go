@@ -153,3 +153,12 @@ type ManualIngestChanges struct {
 	CompanyID string         `json:"companyid"`
 	Changes   []IngestChange `json:"changes"`
 }
+
+type ReportRequest struct {
+	ReportType string `json:"reportType"`
+	Period     string `json:"period,omitempty"`
+	SubReport  string `json:"subreport,omitempty"`
+	TeamID     string `json:"teamid"`
+	SiteID     string `json:"siteid"`
+	Password   string `json:"password,omitempty"`
+}

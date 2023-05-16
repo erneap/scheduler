@@ -103,7 +103,7 @@ func (e *Employee) AtSite(site string, start, end time.Time) bool {
 	answer := false
 	for _, asgmt := range e.Data.Assignments {
 		if strings.EqualFold(asgmt.Site, site) &&
-			asgmt.StartDate.After(end) && asgmt.EndDate.Before((start)) {
+			asgmt.StartDate.Before(end) && asgmt.EndDate.After((start)) {
 			answer = true
 		}
 	}
@@ -714,12 +714,14 @@ func (e *Employee) GetAssignment(start, end time.Time) (string, string) {
 		time.UTC)
 	for current.Before(end) {
 		wd := e.GetWorkday(current, 0.0)
-		label := wd.Workcenter + "-" + wd.Code
-		val, ok := assigned[label]
-		if ok {
-			assigned[label] = val + 1
-		} else {
-			assigned[label] = 1
+		if wd != nil {
+			label := wd.Workcenter + "-" + wd.Code
+			val, ok := assigned[label]
+			if ok {
+				assigned[label] = val + 1
+			} else {
+				assigned[label] = 1
+			}
 		}
 		current = current.AddDate(0, 0, 1)
 	}

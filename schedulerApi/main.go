@@ -174,6 +174,11 @@ func main() {
 			admin.GET("/teams", controllers.GetTeams)
 			admin.DELETE("/teams/:teamid", controllers.DeleteTeam)
 		}
+
+		reports := api.Group("/reports", middleware.CheckJWT())
+		{
+			reports.POST("/", controllers.CreateReport)
+		}
 	}
 
 	// listen on port 3000

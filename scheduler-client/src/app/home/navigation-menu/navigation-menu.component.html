@@ -61,4 +61,14 @@
       style="height: 20px;">Data Purge</a>
     </mat-nav-list>
   </mat-expansion-panel>
+  <mat-expansion-panel 
+    *ngIf="authService.isScheduler || authService.isSiteLeader || authService.isCompanyLead">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Reports</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/reports"
+        style="height: 20px;">Report Creator</a>
+    </mat-nav-list>
+  </mat-expansion-panel>
 </mat-accordion>

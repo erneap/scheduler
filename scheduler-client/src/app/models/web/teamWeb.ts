@@ -45,3 +45,12 @@ export interface TeamsResponse {
   teams: ITeam[];
   exception: string;
 }
+
+export interface ReportRequest {
+  reportType: string;
+  period?: string;
+  subreport?: string;
+  teamid: string;
+  siteid: string;
+  password?: string;
+}

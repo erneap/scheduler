@@ -26,6 +26,7 @@ import { DeletionConfirmationComponent } from './generic/deletion-confirmation/d
 import { TeamModule } from './team/team.module';
 import { SiteIngestModule } from './site-ingest/site-ingest.module';
 import { AdminActionsModule } from './admin-actions/admin-actions.module';
+import { ReportsModule } from './reports/reports.module';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,8 @@ import { AdminActionsModule } from './admin-actions/admin-actions.module';
     SiteIngestModule,
     GenericModule,
     TeamModule,
-    AdminActionsModule
+    AdminActionsModule,
+    ReportsModule
   ],
   exports: [
     DeletionConfirmationComponent

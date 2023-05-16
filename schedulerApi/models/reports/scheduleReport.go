@@ -21,12 +21,13 @@ type ScheduleReport struct {
 	Workcenters []sites.Workcenter
 	Workcodes   map[string]bool
 	Styles      map[string]int
-	Employees   []*employees.Employee
+	Employees   []employees.Employee
 }
 
-func (sr *ScheduleReport) Create() (*excelize.File, error) {
+func (sr *ScheduleReport) Create() error {
+	sr.Styles = make(map[string]int)
+	sr.Workcodes = make(map[string]bool)
 	sr.Report = excelize.NewFile()
-	sr.Year = time.Now().Year()
 
 	// get employees with assignments for the site that are assigned
 	// during the year.
@@ -34,19 +35,19 @@ func (sr *ScheduleReport) Create() (*excelize.File, error) {
 	endDate := time.Date(sr.Year, 12, 31, 23, 59, 59, 0, time.UTC)
 	emps, err := services.GetEmployeesForTeam(sr.TeamID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, emp := range emps {
 		if emp.AtSite(sr.SiteID, startDate, endDate) {
-			sr.Employees = append(sr.Employees, &emp)
+			sr.Employees = append(sr.Employees, emp)
 		}
 	}
 
 	// get the site's workcenters
 	site, err := services.GetSite(sr.TeamID, sr.SiteID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	sr.Workcenters = append(sr.Workcenters, site.Workcenters...)
 	sort.Sort(sites.ByWorkcenter(sr.Workcenters))
@@ -54,18 +55,18 @@ func (sr *ScheduleReport) Create() (*excelize.File, error) {
 	// create styles for display on each monthly sheet
 	err = sr.CreateStyles()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// create monthly schedule for each month of the year
 	for i := 0; i < 12; i++ {
-		err = sr.AddMonth(i)
+		err = sr.AddMonth(i + 1)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return sr.Report, nil
+	return nil
 }
 
 func (sr *ScheduleReport) CreateStyles() error {
@@ -205,7 +206,7 @@ func (sr *ScheduleReport) CreateStyles() error {
 func GetColumn(index int) string {
 	answer := ""
 	letters := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	if index > 26 {
+	if index < 26 {
 		answer = letters[index : index+1]
 	} else {
 		div := int(index/26) - 1
@@ -242,7 +243,7 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 					for _, asgn := range pos.Assigned {
 						if emp.ID.Hex() == asgn {
 							position = true
-							pos.Employees = append(pos.Employees, *emp)
+							pos.Employees = append(pos.Employees, emp)
 						}
 					}
 					if position {
@@ -254,10 +255,16 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 			if !position {
 				wkctr, shift := emp.GetAssignment(startDate, endDate)
 				for w, wc := range sr.Workcenters {
-					if wc.ID == wkctr {
+					if strings.EqualFold(wc.ID, wkctr) {
 						for s, sft := range wc.Shifts {
-							if sft.ID == shift {
-								sft.Employees = append(sft.Employees, *emp)
+							bShift := false
+							for _, code := range sft.AssociatedCodes {
+								if strings.EqualFold(code, shift) {
+									bShift = true
+								}
+							}
+							if bShift {
+								sft.Employees = append(sft.Employees, emp)
 								wc.Shifts[s] = sft
 								sr.Workcenters[w] = wc
 							}
@@ -289,7 +296,7 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 	default:
 		endColumn = "AE"
 	}
-	sr.Report.SetColWidth(sheetLabel, "B", endColumn, 2.37)
+	sr.Report.SetColWidth(sheetLabel, "B", endColumn, 3.5)
 
 	// monthly headers to include month label and days of the month
 	style := sr.Styles["month"]
@@ -368,8 +375,10 @@ func (sr *ScheduleReport) CreateEmployeeRow(sheetLabel string,
 		time.UTC)
 	for current.Before(end) {
 		wd := emp.GetWorkday(current, 0)
+		code := ""
 		styleID = "weekday"
-		if wd.Code != "" {
+		if wd != nil && wd.Code != "" {
+			code = wd.Code
 			if !sr.Workcodes[wd.Code] {
 				styleID = wd.Code
 			}
@@ -390,6 +399,7 @@ func (sr *ScheduleReport) CreateEmployeeRow(sheetLabel string,
 		style = sr.Styles[styleID]
 		cellID := GetCellID(current.Day(), row)
 		sr.Report.SetCellStyle(sheetLabel, cellID, cellID, style)
-		sr.Report.SetCellValue(sheetLabel, cellID, wd.Code)
+		sr.Report.SetCellValue(sheetLabel, cellID, code)
+		current = current.AddDate(0, 0, 1)
 	}
 }
