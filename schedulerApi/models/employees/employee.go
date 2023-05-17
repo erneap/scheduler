@@ -67,6 +67,13 @@ type EmployeeName struct {
 	Suffix     string `json:"suffix"`
 }
 
+func (en *EmployeeName) GetLastFirst() string {
+	if en.MiddleName != "" {
+		return en.LastName + ", " + en.FirstName + " " + en.MiddleName[0:1]
+	}
+	return en.LastName + ", " + en.FirstName
+}
+
 type EmployeeData struct {
 	CompanyInfo CompanyInfo         `json:"companyinfo"`
 	Assignments []Assignment        `json:"assignments,omitempty"`
@@ -111,6 +118,35 @@ func (e *Employee) AtSite(site string, start, end time.Time) bool {
 }
 
 func (e *Employee) GetWorkday(date time.Time, offset float64) *Workday {
+	var wkday *Workday = nil
+	var siteid string = ""
+	for _, asgmt := range e.Data.Assignments {
+		if (asgmt.StartDate.Before(date) || asgmt.StartDate.Equal(date)) &&
+			(asgmt.EndDate.After(date) || asgmt.EndDate.Equal(date)) {
+			siteid = asgmt.Site
+			wkday = asgmt.GetWorkday(date, offset)
+		}
+	}
+	for _, vari := range e.Data.Variations {
+		if (vari.StartDate.Before(date) || vari.StartDate.Equal(date)) &&
+			(vari.EndDate.After(date) || vari.EndDate.Equal(date)) {
+			wkday = vari.GetWorkday(siteid, date)
+		}
+	}
+	for _, lv := range e.Data.Leaves {
+		if lv.LeaveDate.Equal(date) {
+			wkday = &Workday{
+				ID:         uint(0),
+				Workcenter: "",
+				Code:       lv.Code,
+				Hours:      lv.Hours,
+			}
+		}
+	}
+	return wkday
+}
+
+func (e *Employee) GetWorkdayWOLeave(date time.Time, offset float64) *Workday {
 	var wkday *Workday = nil
 	var siteid string = ""
 	for _, asgmt := range e.Data.Assignments {
@@ -713,14 +749,16 @@ func (e *Employee) GetAssignment(start, end time.Time) (string, string) {
 	current := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0,
 		time.UTC)
 	for current.Before(end) {
-		wd := e.GetWorkday(current, 0.0)
+		wd := e.GetWorkdayWOLeave(current, 0.0)
 		if wd != nil {
 			label := wd.Workcenter + "-" + wd.Code
-			val, ok := assigned[label]
-			if ok {
-				assigned[label] = val + 1
-			} else {
-				assigned[label] = 1
+			if label != "-" {
+				val, ok := assigned[label]
+				if ok {
+					assigned[label] = val + 1
+				} else {
+					assigned[label] = 1
+				}
 			}
 		}
 		current = current.AddDate(0, 0, 1)
@@ -733,6 +771,9 @@ func (e *Employee) GetAssignment(start, end time.Time) (string, string) {
 			max = v
 		}
 	}
-	parts := strings.Split(answer, "-")
-	return parts[0], parts[1]
+	if answer != "" {
+		parts := strings.Split(answer, "-")
+		return parts[0], parts[1]
+	}
+	return "", ""
 }

@@ -66,6 +66,12 @@ func (sr *ScheduleReport) Create() error {
 		}
 	}
 
+	// add a leave legend sheet
+	sr.CreateLegendSheet()
+
+	// remove the provided sheet "Sheet1" from the workbook
+	sr.Report.DeleteSheet("Sheet1")
+
 	return nil
 }
 
@@ -300,6 +306,8 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 
 	// monthly headers to include month label and days of the month
 	style := sr.Styles["month"]
+	sr.Report.SetRowHeight(sheetLabel, 1, 20)
+	sr.Report.SetRowHeight(sheetLabel, 2, 20)
 	sr.Report.SetCellStyle(sheetLabel, GetCellID(0, 1), GetCellID(0, 1), style)
 	sr.Report.SetCellValue(sheetLabel, GetCellID(0, 1), startDate.Format("January"))
 
@@ -327,6 +335,7 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 	for _, wc := range sr.Workcenters {
 		row++
 		style = sr.Styles["workcenter"]
+		sr.Report.SetRowHeight(sheetLabel, row, 20)
 		sr.Report.SetCellStyle(sheetLabel, GetCellID(0, row),
 			endColumn+strconv.Itoa(row), style)
 		sr.Report.MergeCell(sheetLabel, GetCellID(0, row),
@@ -367,6 +376,7 @@ func (sr *ScheduleReport) CreateEmployeeRow(sheetLabel string,
 		styleID = "evenday"
 	}
 	style := sr.Styles[styleID]
+	sr.Report.SetRowHeight(sheetLabel, row, 20)
 	sr.Report.SetCellStyle(sheetLabel, GetCellID(0, row), GetCellID(0, row), style)
 	sr.Report.SetCellValue(sheetLabel, GetCellID(0, row),
 		emp.Name.LastName+", "+emp.Name.FirstName[0:1])
@@ -402,4 +412,31 @@ func (sr *ScheduleReport) CreateEmployeeRow(sheetLabel string,
 		sr.Report.SetCellValue(sheetLabel, cellID, code)
 		current = current.AddDate(0, 0, 1)
 	}
+}
+
+func (sr *ScheduleReport) CreateLegendSheet() error {
+	sheetLabel := "Legend"
+	sr.Report.NewSheet(sheetLabel)
+	options := excelize.ViewOptions{}
+	options.ShowGridLines = &[]bool{false}[0]
+	sr.Report.SetSheetView(sheetLabel, 0, &options)
+	sr.Report.SetColWidth(sheetLabel, "A", "A", 30)
+
+	team, err := services.GetTeam(sr.TeamID)
+	if err != nil {
+		return err
+	}
+
+	sort.Sort(sites.ByWorkcode(team.Workcodes))
+	row := 0
+	for _, wc := range team.Workcodes {
+		if !strings.EqualFold(wc.BackColor, "ffffff") {
+			row++
+			sr.Report.SetRowHeight(sheetLabel, row, 20)
+			style := sr.Styles[wc.Id]
+			sr.Report.SetCellStyle(sheetLabel, GetCellID(0, row), GetCellID(0, row), style)
+			sr.Report.SetCellValue(sheetLabel, GetCellID(0, row), wc.Title)
+		}
+	}
+	return nil
 }

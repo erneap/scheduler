@@ -160,5 +160,6 @@ type ReportRequest struct {
 	SubReport  string `json:"subreport,omitempty"`
 	TeamID     string `json:"teamid"`
 	SiteID     string `json:"siteid"`
+	CompanyID  string `json:"companyid,omitempty"`
 	Password   string `json:"password,omitempty"`
 }

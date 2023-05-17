@@ -59,7 +59,38 @@ func CreateReport(c *gin.Context) {
 
 		// get team to include in the download name
 		team, _ := services.GetTeam(data.TeamID)
-		downloadName := strings.ReplaceAll(team.Name, " ", "_") + "-Schedule.xlsx"
+		site, _ := services.GetSite(data.TeamID, data.SiteID)
+		downloadName := strings.ReplaceAll(team.Name, " ", "_") + "-" + site.Name +
+			"-Schedule.xlsx"
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Disposition", "attachment; filename="+downloadName)
+		c.Data(http.StatusOK,
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			b.Bytes())
+	case "ptoholiday":
+		lr := reports.LeaveReport{
+			Year:      year,
+			TeamID:    data.TeamID,
+			SiteID:    data.SiteID,
+			CompanyID: data.CompanyID,
+		}
+		if err := lr.Create(); err != nil {
+			fmt.Println("Creation: " + err.Error())
+			c.JSON(http.StatusInternalServerError, "Creation: "+err.Error())
+			return
+		}
+		var b bytes.Buffer
+		if err := lr.Report.Write(&b); err != nil {
+			fmt.Println("Buffer Write: " + err.Error())
+			c.JSON(http.StatusInternalServerError, "Buffer Write: "+err.Error())
+			return
+		}
+
+		// get team to include in the download name
+		team, _ := services.GetTeam(data.TeamID)
+		site, _ := services.GetSite(data.TeamID, data.SiteID)
+		downloadName := strings.ReplaceAll(team.Name, " ", "_") + "-" + site.Name +
+			"-Leaves.xlsx"
 		c.Header("Content-Description", "File Transfer")
 		c.Header("Content-Disposition", "attachment; filename="+downloadName)
 		c.Data(http.StatusOK,

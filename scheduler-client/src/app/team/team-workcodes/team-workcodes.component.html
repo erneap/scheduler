@@ -57,7 +57,8 @@
       <div class="flexlayout column center"
         [style]="getFormColorStyle()">
         Color Scheme
-        <input formControlName="colors" class="colors">
+        <input formControlName="colors" class="colors"
+          (blur)="onUpdate('colors')">
         (Foreground-Background RGB Hex)
       </div>
       <button mat-raised-button color="accent" style="padding-top: 10px;"

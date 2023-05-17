@@ -24,6 +24,8 @@
       </form>
       <app-report-schedule *ngIf="reportType === 'schedule'" 
         [reportType]="reportType"></app-report-schedule>
+      <app-report-leave-list *ngIf="reportType === 'ptoholiday'"
+        [reportType]="reportType"></app-report-leave-list>
     </mat-card-content>
   </mat-card>
 </div>

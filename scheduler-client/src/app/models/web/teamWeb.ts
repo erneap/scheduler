@@ -52,5 +52,6 @@ export interface ReportRequest {
   subreport?: string;
   teamid: string;
   siteid: string;
+  companyid?: string;
   password?: string;
 }
