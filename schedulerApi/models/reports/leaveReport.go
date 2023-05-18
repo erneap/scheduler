@@ -113,6 +113,11 @@ func (lr *LeaveReport) Create() error {
 			lr.Company = &com
 		}
 	}
+
+	lr.CreateStyles()
+
+	lr.CreateLeaveListing()
+
 	return nil
 }
 
@@ -287,6 +292,9 @@ func (lr *LeaveReport) CreateStyles() error {
 	}
 	lr.Styles["month"] = style
 
+	// remove the provided sheet "Sheet1" from the workbook
+	lr.Report.DeleteSheet("Sheet1")
+
 	return nil
 }
 
@@ -360,6 +368,7 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 						Text: "Date Taken (",
 						Font: &excelize.Font{
 							Bold:  true,
+							Size: 8,
 							Color: "000000",
 						},
 					},
@@ -367,6 +376,7 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 						Text: "Projected",
 						Font: &excelize.Font{
 							Bold:  true,
+							Size: 8,
 							Color: "3366ff",
 						},
 					},
@@ -374,6 +384,7 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 						Text: ")",
 						Font: &excelize.Font{
 							Bold:  true,
+							Size: 8,
 							Color: "000000",
 						},
 					},
@@ -389,16 +400,19 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 					Text: "Request",
 					Font: &excelize.Font{
 						Bold:  true,
+						Size: 8,
 						Color: "3366ff",
 					},
 				},
 			})
+		lr.Report.MergeCell(sheetName, GetCellID(col, row), GetCellID(col+1, row))
 		lr.Report.SetCellRichText(sheetName, GetCellID(col, row),
 			[]excelize.RichTextRun{
 				{
 					Text: "Leave Taken (",
 					Font: &excelize.Font{
 						Bold:  true,
+						Size: 8,
 						Color: "000000",
 					},
 				},
@@ -406,6 +420,7 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 					Text: "Projected",
 					Font: &excelize.Font{
 						Bold:  true,
+						Size: 8,
 						Color: "3366ff",
 					},
 				},
@@ -413,6 +428,7 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 					Text: ")",
 					Font: &excelize.Font{
 						Bold:  true,
+						Size: 8,
 						Color: "000000",
 					},
 				},
