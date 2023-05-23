@@ -851,7 +851,6 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 	lr.Report.SetSheetView(sheetName, 0, &options)
 
 	extendedWidth := 3
-	fmt.Println(lr.BHolidays)
 	if lr.BHolidays {
 		extendedWidth += 4
 	}
@@ -1431,7 +1430,6 @@ func (lr *LeaveReport) CreateFullMonthlyReference() error {
 	}
 
 	freezeCell := GetCellID(1, row+1)
-	fmt.Println(freezeCell)
 	option := &excelize.PaneOptions{
 		SQRef:      freezeCell,
 		ActiveCell: freezeCell,
@@ -1518,7 +1516,6 @@ func (lr *LeaveReport) CreateMinumimMonthlyReference() error {
 	}
 
 	freezeCell := GetCellID(1, row+1)
-	fmt.Println(freezeCell)
 	option := &excelize.PaneOptions{
 		SQRef:      freezeCell,
 		ActiveCell: freezeCell,
