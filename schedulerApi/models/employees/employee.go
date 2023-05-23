@@ -133,13 +133,65 @@ func (e *Employee) GetWorkday(date time.Time, offset float64) *Workday {
 			wkday = vari.GetWorkday(siteid, date)
 		}
 	}
+	bLeave := false
 	for _, lv := range e.Data.Leaves {
 		if lv.LeaveDate.Equal(date) {
-			wkday = &Workday{
-				ID:         uint(0),
-				Workcenter: "",
-				Code:       lv.Code,
-				Hours:      lv.Hours,
+			if !bLeave {
+				wkday = &Workday{
+					ID:         uint(0),
+					Workcenter: "",
+					Code:       lv.Code,
+					Hours:      lv.Hours,
+				}
+				bLeave = true
+			} else {
+				if lv.Hours <= wkday.Hours {
+					wkday.Hours += lv.Hours
+				} else {
+					wkday.Hours += lv.Hours
+					wkday.Code = lv.Code
+				}
+			}
+		}
+	}
+	return wkday
+}
+
+func (e *Employee) GetWorkdayActual(date time.Time, offset float64) *Workday {
+	var wkday *Workday = nil
+	var siteid string = ""
+	for _, asgmt := range e.Data.Assignments {
+		if (asgmt.StartDate.Before(date) || asgmt.StartDate.Equal(date)) &&
+			(asgmt.EndDate.After(date) || asgmt.EndDate.Equal(date)) {
+			siteid = asgmt.Site
+			wkday = asgmt.GetWorkday(date, offset)
+		}
+	}
+	for _, vari := range e.Data.Variations {
+		if (vari.StartDate.Before(date) || vari.StartDate.Equal(date)) &&
+			(vari.EndDate.After(date) || vari.EndDate.Equal(date)) {
+			wkday = vari.GetWorkday(siteid, date)
+		}
+	}
+	bLeave := false
+	for _, lv := range e.Data.Leaves {
+		if lv.LeaveDate.Equal(date) &&
+			strings.EqualFold(lv.Status, "actual") {
+			if !bLeave {
+				wkday = &Workday{
+					ID:         uint(0),
+					Workcenter: "",
+					Code:       lv.Code,
+					Hours:      lv.Hours,
+				}
+				bLeave = true
+			} else {
+				if lv.Hours <= wkday.Hours {
+					wkday.Hours += lv.Hours
+				} else {
+					wkday.Hours += lv.Hours
+					wkday.Code = lv.Code
+				}
 			}
 		}
 	}
@@ -400,6 +452,37 @@ func (e *Employee) DeleteLeave(id int) {
 	if pos >= 0 {
 		e.Data.Leaves = append(e.Data.Leaves[:pos], e.Data.Leaves[pos+1:]...)
 	}
+}
+
+func (e *Employee) GetLeaveHours(start, end time.Time) float64 {
+	answer := 0.0
+
+	sort.Sort(ByLeaveDay(e.Data.Leaves))
+	for _, lv := range e.Data.Leaves {
+		if (lv.LeaveDate.After(start) ||
+			lv.LeaveDate.Equal(start)) &&
+			lv.LeaveDate.Before(end) &&
+			strings.EqualFold(lv.Status, "actual") {
+			answer += lv.Hours
+		}
+	}
+	return answer
+}
+
+func (e *Employee) GetPTOHours(start, end time.Time) float64 {
+	answer := 0.0
+
+	sort.Sort(ByLeaveDay(e.Data.Leaves))
+	for _, lv := range e.Data.Leaves {
+		if (lv.LeaveDate.After(start) ||
+			lv.LeaveDate.Equal(start)) &&
+			lv.LeaveDate.Before(end) &&
+			strings.EqualFold(lv.Status, "actual") &&
+			strings.EqualFold(lv.Code, "v") {
+			answer += lv.Hours
+		}
+	}
+	return answer
 }
 
 func (e *Employee) NewLeaveRequest(empID, code string, start, end time.Time,

@@ -3,6 +3,7 @@ package reports
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/erneap/scheduler/schedulerApi/models/sites"
 	"github.com/erneap/scheduler/schedulerApi/services"
 	"github.com/xuri/excelize/v2"
+	"golang.org/x/exp/maps"
 )
 
 type LeaveMonth struct {
@@ -168,10 +170,19 @@ func (lr *LeaveReport) Create() error {
 			sort.Sort(ByLeaveMonth(lr.Holidays))
 		}
 	}
+	for _, wc := range team.Workcodes {
+		if wc.IsLeave {
+			lr.Workcodes[wc.Id] = wc
+		}
+	}
 
 	lr.CreateStyles()
 
 	lr.CreateLeaveListing()
+
+	lr.CreateFullMonthlyReference()
+
+	lr.CreateMinumimMonthlyReference()
 
 	lr.Report.DeleteSheet("Sheet1")
 
@@ -195,6 +206,23 @@ func (lr *LeaveReport) CreateStyles() error {
 		return err
 	}
 	lr.Styles["ptoname"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"800000"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "ffffff"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["currentasof"] = style
 
 	style, err = lr.Report.NewStyle(&excelize.Style{
 		Border: []excelize.Border{
@@ -231,6 +259,8 @@ func (lr *LeaveReport) CreateStyles() error {
 	lr.Styles["sectionlbl"] = style
 
 	numFmt := "0.0;mm/dd/yyyy;@"
+	intFmt := "0;@"
+	balFmt := "0.0;[Red]-0.0;@"
 	style, err = lr.Report.NewStyle(&excelize.Style{
 		Border: []excelize.Border{
 			{Type: "left", Color: "000000", Style: 1},
@@ -248,6 +278,23 @@ func (lr *LeaveReport) CreateStyles() error {
 		return err
 	}
 	lr.Styles["hollblactual"] = style
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &intFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["holdaysleft"] = style
 
 	style, err = lr.Report.NewStyle(&excelize.Style{
 		Border: []excelize.Border{
@@ -427,11 +474,377 @@ func (lr *LeaveReport) CreateStyles() error {
 	}
 	lr.Styles["ptorequest"] = style
 
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffff00"}, Pattern: 1},
+		Font: &excelize.Font{Bold: false, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &balFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["balance"] = style
+
+	for k, v := range lr.Workcodes {
+		style, err = lr.Report.NewStyle(&excelize.Style{
+			Border: []excelize.Border{
+				{Type: "left", Color: "000000", Style: 1},
+				{Type: "top", Color: "000000", Style: 1},
+				{Type: "right", Color: "000000", Style: 1},
+				{Type: "bottom", Color: "000000", Style: 1},
+			},
+			Fill: excelize.Fill{Type: "pattern", Color: []string{v.BackColor}, Pattern: 1},
+			Font: &excelize.Font{Bold: false, Size: 10, Color: v.TextColor},
+			Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+				WrapText: true},
+			CustomNumFmt: &numFmt,
+		})
+		if err == nil {
+			lr.Styles[k] = style
+		}
+	}
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 0},
+			{Type: "bottom", Color: "000000", Style: 0},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 14, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["header"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 2},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 2},
+			{Type: "bottom", Color: "000000", Style: 0},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"009933"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 14, Color: "ffffff"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["monthup"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 2},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 2},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"009933"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 14, Color: "ffffff"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["monthdn"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 0},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["weekdayup"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["weekdaydn"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["weekday"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 0},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"66ffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["weekendup"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"66ffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["weekenddn"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"66ffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["weekend"] = style
+
+	pto := lr.Workcodes["V"]
+	holiday := lr.Workcodes["H"]
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 0},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"009933"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "ffffff"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["totalup"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"009933"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "ffffff"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["totaldn"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"009933"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "ffffff"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &numFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["total"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 0},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{holiday.BackColor}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: holiday.TextColor},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["holup"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{holiday.BackColor}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: holiday.TextColor},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["holdn"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{holiday.BackColor}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: holiday.TextColor},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &numFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["hol"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 0},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{pto.BackColor}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: pto.TextColor},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["ptoup"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{pto.BackColor}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: pto.TextColor},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["ptodn"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{pto.BackColor}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: pto.TextColor},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &numFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["pto"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 0},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["legend"] = style
+
 	return nil
 }
 
 func (lr *LeaveReport) CreateLeaveListing() error {
-	sheetName := "Leave Listing"
+	sheetName := strconv.Itoa(lr.Year) + " PTO-Hol"
 	lr.Report.NewSheet(sheetName)
 	options := excelize.ViewOptions{}
 	options.ShowGridLines = &[]bool{false}[0]
@@ -442,6 +855,26 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 	if lr.BHolidays {
 		extendedWidth += 4
 	}
+
+	// add current as of reference
+	curStyle := lr.Styles["currentasof"]
+	lr.Report.SetCellStyle(sheetName, GetCellID(0, 1),
+		GetCellID(extendedWidth, 1), curStyle)
+	lr.Report.MergeCell(sheetName, GetCellID(0, 1),
+		GetCellID(extendedWidth, 1))
+	lr.Report.SetCellValue(sheetName, GetCellID(0, 1),
+		"Current As Of: "+time.Now().Format("01/02/2006"))
+
+	// Freeze the first row
+	lr.Report.SetPanes(sheetName, &excelize.Panes{
+		Freeze:      true,
+		YSplit:      1,
+		TopLeftCell: "A2",
+		ActivePane:  "bottomLeft",
+		Panes: []excelize.PaneOptions{
+			{SQRef: "A2", ActiveCell: "A2", Pane: "bottomLeft"},
+		},
+	})
 
 	// months
 	var months []LeaveMonth
@@ -467,8 +900,16 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 		lr.Report.SetColWidth(sheetName, GetColumn(1), GetColumn(4), 7.0)
 	}
 
-	row := 0
+	row := 2
 	for _, emp := range lr.Employees {
+		annual := 0.0
+		carry := 0.0
+		for _, bal := range emp.Data.Balances {
+			if bal.Year == lr.Year {
+				annual = bal.Annual
+				carry = bal.Carryover
+			}
+		}
 		row++
 		// name row for the employee
 		style := lr.Styles["ptoname"]
@@ -854,8 +1295,440 @@ func (lr *LeaveReport) CreateLeaveListing() error {
 			row += lvRow
 		}
 
+		// Add totals labels and data rows
 		row++
+		col = 0
+		if lr.BHolidays {
+			style = lr.Styles["sectionlbl"]
+			lr.Report.SetCellStyle(sheetName, GetCellID(0, row),
+				GetCellID(3, row), style)
+			lr.Report.SetCellValue(sheetName, GetCellID(0, row),
+				"")
+			lr.Report.SetCellValue(sheetName, GetCellID(1, row),
+				"Days Left")
+			lr.Report.SetCellValue(sheetName, GetCellID(2, row),
+				"Hours Left")
+			lr.Report.SetCellValue(sheetName, GetCellID(3, row),
+				"Total Hours")
+			daysLeft := 0
+			hoursTaken := 0.0
+			totalHours := 8.0 * float64(len(lr.Holidays))
+			for _, hol := range lr.Holidays {
+				if hol.GetHolidayHours() < 8.0 {
+					daysLeft++
+				}
+				if hol.GetHolidayHours() > 0.0 {
+					hoursTaken += hol.GetHolidayHours()
+				}
+			}
+			hoursLeft := totalHours - hoursTaken
+			style = lr.Styles["holdaysleft"]
+			lr.Report.SetCellStyle(sheetName, GetCellID(0, row+1),
+				GetCellID(1, row+1), style)
+			style = lr.Styles["hollblactual"]
+			lr.Report.SetCellStyle(sheetName, GetCellID(2, row+1),
+				GetCellID(3, row+1), style)
+			lr.Report.SetCellValue(sheetName, GetCellID(0, row+1), "")
+			lr.Report.SetCellValue(sheetName, GetCellID(1, row+1), daysLeft)
+			lr.Report.SetCellValue(sheetName, GetCellID(2, row+1), hoursLeft)
+			lr.Report.SetCellValue(sheetName, GetCellID(3, row+1), hoursTaken)
+			col = 4
+		}
+
+		style = lr.Styles["sectionlbl"]
+		lr.Report.SetCellStyle(sheetName, GetCellID(col+0, row),
+			GetCellID(col+4, row), style)
+		lr.Report.SetCellValue(sheetName, GetCellID(col+0, row),
+			"Annual Leave")
+		lr.Report.SetCellValue(sheetName, GetCellID(col+1, row),
+			"carry")
+		lr.Report.SetCellValue(sheetName, GetCellID(col+2, row),
+			"Total Taken")
+		lr.Report.SetCellValue(sheetName, GetCellID(col+3, row),
+			"Requested")
+		lr.Report.SetCellValue(sheetName, GetCellID(col+4, row),
+			"Balance")
+		totalTaken := 0.0
+		totalRequested := 0.0
+		for _, mon := range months {
+			totalTaken += mon.GetPTOActual()
+			totalRequested += mon.GetPTOSchedule()
+		}
+		balance := (annual + carry) - (totalTaken + totalRequested)
+		style = lr.Styles["hollblactual"]
+		style2 := lr.Styles["ptorequest"]
+		balstyle := lr.Styles["balance"]
+		lr.Report.SetCellStyle(sheetName, GetCellID(col+0, row+1),
+			GetCellID(col+2, row+1), style)
+		lr.Report.SetCellStyle(sheetName, GetCellID(col+4, row+1),
+			GetCellID(col+4, row+1), balstyle)
+		lr.Report.SetCellStyle(sheetName, GetCellID(col+3, row+1),
+			GetCellID(col+3, row+1), style2)
+		lr.Report.SetCellValue(sheetName, GetCellID(col+0, row+1),
+			annual)
+		lr.Report.SetCellValue(sheetName, GetCellID(col+1, row+1),
+			carry)
+		lr.Report.SetCellValue(sheetName, GetCellID(col+2, row+1),
+			totalTaken)
+		lr.Report.SetCellValue(sheetName, GetCellID(col+3, row+1),
+			totalRequested)
+		lr.Report.SetCellValue(sheetName, GetCellID(col+4, row+1),
+			balance)
+		row += 2
 	}
 
 	return nil
+}
+
+func (lr *LeaveReport) CreateFullMonthlyReference() error {
+	sheetName := strconv.Itoa(lr.Year) + " Monthly"
+	lr.Report.NewSheet(sheetName)
+	options := excelize.ViewOptions{}
+	options.ShowGridLines = &[]bool{false}[0]
+	lr.Report.SetSheetView(sheetName, 0, &options)
+
+	// set all the column widths
+	lr.Report.SetColWidth(sheetName, "A", "A", 3.5)
+	lr.Report.SetColWidth(sheetName, "B", "B", 20.0)
+	lr.Report.SetColWidth(sheetName, "C", "AG", 4.0)
+	lr.Report.SetColWidth(sheetName, "AH", "AJ", 7.0)
+
+	// add page label at top, legend on left and freeze
+	// the panes
+	style := lr.Styles["currentasof"]
+	lr.Report.SetCellStyle(sheetName, "A1", "D1", style)
+	lr.Report.MergeCell(sheetName, "A1", "D1")
+	lr.Report.SetCellValue(sheetName, "A1",
+		"Current As of: "+time.Now().Format("01/02/2006"))
+
+	style = lr.Styles["header"]
+	lr.Report.SetCellStyle(sheetName, "E1", "AH1", style)
+	lr.Report.MergeCell(sheetName, "E1", "AH1")
+	lr.Report.SetCellValue(sheetName, "E1",
+		strconv.Itoa(lr.Year)+" PTO/HOL Quick Reference (FULL)")
+
+	row := 2
+	col := 2
+	workcodes := maps.Values(lr.Workcodes)
+	sort.Sort(sites.ByWorkcode(workcodes))
+	for _, v := range workcodes {
+		style = lr.Styles[v.Id]
+		lr.Report.SetCellStyle(sheetName, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetName, GetCellID(col, row), "")
+		style = lr.Styles["legend"]
+		lr.Report.SetCellStyle(sheetName, GetCellID(col+1, row),
+			GetCellID(col+5, row), style)
+		lr.Report.MergeCell(sheetName, GetCellID(col+1, row),
+			GetCellID(col+5, row))
+		lr.Report.SetCellValue(sheetName, GetCellID(col+1, row),
+			v.Title)
+		col += 6
+		if col > 31 {
+			row++
+			col = 2
+		}
+	}
+
+	freezeCell := GetCellID(1, row+1)
+	fmt.Println(freezeCell)
+	option := &excelize.PaneOptions{
+		SQRef:      freezeCell,
+		ActiveCell: freezeCell,
+		Pane:       "bottomLeft",
+	}
+	pane := &excelize.Panes{
+		Freeze:      true,
+		YSplit:      row,
+		TopLeftCell: freezeCell,
+		ActivePane:  "bottomLeft",
+		Panes: []excelize.PaneOptions{
+			*option,
+		},
+	}
+	err := lr.Report.SetPanes(sheetName, pane)
+	row++
+
+	if err != nil {
+		return err
+	}
+
+	// add months to report sheet
+	current := time.Date(lr.Year, 1, 1, 0, 0, 0, 0, time.UTC)
+	end := current.AddDate(1, 0, 0)
+	for current.Before(end) {
+		row, err = lr.CreateQuickReferenceMonth(sheetName, current, row, true)
+		if err != nil {
+			return err
+		}
+		current = current.AddDate(0, 1, 0)
+	}
+
+	return nil
+}
+
+func (lr *LeaveReport) CreateMinumimMonthlyReference() error {
+	sheetName := strconv.Itoa(lr.Year) + " Monthly (Minumum)"
+	lr.Report.NewSheet(sheetName)
+	options := excelize.ViewOptions{}
+	options.ShowGridLines = &[]bool{false}[0]
+	lr.Report.SetSheetView(sheetName, 0, &options)
+
+	// set all the column widths
+	lr.Report.SetColWidth(sheetName, "A", "A", 3.5)
+	lr.Report.SetColWidth(sheetName, "B", "B", 20.0)
+	lr.Report.SetColWidth(sheetName, "C", "AG", 4.0)
+	lr.Report.SetColWidth(sheetName, "AH", "AJ", 7.0)
+
+	// add page label at top, legend on left and freeze
+	// the panes
+	style := lr.Styles["currentasof"]
+	lr.Report.SetCellStyle(sheetName, "A1", "D1", style)
+	lr.Report.MergeCell(sheetName, "A1", "D1")
+	lr.Report.SetCellValue(sheetName, "A1",
+		"Current As of: "+time.Now().Format("01/02/2006"))
+
+	style = lr.Styles["header"]
+	lr.Report.SetCellStyle(sheetName, "E1", "AH1", style)
+	lr.Report.MergeCell(sheetName, "E1", "AH1")
+	lr.Report.SetCellValue(sheetName, "E1",
+		strconv.Itoa(lr.Year)+" PTO/HOL Quick Reference (FULL)")
+
+	row := 2
+	col := 2
+	workcodes := maps.Values(lr.Workcodes)
+	sort.Sort(sites.ByWorkcode(workcodes))
+	for _, v := range workcodes {
+		style = lr.Styles[v.Id]
+		lr.Report.SetCellStyle(sheetName, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetName, GetCellID(col, row), "")
+		style = lr.Styles["legend"]
+		lr.Report.SetCellStyle(sheetName, GetCellID(col+1, row),
+			GetCellID(col+5, row), style)
+		lr.Report.MergeCell(sheetName, GetCellID(col+1, row),
+			GetCellID(col+5, row))
+		lr.Report.SetCellValue(sheetName, GetCellID(col+1, row),
+			v.Title)
+		col += 6
+		if col > 31 {
+			row++
+			col = 2
+		}
+	}
+
+	freezeCell := GetCellID(1, row+1)
+	fmt.Println(freezeCell)
+	option := &excelize.PaneOptions{
+		SQRef:      freezeCell,
+		ActiveCell: freezeCell,
+		Pane:       "bottomLeft",
+	}
+	pane := &excelize.Panes{
+		Freeze:      true,
+		YSplit:      row,
+		TopLeftCell: freezeCell,
+		ActivePane:  "bottomLeft",
+		Panes: []excelize.PaneOptions{
+			*option,
+		},
+	}
+	err := lr.Report.SetPanes(sheetName, pane)
+	row++
+
+	if err != nil {
+		return err
+	}
+
+	// add months to report sheet
+	current := time.Date(lr.Year, 1, 1, 0, 0, 0, 0, time.UTC)
+	end := current.AddDate(1, 0, 0)
+	for current.Before(end) {
+		row, err = lr.CreateQuickReferenceMonth(sheetName, current, row, false)
+		if err != nil {
+			return err
+		}
+		current = current.AddDate(0, 1, 0)
+	}
+
+	return nil
+}
+
+func (lr *LeaveReport) CreateQuickReferenceMonth(
+	sheetname string, month time.Time, row int, full bool) (int, error) {
+	row++
+
+	// month, days of month, and other labels
+	style := lr.Styles["monthup"]
+	lr.Report.SetCellStyle(sheetname, GetCellID(1, row),
+		GetCellID(1, row), style)
+	lr.Report.SetCellValue(sheetname, GetCellID(1, row),
+		month.Format("January"))
+	style = lr.Styles["monthdn"]
+	lr.Report.SetCellStyle(sheetname, GetCellID(1, row+1),
+		GetCellID(1, row+1), style)
+	lr.Report.SetCellValue(sheetname, GetCellID(1, row+1),
+		month.Format("2006"))
+	current := time.Date(month.Year(), month.Month(), 1, 0, 0,
+		0, 0, time.UTC)
+	end := current.AddDate(0, 1, 0)
+	col := 2
+	for current.Before(end) {
+		sStyle := "weekday"
+		if current.Weekday() == time.Saturday ||
+			current.Weekday() == time.Sunday {
+			sStyle = "weekend"
+		}
+		style = lr.Styles[sStyle+"up"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row),
+			current.Format("_2"))
+		style = lr.Styles[sStyle+"dn"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row+1),
+			GetCellID(col, row+1), style)
+		weekday := current.Format("Mon")
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row+1),
+			weekday[:2])
+		current = current.AddDate(0, 0, 1)
+		col++
+	}
+
+	if full {
+		col = 33
+		style = lr.Styles["totalup"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row),
+			"Total")
+		style = lr.Styles["totaldn"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row+1),
+			GetCellID(col, row+1), style)
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row+1),
+			"Hours")
+		col++
+		style = lr.Styles["holup"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row),
+			"Hol/")
+		style = lr.Styles["holdn"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row+1),
+			GetCellID(col, row+1), style)
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row+1),
+			"Other")
+		col++
+		style = lr.Styles["ptoup"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row),
+			"PTO")
+		style = lr.Styles["ptodn"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row+1),
+			GetCellID(col, row+1), style)
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row+1),
+			"Only")
+	}
+
+	row++
+
+	startRow := row
+	for _, emp := range lr.Employees {
+		if full || emp.GetLeaveHours(month, month.AddDate(0, 1, 0)) > 0.0 {
+			row++
+			lr.CreateEmployeeRow(sheetname, month, emp, row, full)
+		}
+	}
+	endRow := row
+
+	if full {
+		row++
+		col = 33
+		formula := "SUM(" + GetCellID(col, startRow) + ":" +
+			GetCellID(col, endRow) + ")"
+		style = lr.Styles["balance"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellFormula(sheetname, GetCellID(col, row),
+			formula)
+		col++
+		style = lr.Styles["weekday"]
+		lr.Report.SetCellStyle(sheetname, GetCellID(col, row),
+			GetCellID(col+1, row), style)
+		lr.Report.MergeCell(sheetname, GetCellID(col, row),
+			GetCellID(col+1, row))
+		lr.Report.SetCellValue(sheetname, GetCellID(col, row),
+			"TOTALS")
+	}
+	row++
+
+	return row, nil
+}
+
+func (lr *LeaveReport) CreateEmployeeRow(sheetName string,
+	month time.Time, emp employees.Employee, row int,
+	full bool) {
+	col := 1
+	current := time.Date(month.Year(), month.Month(), 1, 0, 0,
+		0, 0, time.UTC)
+	end := current.AddDate(0, 1, 0)
+	style := lr.Styles["weekday"]
+	lr.Report.SetCellStyle(sheetName, GetCellID(col, row),
+		GetCellID(col, row), style)
+	lr.Report.SetCellValue(sheetName, GetCellID(col, row),
+		emp.Name.GetLastFirst())
+	col++
+	for current.Before(end) {
+		wd := emp.GetWorkdayActual(current, 0.0)
+		sStyle := ""
+		display := 0.0
+		for _, wc := range lr.Workcodes {
+			if wd != nil {
+				if strings.EqualFold(wc.Id, wd.Code) && wc.IsLeave {
+					sStyle = wc.Id
+					display = wd.Hours
+				}
+			}
+		}
+		if sStyle == "" {
+			sStyle = "weekday"
+			if current.Weekday() == time.Saturday ||
+				current.Weekday() == time.Sunday {
+				sStyle = "weekend"
+			}
+		}
+		style = lr.Styles[sStyle]
+		lr.Report.SetCellStyle(sheetName, GetCellID(col, row),
+			GetCellID(col, row), style)
+		if display > 0.0 {
+			lr.Report.SetCellValue(sheetName, GetCellID(col, row),
+				display)
+		} else {
+			lr.Report.SetCellValue(sheetName, GetCellID(col, row),
+				"")
+		}
+		current = current.AddDate(0, 0, 1)
+		col++
+	}
+	if full {
+		col = 33
+		totalHrs := emp.GetLeaveHours(month, end)
+		ptoHrs := emp.GetPTOHours(month, end)
+		otherHrs := totalHrs - ptoHrs
+		style = lr.Styles["weekday"]
+		lr.Report.SetCellStyle(sheetName, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetName, GetCellID(col, row),
+			totalHrs)
+		col++
+		lr.Report.SetCellStyle(sheetName, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetName, GetCellID(col, row),
+			otherHrs)
+		col++
+		lr.Report.SetCellStyle(sheetName, GetCellID(col, row),
+			GetCellID(col, row), style)
+		lr.Report.SetCellValue(sheetName, GetCellID(col, row),
+			ptoHrs)
+	}
 }
