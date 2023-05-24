@@ -23,19 +23,23 @@ func CreateReport(c *gin.Context) {
 	}
 
 	now := time.Now().UTC()
-	//month := now.Month()
+	month := now.Month()
+	day := now.Day()
 	year := now.Year()
 	if data.Period != "" {
 		parts := strings.Split(data.Period, "|")
 		if len(parts) > 0 {
 			year, _ = strconv.Atoi(parts[0])
 		}
-		//if len(parts) > 1 {
-		//tmonth, err := strconv.Atoi(parts[1])
-		//if err == nil {
-		//month = time.Month(tmonth)
-		//}
-		//}
+		if len(parts) > 1 {
+			tmonth, err := strconv.Atoi(parts[1])
+			if err == nil {
+				month = time.Month(tmonth)
+			}
+		}
+		if len(parts) > 2 {
+			day, _ = strconv.Atoi(parts[2])
+		}
 	}
 
 	switch strings.ToLower(data.ReportType) {
@@ -91,6 +95,35 @@ func CreateReport(c *gin.Context) {
 		site, _ := services.GetSite(data.TeamID, data.SiteID)
 		downloadName := strings.ReplaceAll(team.Name, " ", "_") + "-" + site.Name +
 			"-Leaves.xlsx"
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Disposition", "attachment; filename="+downloadName)
+		c.Data(http.StatusOK,
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			b.Bytes())
+	case "chargenumber":
+		reportDate := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+		laborrpt := reports.LaborReport{
+			Date:   reportDate,
+			TeamID: data.TeamID,
+			SiteID: data.SiteID,
+		}
+		if err := laborrpt.Create(); err != nil {
+			fmt.Println("Creation: " + err.Error())
+			c.JSON(http.StatusInternalServerError, "Creation: "+err.Error())
+			return
+		}
+		var b bytes.Buffer
+		if err := laborrpt.Report.Write(&b); err != nil {
+			fmt.Println("Buffer Write: " + err.Error())
+			c.JSON(http.StatusInternalServerError, "Buffer Write: "+err.Error())
+			return
+		}
+
+		// get team to include in the download name
+		team, _ := services.GetTeam(data.TeamID)
+		site, _ := services.GetSite(data.TeamID, data.SiteID)
+		downloadName := strings.ReplaceAll(team.Name, " ", "_") + "-" + site.Name +
+			"-ChargeNumber.xlsx"
 		c.Header("Content-Description", "File Transfer")
 		c.Header("Content-Disposition", "attachment; filename="+downloadName)
 		c.Data(http.StatusOK,

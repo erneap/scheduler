@@ -9,6 +9,7 @@ import (
 	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 	"github.com/erneap/scheduler/schedulerApi/services"
 	"github.com/xuri/excelize/v2"
+	"golang.org/x/exp/maps"
 )
 
 type LaborReport struct {
@@ -57,6 +58,15 @@ func (lr *LaborReport) Create() error {
 		}
 	}
 
+	// Get the team's workcodes
+	team, err := services.GetTeam(lr.TeamID)
+	if err != nil {
+		return err
+	}
+	for _, wc := range team.Workcodes {
+		lr.Workcodes[wc.Id] = wc
+	}
+
 	// get employees with assignments for the site that are assigned
 	// during the forecast period.
 
@@ -102,6 +112,9 @@ func (lr *LaborReport) Create() error {
 		// forecast report
 		lr.CreateContractReport(fr, false)
 	}
+
+	lr.Report.DeleteSheet("Sheet1")
+
 	return nil
 }
 
@@ -612,12 +625,27 @@ func (lr *LaborReport) CreateContractReport(
 	lr.Report.SetCellValue(sheetName, "L3",
 		"Week Ending")
 
-	column := 13
+	style = lr.Styles["peopleheader"]
+	lr.Report.SetCellStyle(sheetName, "A4", "L4", style)
+	lr.Report.SetCellValue(sheetName, "B4", "CLIN")
+	lr.Report.SetCellValue(sheetName, "C4", "SLIN")
+	lr.Report.SetCellValue(sheetName, "D4", "Company")
+	lr.Report.SetCellValue(sheetName, "E4", "Location")
+	lr.Report.SetCellValue(sheetName, "F4", "Labor NWA")
+	lr.Report.SetCellValue(sheetName, "G4", "Last Name")
+	lr.Report.SetCellValue(sheetName, "H4", "Labor Category")
+	lr.Report.SetCellValue(sheetName, "I4", "Employee ID")
+	lr.Report.SetCellValue(sheetName, "J4", "PeopleSoft ID")
+	lr.Report.SetCellValue(sheetName, "K4", "Cost Center")
+	lr.Report.SetCellValue(sheetName, "L4", "Comments/Remarks")
+
+	column := 12
 	for _, period := range fr.Periods {
 		style = lr.Styles["periods"]
-		lr.Report.SetCellStyle(sheetName, GetCellID(column, 1),
-			GetCellID(column, 1), style)
-		lr.Report.SetCellValue(sheetName, GetCellID(column, 1),
+		cellID := GetCellID(column, 1)
+		lr.Report.SetCellStyle(sheetName, cellID, cellID,
+			style)
+		lr.Report.SetCellValue(sheetName, cellID,
 			strconv.Itoa(len(period.Periods)))
 		style = lr.Styles["month"]
 		lr.Report.SetCellStyle(sheetName, GetCellID(column, 2),
@@ -631,12 +659,21 @@ func (lr *LaborReport) CreateContractReport(
 			GetCellID(column, 3), style)
 		lr.Report.SetCellValue(sheetName, GetCellID(column, 3),
 			"Month Total")
+		style = lr.Styles["monthdate"]
+		cellID = GetCellID(column, 4)
+		lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+		lr.Report.SetCellValue(sheetName, cellID,
+			period.Month.Format("Jan-06"))
 		lr.Report.SetColOutlineLevel(sheetName, GetColumn(column), 1)
 		style = lr.Styles["dates"]
+		style2 := lr.Styles["weeks"]
 		for i, prd := range period.Periods {
 			cellID := GetCellID(column+i+1, 3)
 			lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
-			lr.Report.SetCellValue(sheetName, cellID, prd.Format("_1/_2/06"))
+			lr.Report.SetCellValue(sheetName, cellID, prd.Format("1/2/06"))
+			cellID = GetCellID(column+i+1, 4)
+			lr.Report.SetCellStyle(sheetName, cellID, cellID, style2)
+			lr.Report.SetCellValue(sheetName, cellID, "Week"+strconv.Itoa(i+1))
 			lr.Report.SetColOutlineLevel(sheetName, GetColumn(column+i+1), 2)
 		}
 		column += len(period.Periods) + 1
@@ -645,6 +682,25 @@ func (lr *LaborReport) CreateContractReport(
 	cellID := GetCellID(column, 3)
 	lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
 	lr.Report.SetCellValue(sheetName, cellID, "EAC")
+	lr.Report.SetColOutlineLevel(sheetName, GetColumn(column), 1)
+
+	row := 4
+	for _, lCode := range fr.LaborCodes {
+		for _, emp := range lr.Employees {
+			actual := emp.GetWorkedHoursForLabor(
+				lCode.ChargeNumber, lCode.Extension, fr.StartDate,
+				fr.EndDate.AddDate(0, 0, 1))
+			forecast := emp.GetForecastHours(lCode.ChargeNumber,
+				lCode.Extension, fr.StartDate,
+				fr.EndDate.AddDate(0, 0, 1),
+				maps.Values(lr.Workcodes))
+			if actual > 0.0 || forecast > 0.0 {
+				// show employee for this labor code
+				row++
+
+			}
+		}
+	}
 
 	return nil
 }

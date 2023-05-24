@@ -26,6 +26,9 @@
         [reportType]="reportType"></app-report-schedule>
       <app-report-leave-list *ngIf="reportType === 'ptoholiday'"
         [reportType]="reportType"></app-report-leave-list>
+      <app-report-charge-number 
+        *ngIf="reportType === 'chargenumber'"
+        [reportType]="reportType"></app-report-charge-number>
     </mat-card-content>
   </mat-card>
 </div>
