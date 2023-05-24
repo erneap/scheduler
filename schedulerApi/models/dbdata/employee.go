@@ -933,3 +933,14 @@ func (e *Employee) GetForecastHours(chgno, ext string,
 
 	return answer
 }
+
+func (e *Employee) GetLastWorkday() time.Time {
+	sort.Sort(ByEmployeeWork(e.Work))
+	answer := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
+	if len(e.Work) > 0 {
+		work := e.Work[len(e.Work)-1]
+		answer = time.Date(work.DateWorked.Year(), work.DateWorked.Month(),
+			work.DateWorked.Day(), 0, 0, 0, 0, time.UTC)
+	}
+	return answer
+}

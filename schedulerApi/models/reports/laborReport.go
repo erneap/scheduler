@@ -368,24 +368,6 @@ func (lr *LaborReport) CreateStyles() error {
 			{Type: "bottom", Color: "000000", Style: 1},
 		},
 		Fill: excelize.Fill{Type: "pattern", Color: []string{"DA9694"}, Pattern: 1},
-		Font: &excelize.Font{Bold: false, Size: 12, Color: "000000", Family: "Calibri Light"},
-		Alignment: &excelize.Alignment{Horizontal: "right", Vertical: "center",
-			WrapText: true},
-		CustomNumFmt: &sumFmt,
-	})
-	if err != nil {
-		return err
-	}
-	lr.Styles["sum"] = style
-
-	style, err = lr.Report.NewStyle(&excelize.Style{
-		Border: []excelize.Border{
-			{Type: "left", Color: "000000", Style: 1},
-			{Type: "top", Color: "000000", Style: 1},
-			{Type: "right", Color: "000000", Style: 1},
-			{Type: "bottom", Color: "000000", Style: 1},
-		},
-		Fill: excelize.Fill{Type: "pattern", Color: []string{"DA9694"}, Pattern: 1},
 		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
 		Alignment: &excelize.Alignment{Horizontal: "right", Vertical: "center",
 			WrapText: true},
@@ -627,17 +609,17 @@ func (lr *LaborReport) CreateContractReport(
 
 	style = lr.Styles["peopleheader"]
 	lr.Report.SetCellStyle(sheetName, "A4", "L4", style)
-	lr.Report.SetCellValue(sheetName, "B4", "CLIN")
-	lr.Report.SetCellValue(sheetName, "C4", "SLIN")
-	lr.Report.SetCellValue(sheetName, "D4", "Company")
-	lr.Report.SetCellValue(sheetName, "E4", "Location")
-	lr.Report.SetCellValue(sheetName, "F4", "Labor NWA")
-	lr.Report.SetCellValue(sheetName, "G4", "Last Name")
-	lr.Report.SetCellValue(sheetName, "H4", "Labor Category")
-	lr.Report.SetCellValue(sheetName, "I4", "Employee ID")
-	lr.Report.SetCellValue(sheetName, "J4", "PeopleSoft ID")
-	lr.Report.SetCellValue(sheetName, "K4", "Cost Center")
-	lr.Report.SetCellValue(sheetName, "L4", "Comments/Remarks")
+	lr.Report.SetCellValue(sheetName, "A4", "CLIN")
+	lr.Report.SetCellValue(sheetName, "B4", "SLIN")
+	lr.Report.SetCellValue(sheetName, "C4", "Company")
+	lr.Report.SetCellValue(sheetName, "D4", "Location")
+	lr.Report.SetCellValue(sheetName, "E4", "Labor NWA")
+	lr.Report.SetCellValue(sheetName, "F4", "Last Name")
+	lr.Report.SetCellValue(sheetName, "G4", "Labor Category")
+	lr.Report.SetCellValue(sheetName, "H4", "Employee ID")
+	lr.Report.SetCellValue(sheetName, "I4", "PeopleSoft ID")
+	lr.Report.SetCellValue(sheetName, "J4", "Cost Center")
+	lr.Report.SetCellValue(sheetName, "K4", "Comments/Remarks")
 
 	column := 12
 	for _, period := range fr.Periods {
@@ -687,6 +669,7 @@ func (lr *LaborReport) CreateContractReport(
 	row := 4
 	for _, lCode := range fr.LaborCodes {
 		for _, emp := range lr.Employees {
+			lastWorkday := emp.GetLastWorkday()
 			actual := emp.GetWorkedHoursForLabor(
 				lCode.ChargeNumber, lCode.Extension, fr.StartDate,
 				fr.EndDate.AddDate(0, 0, 1))
@@ -697,7 +680,72 @@ func (lr *LaborReport) CreateContractReport(
 			if actual > 0.0 || forecast > 0.0 {
 				// show employee for this labor code
 				row++
-
+				style = lr.Styles["peoplectr"]
+				lr.Report.SetCellStyle(sheetName, GetCellID(0, row), GetCellID(11, row),
+					style)
+				lr.Report.SetCellValue(sheetName, GetCellID(0, row), lCode.CLIN)
+				lr.Report.SetCellValue(sheetName, GetCellID(1, row), lCode.SLIN)
+				lr.Report.SetCellValue(sheetName, GetCellID(2, row),
+					emp.Data.CompanyInfo.Company)
+				lr.Report.SetCellValue(sheetName, GetCellID(3, row), lCode.Location)
+				lr.Report.SetCellValue(sheetName, GetCellID(4, row),
+					lCode.ChargeNumber+" "+lCode.Extension)
+				lr.Report.SetCellValue(sheetName, GetCellID(5, row), emp.Name.LastName)
+				lr.Report.SetCellValue(sheetName, GetCellID(6, row),
+					emp.Data.CompanyInfo.Rank)
+				lr.Report.SetCellValue(sheetName, GetCellID(7, row),
+					emp.Data.CompanyInfo.EmployeeID)
+				lr.Report.SetCellValue(sheetName, GetCellID(8, row),
+					emp.Data.CompanyInfo.AlternateID)
+				lr.Report.SetCellValue(sheetName, GetCellID(9, row),
+					emp.Data.CompanyInfo.CostCenter)
+				column = 12
+				var sumlist = []string{}
+				for _, period := range fr.Periods {
+					style = lr.Styles["sum"]
+					formula := ""
+					if len(period.Periods) > 1 {
+						formula = "=SUM(" + GetCellID(column+1, row) + ":" +
+							GetCellID(column+(len(period.Periods)-1), row) + ")"
+					} else {
+						formula = "=" + GetCellID(column+1, row)
+					}
+					cellID = GetCellID(column, row)
+					sumlist = append(sumlist, cellID)
+					lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+					lr.Report.SetCellFormula(sheetName, cellID, formula)
+					style = lr.Styles["cell"]
+					hours := 0.0
+					lr.Report.SetCellStyle(sheetName, GetCellID(column+1, row),
+						GetCellID(column+len(period.Periods), row), style)
+					for _, prd := range period.Periods {
+						column++
+						cellID = GetCellID(column, row)
+						last := time.Date(prd.Year(), prd.Month(), prd.Day()+1, 0, 0, 0,
+							0, time.UTC)
+						first := last.AddDate(0, 0, -7)
+						if first.Before(fr.StartDate) {
+							first = time.Date(fr.StartDate.Year(), fr.StartDate.Month(),
+								fr.StartDate.Day(), 0, 0, 0, 0, time.UTC)
+						}
+						if last.After(fr.EndDate.AddDate(0, 0, 1)) {
+							last = time.Date(fr.EndDate.Year(), fr.EndDate.Month(),
+								fr.EndDate.Day()+1, 0, 0, 0, 0, time.UTC)
+						}
+						style = lr.Styles["actual"]
+						hours = emp.GetWorkedHoursForLabor(lCode.ChargeNumber,
+							lCode.Extension, first, last)
+						if !current {
+							if last.After(lastWorkday) {
+								style = lr.Styles["forecast"]
+							}
+							hours += emp.GetForecastHours(lCode.ChargeNumber,
+								lCode.Extension, first, last, maps.Values(lr.Workcodes))
+						}
+						lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+						lr.Report.SetCellValue(sheetName, cellID, hours)
+					}
+				}
 			}
 		}
 	}
