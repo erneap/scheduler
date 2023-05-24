@@ -1,4 +1,4 @@
-package employees
+package dbdata
 
 import (
 	"errors"

@@ -8,8 +8,7 @@ import (
 	"time"
 
 	"github.com/erneap/scheduler/schedulerApi/middleware"
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
-	"github.com/erneap/scheduler/schedulerApi/models/users"
+	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,7 @@ func Login(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		c.JSON(http.StatusBadRequest,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "Trouble with request"})
 		return
 	}
@@ -31,7 +30,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		log.Println(err.Error())
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "User not found"})
 		return
 	}
@@ -41,12 +40,12 @@ func Login(c *gin.Context) {
 		err := services.UpdateUser(*user)
 		if err != nil {
 			c.JSON(http.StatusNotFound,
-				web.AuthenticationResponse{User: &users.User{},
+				web.AuthenticationResponse{User: &dbdata.User{},
 					Token: "", Exception: "Problem Updating Database"})
 			return
 		}
 		c.JSON(http.StatusUnauthorized,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: exception})
 		return
 	}
@@ -54,7 +53,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "Problem Updating Database"})
 		return
 	}
@@ -64,7 +63,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "Problem creating JWT Token"})
 		return
 	}
@@ -74,12 +73,12 @@ func Login(c *gin.Context) {
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
 			c.JSON(http.StatusNotFound,
-				web.AuthenticationResponse{User: &users.User{},
+				web.AuthenticationResponse{User: &dbdata.User{},
 					Token: "", Exception: err.Error()})
 		} else {
 			log.Println(err.Error())
 			c.JSON(http.StatusNotFound,
-				web.AuthenticationResponse{User: &users.User{},
+				web.AuthenticationResponse{User: &dbdata.User{},
 					Token: "", Exception: err.Error()})
 		}
 	}
@@ -88,14 +87,14 @@ func Login(c *gin.Context) {
 	team, err := services.GetTeam(emp.TeamID.Hex())
 	if err != nil {
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: err.Error()})
 	}
 
 	site, err := services.GetSite(team.ID.Hex(), emp.SiteID)
 	if err != nil {
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: err.Error()})
 	}
 
@@ -110,7 +109,7 @@ func Login(c *gin.Context) {
 			for _, usr := range usrs {
 				if usr.ID == emp.ID {
 					emp.Email = usr.EmailAddress
-					user := users.User{
+					user := dbdata.User{
 						ID:              usr.ID,
 						EmailAddress:    usr.EmailAddress,
 						BadAttempts:     usr.BadAttempts,
@@ -131,7 +130,7 @@ func Login(c *gin.Context) {
 			if err == nil {
 				emp.Work = append(emp.Work, work.Work...)
 			}
-			sort.Sort(employees.ByEmployeeWork(emp.Work))
+			sort.Sort(dbdata.ByEmployeeWork(emp.Work))
 			site.Employees = append(site.Employees, emp)
 		}
 	}
@@ -152,7 +151,7 @@ func ChangePassword(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		c.JSON(http.StatusBadRequest,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "Trouble with request"})
 		return
 	}
@@ -160,7 +159,7 @@ func ChangePassword(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(data.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: err.Error()})
 		return
 	}
@@ -174,7 +173,7 @@ func ChangePassword(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "Problem Updating Database"})
 		return
 	}
@@ -186,7 +185,7 @@ func ChangeUser(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		c.JSON(http.StatusBadRequest,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "Trouble with request"})
 		return
 	}
@@ -194,7 +193,7 @@ func ChangeUser(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(data.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "Couldn't convert to ObjectID"})
 		return
 	}
@@ -203,7 +202,7 @@ func ChangeUser(c *gin.Context) {
 	if user == nil {
 		log.Println(err)
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "User not found"})
 		return
 	}
@@ -238,7 +237,7 @@ func ChangeUser(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &users.User{},
+			web.AuthenticationResponse{User: &dbdata.User{},
 				Token: "", Exception: "Problem Updating Database"})
 		return
 	}
@@ -300,7 +299,7 @@ func AddUser(c *gin.Context) {
 
 	// check for employee by comparing first and last name
 	// attributes.  If exists, use the employee record object id for account.
-	user := users.User{
+	user := dbdata.User{
 		ID:           primitive.NewObjectID(),
 		EmailAddress: data.EmailAddress,
 		FirstName:    data.FirstName,
@@ -315,7 +314,7 @@ func AddUser(c *gin.Context) {
 	}
 	newUser := services.AddUser(&user)
 	usrs = append(usrs, *newUser)
-	sort.Sort(users.ByUser(usrs))
+	sort.Sort(dbdata.ByUser(usrs))
 
 	c.JSON(http.StatusOK, web.UsersResponse{
 		Users:     usrs,

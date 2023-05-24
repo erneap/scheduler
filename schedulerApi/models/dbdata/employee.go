@@ -1,4 +1,4 @@
-package employees
+package dbdata
 
 import (
 	"errors"
@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/erneap/scheduler/schedulerApi/models/users"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -21,7 +20,7 @@ type Employee struct {
 	Email  string             `json:"email" bson:"email"`
 	Name   EmployeeName       `json:"name" bson:"name"`
 	Data   EmployeeData       `json:"data" bson:"data"`
-	User   *users.User        `json:"user,omitempty" bson:"-"`
+	User   *User              `json:"user,omitempty" bson:"-"`
 	Work   []Work             `json:"work,omitempty"`
 }
 
@@ -859,4 +858,78 @@ func (e *Employee) GetAssignment(start, end time.Time) (string, string) {
 		return parts[0], parts[1]
 	}
 	return "", ""
+}
+
+func (e *Employee) GetWorkedHours(start, end time.Time) float64 {
+	answer := 0.0
+
+	for _, wk := range e.Work {
+		if (wk.DateWorked.Equal(start) ||
+			wk.DateWorked.After(start)) &&
+			wk.DateWorked.Before(end) {
+			answer += wk.Hours
+		}
+	}
+
+	return answer
+}
+
+func (e *Employee) GetWorkedHoursForLabor(chgno, ext string,
+	start, end time.Time) float64 {
+	answer := 0.0
+
+	for _, wk := range e.Work {
+		if (wk.DateWorked.Equal(start) ||
+			wk.DateWorked.After(start)) &&
+			wk.DateWorked.Before(end) &&
+			strings.EqualFold(chgno, wk.ChargeNumber) &&
+			strings.EqualFold(ext, wk.Extension) {
+			answer += wk.Hours
+		}
+	}
+	return answer
+}
+
+func (e *Employee) GetForecastHours(chgno, ext string,
+	start, end time.Time, workcodes []Workcode) float64 {
+	answer := 0.0
+
+	// first check to see if assigned this labor code, if not
+	// return 0 hours
+	found := false
+	for _, lc := range e.Data.LaborCodes {
+		if strings.EqualFold(chgno, lc.ChargeNumber) &&
+			strings.EqualFold(ext, lc.Extension) {
+			found = true
+		}
+	}
+	if !found {
+		return 0.0
+	}
+
+	// now step through the days of the period to:
+	// 1) see if they had worked any charge numbers during
+	//		the period, if working add 0 hours
+	// 2) see if they were supposed to be working on this
+	//		date, compare workday code to workcodes to ensure
+	//		they weren't on leave.  If not on leave, add
+	// 		standard work day.
+	current := time.Date(start.Year(), start.Month(),
+		start.Day(), 0, 0, 0, 0, time.UTC)
+	for current.Before(end) {
+		hours := e.GetWorkedHours(current, current.AddDate(0, 0, 1))
+		if hours == 0.0 {
+			wd := e.GetWorkday(current, 0.0)
+			if wd != nil && wd.Code != "" {
+				for _, wc := range workcodes {
+					if strings.EqualFold(wc.Id, wd.Code) && !wc.IsLeave {
+						std := e.GetStandardWorkday(current)
+						answer += std
+					}
+				}
+			}
+		}
+	}
+
+	return answer
 }

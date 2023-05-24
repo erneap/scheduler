@@ -1,4 +1,4 @@
-package sites
+package dbdata
 
 type Workcode struct {
 	Id        string `json:"id" bson:"id"`

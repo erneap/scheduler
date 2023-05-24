@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
+	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 )
 
 type AuthenticationRequest struct {
@@ -51,10 +51,10 @@ type Message struct {
 }
 
 type NewEmployeeRequest struct {
-	TeamID   string             `json:"team"`
-	SiteID   string             `json:"site"`
-	Employee employees.Employee `json:"employee"`
-	Password string             `json:"password"`
+	TeamID   string          `json:"team"`
+	SiteID   string          `json:"site"`
+	Employee dbdata.Employee `json:"employee"`
+	Password string          `json:"password"`
 }
 
 type NewEmployeeAssignment struct {
@@ -120,8 +120,8 @@ func (ur *ChangeAssignmentRequest) DateValue() time.Time {
 }
 
 type NewEmployeeVariation struct {
-	EmployeeID string              `json:"employee"`
-	Variation  employees.Variation `json:"variation"`
+	EmployeeID string           `json:"employee"`
+	Variation  dbdata.Variation `json:"variation"`
 }
 
 type LeaveBalanceRequest struct {
@@ -145,6 +145,6 @@ type EmployeeLaborCodeRequest struct {
 }
 
 type EmployeeLeaveDayRequest struct {
-	EmployeeID string             `json:"employee"`
-	Leave      employees.LeaveDay `json:"leave"`
+	EmployeeID string          `json:"employee"`
+	Leave      dbdata.LeaveDay `json:"leave"`
 }

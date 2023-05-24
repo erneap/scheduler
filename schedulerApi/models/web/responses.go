@@ -1,43 +1,41 @@
 package web
 
 import (
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
-	"github.com/erneap/scheduler/schedulerApi/models/sites"
-	"github.com/erneap/scheduler/schedulerApi/models/users"
+	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 )
 
 type AuthenticationResponse struct {
-	User      *users.User         `json:"user,omitempty"`
-	Token     string              `json:"token"`
-	Employee  *employees.Employee `json:"employee,omitempty"`
-	Site      *sites.Site         `json:"site,omitempty"`
-	Team      *sites.Team         `json:"team,omitempty"`
-	Exception string              `json:"exception"`
+	User      *dbdata.User     `json:"user,omitempty"`
+	Token     string           `json:"token"`
+	Employee  *dbdata.Employee `json:"employee,omitempty"`
+	Site      *dbdata.Site     `json:"site,omitempty"`
+	Team      *dbdata.Team     `json:"team,omitempty"`
+	Exception string           `json:"exception"`
 }
 
 type EmployeeResponse struct {
-	Employee  *employees.Employee `json:"employee,omitempty"`
-	Exception string              `json:"exception"`
+	Employee  *dbdata.Employee `json:"employee,omitempty"`
+	Exception string           `json:"exception"`
 }
 
 type SiteResponse struct {
-	Team      *sites.Team `json:"team,omitempty"`
-	Site      *sites.Site `json:"site,omitempty"`
-	Exception string      `json:"exception"`
+	Team      *dbdata.Team `json:"team,omitempty"`
+	Site      *dbdata.Site `json:"site,omitempty"`
+	Exception string       `json:"exception"`
 }
 
 type IngestResponse struct {
-	Employees  []employees.Employee `json:"employees"`
-	IngestType string               `json:"ingest"`
-	Exception  string               `json:"exception"`
+	Employees  []dbdata.Employee `json:"employees"`
+	IngestType string            `json:"ingest"`
+	Exception  string            `json:"exception"`
 }
 
 type UsersResponse struct {
-	Users     []users.User `json:"users"`
-	Exception string       `json:"exception"`
+	Users     []dbdata.User `json:"users"`
+	Exception string        `json:"exception"`
 }
 
 type TeamsResponse struct {
-	Teams     []sites.Team `json:"teams,omitempty"`
-	Exception string       `json:"exception"`
+	Teams     []dbdata.Team `json:"teams,omitempty"`
+	Exception string        `json:"exception"`
 }

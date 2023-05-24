@@ -1,4 +1,4 @@
-package employees
+package dbdata
 
 type CompanyInfo struct {
 	Company     string `json:"company"`

@@ -3,18 +3,17 @@ package web
 import (
 	"time"
 
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
-	"github.com/erneap/scheduler/schedulerApi/models/users"
+	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 )
 
 type NewSiteRequest struct {
-	TeamID    string      `json:"team"`
-	SiteID    string      `json:"siteid"`
-	Name      string      `json:"name"`
-	UseMids   bool        `json:"mids"`
-	Offset    float64     `json:"offset"`
-	Leader    *users.User `json:"lead"`
-	Scheduler *users.User `json:"scheduler,omitempty"`
+	TeamID    string       `json:"team"`
+	SiteID    string       `json:"siteid"`
+	Name      string       `json:"name"`
+	UseMids   bool         `json:"mids"`
+	Offset    float64      `json:"offset"`
+	Leader    *dbdata.User `json:"lead"`
+	Scheduler *dbdata.User `json:"scheduler,omitempty"`
 }
 
 type CreateEmployeeLeaveBalances struct {
@@ -101,9 +100,9 @@ type UpdateSiteForecast struct {
 }
 
 type CreateTeamRequest struct {
-	Name            string     `json:"name"`
-	UseStdWorkcodes bool       `json:"useStdWorkcodes"`
-	Leader          users.User `json:"leader"`
+	Name            string      `json:"name"`
+	UseStdWorkcodes bool        `json:"useStdWorkcodes"`
+	Leader          dbdata.User `json:"leader"`
 }
 
 type UpdateTeamRequest struct {
@@ -141,10 +140,10 @@ type CreateCompanyHoliday struct {
 }
 
 type IngestChange struct {
-	EmployeeID string              `json:"employeeid"`
-	ChangeType string              `json:"changetype"`
-	Work       *employees.Work     `json:"work,omitempty"`
-	Leave      *employees.LeaveDay `json:"leave,omitempty"`
+	EmployeeID string           `json:"employeeid"`
+	ChangeType string           `json:"changetype"`
+	Work       *dbdata.Work     `json:"work,omitempty"`
+	Leave      *dbdata.LeaveDay `json:"leave,omitempty"`
 }
 
 type ManualIngestChanges struct {

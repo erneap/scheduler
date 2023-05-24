@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/erneap/scheduler/schedulerApi/converters"
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
+	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 	"github.com/erneap/scheduler/schedulerApi/models/ingest"
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
@@ -46,8 +46,8 @@ func GetIngestEmployees(c *gin.Context) {
 	})
 }
 
-func getEmployeesAfterIngest(team, site, company string) ([]employees.Employee, error) {
-	var companyEmployees []employees.Employee
+func getEmployeesAfterIngest(team, site, company string) ([]dbdata.Employee, error) {
+	var companyEmployees []dbdata.Employee
 	now := time.Now()
 
 	empls, err := services.GetEmployees(team, site)
@@ -66,11 +66,11 @@ func getEmployeesAfterIngest(team, site, company string) ([]employees.Employee, 
 			if err == nil && len(work.Work) > 0 {
 				emp.Work = append(emp.Work, work.Work...)
 			}
-			sort.Sort(employees.ByEmployeeWork(emp.Work))
+			sort.Sort(dbdata.ByEmployeeWork(emp.Work))
 			companyEmployees = append(companyEmployees, emp)
 		}
 	}
-	sort.Sort(employees.ByEmployees(companyEmployees))
+	sort.Sort(dbdata.ByEmployees(companyEmployees))
 
 	return companyEmployees, nil
 }
@@ -186,7 +186,7 @@ func IngestFiles(c *gin.Context) {
 							lvid = lv.ID
 						}
 					}
-					lv := employees.LeaveDay{
+					lv := dbdata.LeaveDay{
 						ID:        lvid + 1,
 						LeaveDate: rec.Date,
 						Code:      rec.Code,
@@ -203,7 +203,7 @@ func IngestFiles(c *gin.Context) {
 				} else {
 					// work object, so get work record object for employee and year, then
 					// add it to the work record, update it in the database.
-					wr := employees.Work{
+					wr := dbdata.Work{
 						DateWorked:   rec.Date,
 						ChargeNumber: rec.ChargeNumber,
 						Extension:    rec.Extension,
@@ -213,7 +213,7 @@ func IngestFiles(c *gin.Context) {
 					workrec, err := services.GetEmployeeWork(emp.ID.Hex(),
 						uint(rec.Date.Year()))
 					if err != nil {
-						workrec = &employees.EmployeeWorkRecord{
+						workrec = &dbdata.EmployeeWorkRecord{
 							ID:         primitive.NewObjectID(),
 							EmployeeID: emp.ID,
 							Year:       uint(rec.Date.Year()),
@@ -281,7 +281,7 @@ func ManualIngestActions(c *gin.Context) {
 				services.UpdateEmployeeWork(work)
 			} else {
 				empID, _ := primitive.ObjectIDFromHex(change.EmployeeID)
-				work = &employees.EmployeeWorkRecord{
+				work = &dbdata.EmployeeWorkRecord{
 					ID:         primitive.NewObjectID(),
 					EmployeeID: empID,
 					Year:       uint(change.Work.DateWorked.Year()),

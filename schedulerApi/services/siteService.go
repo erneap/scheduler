@@ -4,21 +4,20 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
-	"github.com/erneap/scheduler/schedulerApi/models/sites"
+	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 )
 
 // Every service will have functions for completing the CRUD functions
 // the retrieve functions will be for individual site and the whole list of
 // tea's sotes.
 
-func CreateSite(teamid string, id, name string) (*sites.Site, error) {
+func CreateSite(teamid string, id, name string) (*dbdata.Site, error) {
 	team, err := GetTeam(teamid)
 	if err != nil {
 		return nil, err
 	}
 
-	var answer *sites.Site
+	var answer *dbdata.Site
 
 	for _, site := range team.Sites {
 		if strings.EqualFold(site.ID, id) || strings.EqualFold(site.Name, name) {
@@ -26,7 +25,7 @@ func CreateSite(teamid string, id, name string) (*sites.Site, error) {
 		}
 	}
 	if answer == nil {
-		answer = &sites.Site{
+		answer = &dbdata.Site{
 			ID:   id,
 			Name: name,
 		}
@@ -40,35 +39,35 @@ func CreateSite(teamid string, id, name string) (*sites.Site, error) {
 	return answer, nil
 }
 
-func GetSite(teamid, siteid string) (*sites.Site, error) {
+func GetSite(teamid, siteid string) (*dbdata.Site, error) {
 	team, err := GetTeam(teamid)
 	if err != nil {
 		return nil, err
 	}
 
-	var answer sites.Site
+	var answer dbdata.Site
 	for _, site := range team.Sites {
 		if strings.EqualFold(site.ID, siteid) {
 			answer = site
 			emps, _ := GetEmployees(teamid, siteid)
 			answer.Employees = append(site.Employees, emps...)
-			sort.Sort(employees.ByEmployees(answer.Employees))
+			sort.Sort(dbdata.ByEmployees(answer.Employees))
 		}
 	}
 	return &answer, nil
 }
 
-func GetSites(teamid string) ([]sites.Site, error) {
+func GetSites(teamid string) ([]dbdata.Site, error) {
 	team, err := GetTeam(teamid)
 	if err != nil {
 		return nil, err
 	}
 
-	sort.Sort(sites.BySites(team.Sites))
+	sort.Sort(dbdata.BySites(team.Sites))
 	return team.Sites, nil
 }
 
-func UpdateSite(teamid string, nsite sites.Site) error {
+func UpdateSite(teamid string, nsite dbdata.Site) error {
 	team, err := GetTeam(teamid)
 	if err != nil {
 		return err

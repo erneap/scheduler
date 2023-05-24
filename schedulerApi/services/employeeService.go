@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/erneap/scheduler/schedulerApi/models/config"
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
-	"github.com/erneap/scheduler/schedulerApi/models/users"
+	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,8 +22,8 @@ import (
 // Most employees will have a log in account to allow them to view the
 // schedule data.  So a comparison of their possible authentication account is
 // made to ensure their object ID is the same.
-func CreateEmployee(emp employees.Employee, passwd, workgroup, teamID,
-	siteid string) (*employees.Employee, error) {
+func CreateEmployee(emp dbdata.Employee, passwd, workgroup, teamID,
+	siteid string) (*dbdata.Employee, error) {
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 	teamid, err := primitive.ObjectIDFromHex(teamID)
@@ -41,7 +40,7 @@ func CreateEmployee(emp employees.Employee, passwd, workgroup, teamID,
 	// first check to see of an employee already exists for this first and last
 	// name.  If present, change filter to include middle if not blank, but if
 	// middle is blank, return old employee record
-	var tEmp employees.Employee
+	var tEmp dbdata.Employee
 	err = empCol.FindOne(context.TODO(), filter).Decode(&tEmp)
 	if err == nil || err != mongo.ErrNoDocuments {
 		if emp.Name.MiddleName == "" {
@@ -66,13 +65,13 @@ func CreateEmployee(emp employees.Employee, passwd, workgroup, teamID,
 		"lastName":  emp.Name.LastName,
 	}
 
-	var user users.User
+	var user dbdata.User
 
 	err = userCol.FindOne(context.TODO(), filter).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		emp.ID = primitive.NewObjectID()
 		// create user record with provided password.
-		user = users.User{
+		user = dbdata.User{
 			ID:           emp.ID,
 			EmailAddress: emp.Email,
 			FirstName:    emp.Name.FirstName,
@@ -98,7 +97,7 @@ func CreateEmployee(emp employees.Employee, passwd, workgroup, teamID,
 	return &emp, nil
 }
 
-func GetEmployee(id string) (*employees.Employee, error) {
+func GetEmployee(id string) (*dbdata.Employee, error) {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
@@ -111,19 +110,19 @@ func GetEmployee(id string) (*employees.Employee, error) {
 		"_id": oEmpID,
 	}
 
-	var emp employees.Employee
+	var emp dbdata.Employee
 	err = empCol.FindOne(context.TODO(), filter).Decode(&emp)
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	var user users.User
+	var user dbdata.User
 	userCol.FindOne(context.TODO(), filter).Decode(&user)
 	emp.User = &user
 	return &emp, nil
 }
 
-func GetEmployeeByName(first, middle, last string) (*employees.Employee, error) {
+func GetEmployeeByName(first, middle, last string) (*dbdata.Employee, error) {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
@@ -133,7 +132,7 @@ func GetEmployeeByName(first, middle, last string) (*employees.Employee, error) 
 		"name.lastname":   last,
 	}
 
-	var emp employees.Employee
+	var emp dbdata.Employee
 	err := empCol.FindOne(context.TODO(), filter).Decode(&emp)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -150,7 +149,7 @@ func GetEmployeeByName(first, middle, last string) (*employees.Employee, error) 
 			return nil, err
 		}
 	}
-	var user users.User
+	var user dbdata.User
 	filter = bson.M{
 		"_id": emp.ID,
 	}
@@ -160,7 +159,7 @@ func GetEmployeeByName(first, middle, last string) (*employees.Employee, error) 
 	return &emp, nil
 }
 
-func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
+func GetEmployees(teamid, siteid string) ([]dbdata.Employee, error) {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
@@ -170,7 +169,7 @@ func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 		"site": siteid,
 	}
 
-	var employees []employees.Employee
+	var employees []dbdata.Employee
 
 	cursor, err := empCol.Find(context.TODO(), filter)
 	if err != nil {
@@ -185,7 +184,7 @@ func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 		filter = bson.M{
 			"_id": emp.ID,
 		}
-		var user users.User
+		var user dbdata.User
 		userCol.FindOne(context.TODO(), filter).Decode(&user)
 		emp.User = &user
 		employees[i] = emp
@@ -194,7 +193,7 @@ func GetEmployees(teamid, siteid string) ([]employees.Employee, error) {
 	return employees, nil
 }
 
-func GetEmployeesForTeam(teamid string) ([]employees.Employee, error) {
+func GetEmployeesForTeam(teamid string) ([]dbdata.Employee, error) {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 	userCol := config.GetCollection(config.DB, "authenticate", "users")
 
@@ -203,7 +202,7 @@ func GetEmployeesForTeam(teamid string) ([]employees.Employee, error) {
 		"team": oTID,
 	}
 
-	var employees []employees.Employee
+	var employees []dbdata.Employee
 
 	cursor, err := empCol.Find(context.TODO(), filter)
 	if err != nil {
@@ -218,7 +217,7 @@ func GetEmployeesForTeam(teamid string) ([]employees.Employee, error) {
 		filter = bson.M{
 			"_id": emp.ID,
 		}
-		var user users.User
+		var user dbdata.User
 		userCol.FindOne(context.TODO(), filter).Decode(&user)
 		emp.User = &user
 		employees[i] = emp
@@ -227,7 +226,7 @@ func GetEmployeesForTeam(teamid string) ([]employees.Employee, error) {
 	return employees, nil
 }
 
-func UpdateEmployee(emp *employees.Employee) error {
+func UpdateEmployee(emp *dbdata.Employee) error {
 	empCol := config.GetCollection(config.DB, "scheduler", "employees")
 
 	filter := bson.M{
@@ -255,7 +254,7 @@ func DeleteEmployee(empID string) error {
 		return errors.New("employee not found")
 	}
 
-	var user users.User
+	var user dbdata.User
 	err = userCol.FindOne(context.TODO(), filter).Decode(&user)
 	if err == nil {
 		found := false

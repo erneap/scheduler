@@ -8,8 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/erneap/scheduler/schedulerApi/models/employees"
-	"github.com/erneap/scheduler/schedulerApi/models/users"
+	"github.com/erneap/scheduler/schedulerApi/models/dbdata"
 	"github.com/erneap/scheduler/schedulerApi/models/web"
 	"github.com/erneap/scheduler/schedulerApi/services"
 	"github.com/gin-gonic/gin"
@@ -198,7 +197,7 @@ func CreateUserAccount(c *gin.Context) {
 	user := services.GetUser(id)
 
 	if user == nil {
-		user = &users.User{
+		user = &dbdata.User{
 			ID:           id,
 			EmailAddress: data.EmailAddress,
 			FirstName:    emp.Name.FirstName,
@@ -441,7 +440,7 @@ func CreateEmployeeVariation(c *gin.Context) {
 	data.Variation.ID = max + 1
 
 	emp.Data.Variations = append(emp.Data.Variations, data.Variation)
-	sort.Sort(employees.ByVariation(emp.Data.Variations))
+	sort.Sort(dbdata.ByVariation(emp.Data.Variations))
 
 	err = services.UpdateEmployee(emp)
 	if err != nil {
@@ -516,7 +515,7 @@ func UpdateEmployeeVariation(c *gin.Context) {
 					}
 				}
 				vari.SetScheduleDays()
-				sort.Sort(employees.ByWorkday(vari.Schedule.Workdays))
+				sort.Sort(dbdata.ByWorkday(vari.Schedule.Workdays))
 
 				count := uint(0)
 				for start.Before(vari.EndDate) || start.Equal(vari.EndDate) {
@@ -547,7 +546,7 @@ func UpdateEmployeeVariation(c *gin.Context) {
 		emp.Data.Variations[i] = vari
 	}
 
-	sort.Sort(employees.ByVariation(emp.Data.Variations))
+	sort.Sort(dbdata.ByVariation(emp.Data.Variations))
 
 	err = services.UpdateEmployee(emp)
 	if err != nil {
