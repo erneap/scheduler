@@ -8,6 +8,7 @@ type Site struct {
 	Workcenters     []Workcenter     `json:"workcenters,omitempty" bson:"workcenters,omitempty"`
 	LaborCodes      []LaborCode      `json:"laborCodes,omitempty" bson:"laborCodes,omitempty"`
 	ForecastReports []ForecastReport `json:"forecasts,omitempty" bson:"forecasts,omitempty"`
+	CofSReports     []CofSReport     `json:"cofs,omitempty" bson:"cofs,omitempty"`
 	Employees       []Employee       `json:"employees,omitempty" bson:"-"`
 }
 
