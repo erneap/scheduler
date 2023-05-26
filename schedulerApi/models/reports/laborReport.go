@@ -1,6 +1,7 @@
 package reports
 
 import (
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -22,9 +23,13 @@ type LaborReport struct {
 	Styles            map[string]int
 	ConditionalStyles map[string]int
 	Employees         []dbdata.Employee
+	StatsRow          int
+	CurrentAsOf       time.Time
 }
 
 func (lr *LaborReport) Create() error {
+	lr.CurrentAsOf = time.Now().UTC()
+	lr.StatsRow = 3
 	lr.Styles = make(map[string]int)
 	lr.ConditionalStyles = make(map[string]int)
 	lr.Workcodes = make(map[string]dbdata.Workcode)
@@ -103,6 +108,8 @@ func (lr *LaborReport) Create() error {
 	//////////////////////////////////////////////////////////
 	lr.CreateStyles()
 
+	lr.CreateStatisticsReport()
+
 	sort.Sort(dbdata.ByForecastReport(lr.ForecastReports))
 
 	for _, fr := range lr.ForecastReports {
@@ -121,6 +128,7 @@ func (lr *LaborReport) Create() error {
 func (lr *LaborReport) CreateStyles() error {
 	numFmt := "##0.0;[Red]##0.0;-;@"
 	sumFmt := "_(* #,##0.0_);_(* (#,##0.0);_(* \"-\"??_);_(@_)"
+	pctFmt := "##0.0%;[Red]##0.0%;-;@"
 	style, err := lr.Report.NewStyle(&excelize.Style{
 		Border: []excelize.Border{
 			{Type: "left", Color: "000000", Style: 0},
@@ -137,6 +145,22 @@ func (lr *LaborReport) CreateStyles() error {
 		return err
 	}
 	lr.Styles["header"] = style
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 0},
+			{Type: "right", Color: "000000", Style: 0},
+			{Type: "bottom", Color: "000000", Style: 0},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 18, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["headerctr"] = style
 
 	style, err = lr.Report.NewStyle(&excelize.Style{
 		Border: []excelize.Border{
@@ -154,6 +178,120 @@ func (lr *LaborReport) CreateStyles() error {
 		return err
 	}
 	lr.Styles["label"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 2},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12,
+			Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center",
+			Vertical: "center", TextRotation: 45,
+			WrapText: false},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["slantwhitelbl"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 2},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"6699ff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12,
+			Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center",
+			Vertical: "center", TextRotation: 45,
+			WrapText: false},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["slantbluelbl"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 2},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"00e600"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12,
+			Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center",
+			Vertical: "center", TextRotation: 45,
+			WrapText: false},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["slantgreenlbl"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 2},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12,
+			Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center",
+			Vertical: "center",
+			WrapText: false},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["whitelbl"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 2},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"6699ff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12,
+			Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center",
+			Vertical: "center",
+			WrapText: false},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["bluelbl"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 0},
+			{Type: "top", Color: "000000", Style: 2},
+			{Type: "right", Color: "000000", Style: 2},
+			{Type: "bottom", Color: "000000", Style: 2},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"00e600"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12,
+			Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center",
+			Vertical: "center",
+			WrapText: false},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["greenlbl"] = style
 
 	style, err = lr.Report.NewStyle(&excelize.Style{
 		Border: []excelize.Border{
@@ -323,7 +461,7 @@ func (lr *LaborReport) CreateStyles() error {
 	if err != nil {
 		return err
 	}
-	lr.Styles["liasonctr"] = style
+	lr.Styles["liaisonctr"] = style
 
 	style, err = lr.Report.NewStyle(&excelize.Style{
 		Border: []excelize.Border{
@@ -340,7 +478,7 @@ func (lr *LaborReport) CreateStyles() error {
 	if err != nil {
 		return err
 	}
-	lr.Styles["liasonleft"] = style
+	lr.Styles["liaisonleft"] = style
 
 	style, err = lr.Report.NewStyle(&excelize.Style{
 		Border: []excelize.Border{
@@ -351,7 +489,7 @@ func (lr *LaborReport) CreateStyles() error {
 		},
 		Fill: excelize.Fill{Type: "pattern", Color: []string{"DA9694"}, Pattern: 1},
 		Font: &excelize.Font{Bold: false, Size: 12, Color: "000000", Family: "Calibri Light"},
-		Alignment: &excelize.Alignment{Horizontal: "left", Vertical: "center",
+		Alignment: &excelize.Alignment{Horizontal: "right", Vertical: "center",
 			WrapText: true},
 		CustomNumFmt: &numFmt,
 	})
@@ -432,6 +570,184 @@ func (lr *LaborReport) CreateStyles() error {
 	}
 	lr.Styles["cellsum"] = style
 
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"c0c0c0"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["graytext"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"ffffff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 10, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["whitetext"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"6699ff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &numFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["bluenum"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"6699ff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &pctFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["bluepct"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"b3ccff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &numFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["ltbluenum"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"b3ccff"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &pctFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["ltbluepct"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"00e600"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &numFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["greennum"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"00e600"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &pctFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["greenpct"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"80ff80"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &numFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["ltgreennum"] = style
+
+	style, err = lr.Report.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "left", Color: "000000", Style: 1},
+			{Type: "top", Color: "000000", Style: 1},
+			{Type: "right", Color: "000000", Style: 1},
+			{Type: "bottom", Color: "000000", Style: 1},
+		},
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"80ff80"}, Pattern: 1},
+		Font: &excelize.Font{Bold: true, Size: 12, Color: "000000", Family: "Calibri Light"},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center",
+			WrapText: true},
+		CustomNumFmt: &pctFmt,
+	})
+	if err != nil {
+		return err
+	}
+	lr.Styles["ltgreenpct"] = style
+
 	// conditional styles
 	// slin/wbs yellowed or greened
 	format, err := lr.Report.NewConditionalStyle(
@@ -480,7 +796,7 @@ func (lr *LaborReport) CreateStyles() error {
 				{Type: "right", Color: "000000", Style: 1},
 				{Type: "bottom", Color: "000000", Style: 1},
 			},
-			Fill: excelize.Fill{Type: "pattern", Color: []string{"ffeb9c"}, Pattern: 1},
+			Fill: excelize.Fill{Type: "pattern", Color: []string{"c6efce"}, Pattern: 1},
 			Font: &excelize.Font{Bold: false, Size: 12, Color: "9c6500", Family: "Calibri Light"},
 			Alignment: &excelize.Alignment{Horizontal: "right", Vertical: "center",
 				WrapText: true},
@@ -508,7 +824,7 @@ func (lr *LaborReport) CreateStyles() error {
 	if err != nil {
 		return err
 	}
-	lr.ConditionalStyles["yellowed"] = format
+	lr.ConditionalStyles["yellowedleft"] = format
 
 	format, err = lr.Report.NewConditionalStyle(
 		&excelize.Style{
@@ -613,13 +929,14 @@ func (lr *LaborReport) CreateContractReport(
 	lr.Report.SetCellValue(sheetName, "B4", "SLIN")
 	lr.Report.SetCellValue(sheetName, "C4", "Company")
 	lr.Report.SetCellValue(sheetName, "D4", "Location")
-	lr.Report.SetCellValue(sheetName, "E4", "Labor NWA")
-	lr.Report.SetCellValue(sheetName, "F4", "Last Name")
-	lr.Report.SetCellValue(sheetName, "G4", "Labor Category")
-	lr.Report.SetCellValue(sheetName, "H4", "Employee ID")
-	lr.Report.SetCellValue(sheetName, "I4", "PeopleSoft ID")
-	lr.Report.SetCellValue(sheetName, "J4", "Cost Center")
-	lr.Report.SetCellValue(sheetName, "K4", "Comments/Remarks")
+	lr.Report.SetCellValue(sheetName, "E4", "WBS")
+	lr.Report.SetCellValue(sheetName, "F4", "Labor NWA")
+	lr.Report.SetCellValue(sheetName, "G4", "Last Name")
+	lr.Report.SetCellValue(sheetName, "H4", "Labor Category")
+	lr.Report.SetCellValue(sheetName, "I4", "Employee ID")
+	lr.Report.SetCellValue(sheetName, "J4", "PeopleSoft ID")
+	lr.Report.SetCellValue(sheetName, "K4", "Cost Center")
+	lr.Report.SetCellValue(sheetName, "L4", "Comments/Remarks")
 
 	column := 12
 	for _, period := range fr.Periods {
@@ -646,7 +963,7 @@ func (lr *LaborReport) CreateContractReport(
 		lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
 		lr.Report.SetCellValue(sheetName, cellID,
 			period.Month.Format("Jan-06"))
-		lr.Report.SetColOutlineLevel(sheetName, GetColumn(column), 1)
+		lr.Report.SetColOutlineLevel(sheetName, GetColumn(column), 0)
 		style = lr.Styles["dates"]
 		style2 := lr.Styles["weeks"]
 		for i, prd := range period.Periods {
@@ -656,20 +973,27 @@ func (lr *LaborReport) CreateContractReport(
 			cellID = GetCellID(column+i+1, 4)
 			lr.Report.SetCellStyle(sheetName, cellID, cellID, style2)
 			lr.Report.SetCellValue(sheetName, cellID, "Week"+strconv.Itoa(i+1))
-			lr.Report.SetColOutlineLevel(sheetName, GetColumn(column+i+1), 2)
+			lr.Report.SetColOutlineLevel(sheetName, GetColumn(column+i+1), 1)
 		}
 		column += len(period.Periods) + 1
 	}
 	style = lr.Styles["monthsumlbl"]
-	cellID := GetCellID(column, 3)
+	cellID := GetCellID(column, 4)
 	lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
 	lr.Report.SetCellValue(sheetName, cellID, "EAC")
-	lr.Report.SetColOutlineLevel(sheetName, GetColumn(column), 1)
+	lr.Report.SetColOutlineLevel(sheetName, GetColumn(column), 0)
+	lastWorkday := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
+	sort.Sort(dbdata.ByEmployees(lr.Employees))
+	for _, emp := range lr.Employees {
+		last := emp.GetLastWorkday()
+		if last.After(lastWorkday) {
+			lastWorkday = last
+		}
+	}
 
 	row := 4
 	for _, lCode := range fr.LaborCodes {
 		for _, emp := range lr.Employees {
-			lastWorkday := emp.GetLastWorkday()
 			actual := emp.GetWorkedHoursForLabor(
 				lCode.ChargeNumber, lCode.Extension, fr.StartDate,
 				fr.EndDate.AddDate(0, 0, 1))
@@ -681,32 +1005,43 @@ func (lr *LaborReport) CreateContractReport(
 				// show employee for this labor code
 				row++
 				style = lr.Styles["peoplectr"]
-				lr.Report.SetCellStyle(sheetName, GetCellID(0, row), GetCellID(11, row),
+				lStyle := lr.Styles["peopleleft"]
+				if strings.Contains(emp.Data.CompanyInfo.JobTitle, "Liaison") {
+					style = lr.Styles["liaisonctr"]
+					lStyle = lr.Styles["liaisonleft"]
+				}
+				lr.Report.SetCellStyle(sheetName, GetCellID(0, row), GetCellID(5, row),
+					style)
+				lr.Report.SetCellStyle(sheetName, GetCellID(6, row), GetCellID(6, row),
+					lStyle)
+				lr.Report.SetCellStyle(sheetName, GetCellID(7, row), GetCellID(11, row),
 					style)
 				lr.Report.SetCellValue(sheetName, GetCellID(0, row), lCode.CLIN)
 				lr.Report.SetCellValue(sheetName, GetCellID(1, row), lCode.SLIN)
 				lr.Report.SetCellValue(sheetName, GetCellID(2, row),
-					emp.Data.CompanyInfo.Company)
+					strings.ToUpper(emp.Data.CompanyInfo.Division))
 				lr.Report.SetCellValue(sheetName, GetCellID(3, row), lCode.Location)
-				lr.Report.SetCellValue(sheetName, GetCellID(4, row),
+				lr.Report.SetCellValue(sheetName, GetCellID(4, row), lCode.WBS)
+				lr.Report.SetCellValue(sheetName, GetCellID(5, row),
 					lCode.ChargeNumber+" "+lCode.Extension)
-				lr.Report.SetCellValue(sheetName, GetCellID(5, row), emp.Name.LastName)
-				lr.Report.SetCellValue(sheetName, GetCellID(6, row),
-					emp.Data.CompanyInfo.Rank)
+				lr.Report.SetCellValue(sheetName, GetCellID(6, row), emp.Name.LastName)
 				lr.Report.SetCellValue(sheetName, GetCellID(7, row),
-					emp.Data.CompanyInfo.EmployeeID)
+					emp.Data.CompanyInfo.Rank)
 				lr.Report.SetCellValue(sheetName, GetCellID(8, row),
-					emp.Data.CompanyInfo.AlternateID)
+					emp.Data.CompanyInfo.EmployeeID)
 				lr.Report.SetCellValue(sheetName, GetCellID(9, row),
+					emp.Data.CompanyInfo.AlternateID)
+				lr.Report.SetCellValue(sheetName, GetCellID(10, row),
 					emp.Data.CompanyInfo.CostCenter)
-				column = 12
+				column = 11
 				var sumlist = []string{}
 				for _, period := range fr.Periods {
+					column++
 					style = lr.Styles["sum"]
 					formula := ""
 					if len(period.Periods) > 1 {
 						formula = "=SUM(" + GetCellID(column+1, row) + ":" +
-							GetCellID(column+(len(period.Periods)-1), row) + ")"
+							GetCellID(column+(len(period.Periods)), row) + ")"
 					} else {
 						formula = "=" + GetCellID(column+1, row)
 					}
@@ -714,10 +1049,7 @@ func (lr *LaborReport) CreateContractReport(
 					sumlist = append(sumlist, cellID)
 					lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
 					lr.Report.SetCellFormula(sheetName, cellID, formula)
-					style = lr.Styles["cell"]
 					hours := 0.0
-					lr.Report.SetCellStyle(sheetName, GetCellID(column+1, row),
-						GetCellID(column+len(period.Periods), row), style)
 					for _, prd := range period.Periods {
 						column++
 						cellID = GetCellID(column, row)
@@ -743,22 +1075,236 @@ func (lr *LaborReport) CreateContractReport(
 								lCode.Extension, first, last, maps.Values(lr.Workcodes))
 						}
 						lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+						format := lr.ConditionalStyles["cellpink"]
+						lr.Report.SetConditionalFormat(sheetName, cellID,
+							[]excelize.ConditionalFormatOptions{
+								{Type: "cell", Criteria: "==", Format: format, Value: "0"},
+							})
 						lr.Report.SetCellValue(sheetName, cellID, hours)
 					}
 				}
+				style = lr.Styles["monthsum"]
+				column++
+				cellID = GetCellID(column, row)
+				formula := ""
+				for _, val := range sumlist {
+					if formula == "" {
+						formula += "="
+					} else {
+						formula += "+"
+					}
+					formula += val
+				}
+				lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+				format := lr.ConditionalStyles["pinkright"]
+				lr.Report.SetConditionalFormat(sheetName, cellID,
+					[]excelize.ConditionalFormatOptions{
+						{Type: "cell", Criteria: ">",
+							Format: format,
+							Value:  strconv.FormatFloat(lCode.HoursPerEmployee, 'f', 1, 64),
+						},
+					})
+				format = lr.ConditionalStyles["greenedright"]
+				lr.Report.SetConditionalFormat(sheetName, cellID,
+					[]excelize.ConditionalFormatOptions{
+						{Type: "cell", Criteria: "<=",
+							Format: format,
+							Value:  strconv.FormatFloat(lCode.HoursPerEmployee, 'f', 1, 64),
+						},
+					})
+				lr.Report.SetCellFormula(sheetName, cellID, formula)
 			}
+		}
+		if current {
+			days := math.Ceil(fr.EndDate.Sub(fr.StartDate).Hours() / 24.0)
+			daysToNow := math.Ceil(lr.CurrentAsOf.Sub(fr.StartDate).Hours() / 24.0)
+			lr.StatsRow += 1
+			codeTxt := lCode.ChargeNumber + " " + lCode.Extension
+			totalHours := lCode.HoursPerEmployee * float64(lCode.MinimumEmployees)
+			perDay := totalHours / days
+			codeHours := perDay * daysToNow
+			pctStyle := 0
+
+			bLight := (lr.StatsRow%2 == 0)
+			if bLight {
+				style = lr.Styles["graytext"]
+			} else {
+				style = lr.Styles["whitetext"]
+			}
+			lr.Report.SetCellStyle("Statistics", GetCellID(0,
+				lr.StatsRow), GetCellID(2, lr.StatsRow), style)
+			lr.Report.SetCellValue("Statistics", GetCellID(0,
+				lr.StatsRow), codeTxt)
+			lr.Report.SetCellValue("Statistics", GetCellID(1,
+				lr.StatsRow), fr.StartDate.Format("01/02/2006"))
+			lr.Report.SetCellValue("Statistics", GetCellID(2,
+				lr.StatsRow), fr.EndDate.Format("01/02/2006"))
+			if bLight {
+				style = lr.Styles["bluenum"]
+				pctStyle = lr.Styles["bluepct"]
+			} else {
+				style = lr.Styles["ltbluenum"]
+				pctStyle = lr.Styles["ltbluepct"]
+			}
+			lr.Report.SetCellStyle("Statistics", GetCellID(3,
+				lr.StatsRow), GetCellID(5, lr.StatsRow), style)
+			lr.Report.SetCellStyle("Statistics", GetCellID(6,
+				lr.StatsRow), GetCellID(6, lr.StatsRow), pctStyle)
+			lr.Report.SetCellValue("Statistics", GetCellID(3,
+				lr.StatsRow), codeHours)
+			formula := "=SUMIF(" + sheetName + "!" +
+				GetCellID(5, 5) + ":" + GetCellID(5, row) + ", \"*" +
+				lCode.ChargeNumber + " " + lCode.Extension + "*\", " +
+				sheetName + "!" + GetCellID(column, 5) + ":" +
+				GetCellID(column, row) + ")"
+			lr.Report.SetCellFormula("Statistics", GetCellID(4,
+				lr.StatsRow), formula)
+			formula = "=" + GetCellID(4, lr.StatsRow) + "-" +
+				GetCellID(3, lr.StatsRow)
+			lr.Report.SetCellFormula("Statistics", GetCellID(5,
+				lr.StatsRow), formula)
+			formula = "=IFERROR(" + GetCellID(5, lr.StatsRow) +
+				"/" + GetCellID(3, lr.StatsRow) + ",\"N/A\")"
+			lr.Report.SetCellFormula("Statistics",
+				GetCellID(6, lr.StatsRow), formula)
+			if bLight {
+				style = lr.Styles["greennum"]
+				pctStyle = lr.Styles["greenpct"]
+			} else {
+				style = lr.Styles["ltgreennum"]
+				pctStyle = lr.Styles["ltgreenpct"]
+			}
+
+			lr.Report.SetCellStyle("Statistics", GetCellID(7,
+				lr.StatsRow), GetCellID(9, lr.StatsRow), style)
+			lr.Report.SetCellStyle("Statistics", GetCellID(10,
+				lr.StatsRow), GetCellID(10, lr.StatsRow), pctStyle)
+			lr.Report.SetCellValue("Statistics", GetCellID(7,
+				lr.StatsRow), totalHours)
+			formula = "=SUMIF(" + fr.Name + "_Forecast!" +
+				GetCellID(5, 5) + ":" + GetCellID(5, row) + ", \"*" +
+				lCode.ChargeNumber + " " + lCode.Extension + "*\", " +
+				fr.Name + "_Forecast!" + GetCellID(column, 5) + ":" +
+				GetCellID(column, row) + ")"
+			lr.Report.SetCellFormula("Statistics", GetCellID(8,
+				lr.StatsRow), formula)
+			formula = "=" + GetCellID(8, lr.StatsRow) + "-" +
+				GetCellID(7, lr.StatsRow)
+			lr.Report.SetCellFormula("Statistics", GetCellID(9,
+				lr.StatsRow), formula)
+			formula = "=IFERROR(" + GetCellID(9, lr.StatsRow) +
+				"/" + GetCellID(7, lr.StatsRow) + ",\"N/A\")"
+			lr.Report.SetCellFormula("Statistics",
+				GetCellID(10, lr.StatsRow), formula)
 		}
 	}
 
+	// add totals for each month summary and period summary
+	style = lr.Styles["monthsumlbl"]
+	cellID = GetCellID(3, row+1)
+	lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+	lr.Report.SetCellValue(sheetName, cellID, "TOTAL")
+	column = 11
+	for _, period := range fr.Periods {
+		column++
+		formula := "=SUM(" + GetCellID(column, 5) + ":" +
+			GetCellID(column, row) + ")"
+		style = lr.Styles["monthsum"]
+		cellID = GetCellID(column, row+1)
+		lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+		lr.Report.SetCellFormula(sheetName, cellID, formula)
+		for i := 0; i < len(period.Periods); i++ {
+			column++
+			formula = "=SUM(" + GetCellID(column, 5) + ":" +
+				GetCellID(column, row) + ")"
+			style = lr.Styles["cellsum"]
+			cellID = GetCellID(column, row+1)
+			lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+			lr.Report.SetCellFormula(sheetName, cellID, formula)
+			format := lr.ConditionalStyles["cellpink"]
+			lr.Report.SetConditionalFormat(sheetName, cellID,
+				[]excelize.ConditionalFormatOptions{
+					{Type: "cell", Criteria: "==", Format: format, Value: "0"},
+				})
+		}
+	}
+	column++
+	style = lr.Styles["monthsum"]
+	cellID = GetCellID(column, row+1)
+	formula := "=SUM(" + GetCellID(column, 5) + ":" +
+		GetCellID(column, row) + ")"
+	lr.Report.SetCellStyle(sheetName, cellID, cellID, style)
+	lr.Report.SetCellFormula(sheetName, cellID, formula)
+
+	// freeze pane at column G (Name)
+	lr.Report.SetPanes(sheetName, &excelize.Panes{
+		Freeze:      true,
+		XSplit:      7,
+		YSplit:      4,
+		TopLeftCell: "H5",
+		ActivePane:  "bottomLeft",
+		Panes: []excelize.PaneOptions{
+			{SQRef: "H5", ActiveCell: "H5", Pane: "bottomLeft"},
+		},
+	})
 	return nil
 }
 
 func (lr *LaborReport) CreateStatisticsReport() error {
 	sheetName := "Statistics"
-	lr.Report.NewSheet(sheetName)
+	ind, _ := lr.Report.NewSheet(sheetName)
 	options := excelize.ViewOptions{}
 	options.ShowGridLines = &[]bool{false}[0]
 	lr.Report.SetSheetView(sheetName, 0, &options)
+	lr.Report.SetActiveSheet(ind)
+
+	// set column widths
+	lr.Report.SetColWidth(sheetName, GetColumn(0),
+		GetColumn(0), 30.0)
+	lr.Report.SetColWidth(sheetName, GetColumn(1),
+		GetColumn(2), 12.0)
+	lr.Report.SetColWidth(sheetName, GetColumn(3),
+		GetColumn(10), 8.57)
+
+	// Current as of header
+	style := lr.Styles["headerctr"]
+	lr.Report.MergeCell(sheetName, "A1", "K1")
+	lr.Report.SetCellStyle(sheetName, "A1", "A1", style)
+	lr.Report.SetCellValue(sheetName, "A1", "Current As Of "+
+		lr.CurrentAsOf.Format("02 Jan 2006"))
+
+	lr.Report.SetRowHeight(sheetName, 1, 20.0)
+	lr.Report.SetRowHeight(sheetName, 2, 77.0)
+	style = lr.Styles["slantwhitelbl"]
+	lr.Report.SetCellStyle(sheetName, "B2", "C2", style)
+	lr.Report.SetCellValue(sheetName, "B2", "Start")
+	lr.Report.SetCellValue(sheetName, "C2", "End")
+	style = lr.Styles["slantbluelbl"]
+	lr.Report.SetCellStyle(sheetName, "D2", "G2", style)
+	lr.Report.SetCellValue(sheetName, "D2", "Alloted")
+	lr.Report.SetCellValue(sheetName, "E2", "Used")
+	lr.Report.SetCellValue(sheetName, "F2", "Over/Under")
+	lr.Report.SetCellValue(sheetName, "G2", "Percent")
+	style = lr.Styles["slantgreenlbl"]
+	lr.Report.SetCellStyle(sheetName, "H2", "K2", style)
+	lr.Report.SetCellValue(sheetName, "H2", "Alloted")
+	lr.Report.SetCellValue(sheetName, "I2", "Used/Projected")
+	lr.Report.SetCellValue(sheetName, "J2", "Over/Under")
+	lr.Report.SetCellValue(sheetName, "K2", "Percent")
+	style = lr.Styles["whitelbl"]
+	lr.Report.SetCellStyle(sheetName, "A2", "A2", style)
+	lr.Report.SetCellStyle(sheetName, "A3", "C3", style)
+	lr.Report.SetCellValue(sheetName, "A3", "Contract No/Ext")
+	lr.Report.MergeCell(sheetName, "B3", "C3")
+	lr.Report.SetCellValue(sheetName, "B3", "Contract Period")
+	style = lr.Styles["bluelbl"]
+	lr.Report.SetCellStyle(sheetName, "D3", "G3", style)
+	lr.Report.MergeCell(sheetName, "D3", "G3")
+	lr.Report.SetCellValue(sheetName, "D3", "Current")
+	style = lr.Styles["greenlbl"]
+	lr.Report.SetCellStyle(sheetName, "H3", "K3", style)
+	lr.Report.MergeCell(sheetName, "H3", "K3")
+	lr.Report.SetCellValue(sheetName, "H3", "Forecast")
 
 	return nil
 }

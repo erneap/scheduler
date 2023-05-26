@@ -929,6 +929,7 @@ func (e *Employee) GetForecastHours(chgno, ext string,
 				}
 			}
 		}
+		current = current.AddDate(0, 0, 1)
 	}
 
 	return answer

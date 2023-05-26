@@ -27,6 +27,10 @@ export class SiteComponent {
     protected siteService: SiteService,
     protected teamService: TeamService
   ) { 
+    const iSite = this.siteService.getSite();
+    if (iSite) {
+      this.site = iSite;
+    }
   }
 
   onChangedSite(iSite: ISite) {
