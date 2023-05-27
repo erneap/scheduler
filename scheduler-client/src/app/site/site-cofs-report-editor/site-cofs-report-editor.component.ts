@@ -55,7 +55,7 @@ export class SiteCofsReportEditorComponent {
       end: [new Date(), [Validators.required]],
     });
     this.companyForm = this.fb.group({
-      signature: ['', [Validators.required]],
+      signature: '',
       exercise: false,
     });
   }
