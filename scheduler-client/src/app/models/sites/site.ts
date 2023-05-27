@@ -1,4 +1,5 @@
 import { Employee, IEmployee } from "../employees/employee";
+import { CofSReport, ICofSReport } from "./cofsreport";
 import { ForecastReport, IForecastReport } from "./forecastreport";
 import { ILaborCode, LaborCode } from "./laborcode";
 import { IWorkcenter, Workcenter } from "./workcenter";
@@ -11,6 +12,7 @@ export interface ISite {
   workcenters?: IWorkcenter[];
   laborCodes?: ILaborCode[];
   forecasts?: IForecastReport[];
+  cofs?: ICofSReport[];
   employees?: IEmployee[];
 }
 
@@ -19,9 +21,10 @@ export class Site implements ISite {
   name: string;
   showMids: boolean;
   utcOffset?: number;
-  workcenters?: Workcenter[];
-  laborCodes?: LaborCode[];
-  forecasts?: ForecastReport[];
+  workcenters: Workcenter[];
+  laborCodes: LaborCode[];
+  forecasts: ForecastReport[];
+  cofs: CofSReport[];
   employees?: Employee[];
 
   constructor(site?: ISite) {
@@ -49,6 +52,12 @@ export class Site implements ISite {
         this.forecasts?.push(new ForecastReport(fc));
       });
       this.forecasts.sort((a,b) => a.compareTo(b))
+    }
+    this.cofs = [];
+    if (site && site.cofs && site.cofs.length > 0) {
+      site.cofs.forEach(cs => {
+        this.cofs.push(new CofSReport(cs));
+      })
     }
     this.employees = [];
     if (site && site.employees && site.employees.length > 0) {

@@ -11,6 +11,8 @@ import { SiteWorkcenterShiftComponent } from './site-workcenters/site-workcenter
 import { SiteWorkcenterPositionComponent } from './site-workcenters/site-workcenter-position/site-workcenter-position.component';
 import { SiteForecastReportPeriodsComponent } from './site-forecast-report-editor/site-forecast-report-periods/site-forecast-report-periods.component';
 import { SiteForecastReportLaborCodesComponent } from './site-forecast-report-editor/site-forecast-report-labor-codes/site-forecast-report-labor-codes.component';
+import { SiteReportEditorComponent } from './site-report-editor/site-report-editor.component';
+import { SiteCofsReportEditorComponent } from './site-cofs-report-editor/site-cofs-report-editor.component';
 
 
 @NgModule({
@@ -24,7 +26,9 @@ import { SiteForecastReportLaborCodesComponent } from './site-forecast-report-ed
        SiteWorkcenterShiftComponent,
        SiteWorkcenterPositionComponent,
        SiteForecastReportPeriodsComponent,
-       SiteForecastReportLaborCodesComponent
+       SiteForecastReportLaborCodesComponent,
+       SiteReportEditorComponent,
+       SiteCofsReportEditorComponent
   ],
   imports: [
     CommonModule,
