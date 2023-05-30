@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { ListItem } from 'src/app/generic/button-list/listitem';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { ForecastReport, IForecastReport } from 'src/app/models/sites/forecastreport';
 import { ISite, Site } from 'src/app/models/sites/site';
 import { SiteResponse } from 'src/app/models/web/siteWeb';
@@ -39,6 +41,7 @@ export class SiteForecastReportEditorComponent {
     protected dialogService: DialogService,
     protected siteService: SiteService,
     protected teamService: TeamService,
+    protected dialog: MatDialog,
     private fb: FormBuilder
   ) {
     const team = this.teamService.getTeam();
@@ -235,5 +238,49 @@ export class SiteForecastReportEditorComponent {
         }
       });
     }
+  }
+
+  onDeleteReport() {
+    if (this.selected !== 'new' && this.selected !== '') {
+      const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+        data: {title: 'Confirm CofS Report Deletion', 
+        message: 'Are you sure you want to delete this CofS Report?'},
+      });
+  
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === 'yes') {
+          const rptID = Number(this.selected);
+          this.authService.statusMessage = "Deleting CofS Report";
+          this.dialogService.showSpinner();
+          this.siteService.deleteForecastReport(this.teamid, 
+            this.site.id, rptID ).subscribe({
+            next: resp => {
+              this.dialogService.closeSpinner();
+              if (resp.headers.get('token') !== null) {
+                this.authService.setToken(resp.headers.get('token') as string);
+              }
+              const data: SiteResponse | null = resp.body;
+              if (data && data != null && data.site) {
+                this.site = new Site(data.site);
+                this.siteChanged.emit(new Site(data.site));
+                this.selected = 'new';
+                this.setReports();
+                this.setReport();
+                const site = this.siteService.getSite();
+                if (site && data.site.id === site.id) {
+                  this.siteService.setSite(new Site(data.site));
+                }
+                this.teamService.setSelectedSite(new Site(data.site));
+              }
+              this.authService.statusMessage = "Deletion complete"
+            },
+            error: err => {
+              this.dialogService.closeSpinner();
+              this.authService.statusMessage = err.message;
+            }
+          });
+        }
+      });
+    } 
   }
 }

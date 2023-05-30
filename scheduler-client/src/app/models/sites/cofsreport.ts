@@ -22,7 +22,7 @@ export class CofSCompany implements ICofSCompany {
     this.sortid = (co) ? co.sortid : 0;
     this.exercises = (co) ? co.exercises : false;
     this.laborcodes = [];
-    if (co && co.laborcodes.length > 0) {
+    if (co && co.laborcodes && co.laborcodes.length > 0) {
       co.laborcodes.forEach(lc => {
         this.laborcodes.push(new EmployeeLaborCode(lc));
       });
@@ -49,7 +49,7 @@ export class CofSReport implements ICofSReport {
   shortname: string;
   startdate: Date;
   enddate: Date;
-  companies: ICofSCompany[];
+  companies: CofSCompany[];
 
   constructor(rpt?: ICofSReport) {
     this.id = (rpt) ? rpt.id : 0;

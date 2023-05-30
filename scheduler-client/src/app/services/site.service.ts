@@ -7,7 +7,9 @@ import { IUser, User } from '../models/users/user';
 import { NewSiteRequest, NewSiteWorkcenter, SiteResponse, SiteWorkcenterUpdate,
   NewWorkcenterPosition, WorkcenterPositionUpdate, CreateSiteForecast,
   UpdateSiteForecast, 
-  UpdateSiteLaborCode} 
+  UpdateSiteLaborCode,
+  NewCofSReport,
+  UpdateCofSReport} 
   from '../models/web/siteWeb';
 import { CacheService } from './cache.service';
 import { NewSiteLaborCode } from '../models/web/siteWeb';
@@ -267,5 +269,44 @@ export class SiteService extends CacheService {
       value: value,
     };
     return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  createCofSReport(teamid: string, siteid: string, 
+    name: string, shortname: string, startdate: Date, 
+    enddate: Date): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site/cofs';
+    const data: NewCofSReport = {
+      teamid: teamid,
+      siteid: siteid,
+      rptname: name,
+      shortname: shortname,
+      startdate: startdate,
+      enddate: enddate,
+    };
+    return this.httpClient.post<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  updateCofSReport(teamid: string, siteid: string, 
+    rptid: number, field: string, value: string, 
+    companyid?: string, ): Observable<HttpResponse<SiteResponse>> {
+    const url = '/scheduler/api/v1/site/cofs';
+    const data: UpdateCofSReport = {
+      teamid: teamid,
+      siteid: siteid,
+      rptid: rptid,
+      field: field,
+      value: value,
+    };
+    if (companyid) {
+      data.companyid = companyid;
+    }
+    return this.httpClient.put<SiteResponse>(url, data, {observe: 'response'});
+  }
+
+  deleteCofSReport(teamid: string, siteid: string, 
+    rptid: number): Observable<HttpResponse<SiteResponse>> {
+    const url = `/scheduler/api/v1/site/cofs/${teamid}/`
+      + `${siteid}/${rptid}`;
+    return this.httpClient.delete<SiteResponse>(url, {observe: 'response'});
   }
 }

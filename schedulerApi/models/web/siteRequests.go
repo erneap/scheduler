@@ -162,3 +162,21 @@ type ReportRequest struct {
 	CompanyID  string `json:"companyid,omitempty"`
 	Password   string `json:"password,omitempty"`
 }
+
+type NewCofSReport struct {
+	TeamID    string    `json:"teamid"`
+	SiteID    string    `json:"siteid"`
+	Name      string    `json:"rptname"`
+	ShortName string    `json:"shortname"`
+	StartDate time.Time `json:"startdate"`
+	EndDate   time.Time `json:"enddate"`
+}
+
+type UpdateCofSReport struct {
+	TeamID    string `json:"teamid"`
+	SiteID    string `json:"siteid"`
+	ReportID  int    `json:"rptid"`
+	CompanyID string `json:"companyid,omitempty"`
+	Field     string `json:"field"`
+	Value     string `json:"value"`
+}

@@ -18,6 +18,7 @@
             <span class="flex-spacer"></span>
             <button mat-icon-button color="accent"
               *ngIf="selected !== 'new' && selected !== ''"
+              (click)="onDeleteReport()"
               matTooltip="Delete selected forecast report">
               <mat-icon>delete</mat-icon>
             </button>
@@ -30,11 +31,12 @@
               >{{item.label}}</div>
             </div>
           </div>
+          <H4>Certificate of Service Report Editor</H4>
           <form [formGroup]="reportForm" class="fxLayout-column-center"
             style="margin-top: 20px;">
             <div class="formFieldWider">
               <mat-form-field appearance="fill" class="extraWideField">
-                <mat-label>Forecast Report Name</mat-label>
+                <mat-label>CofS Report Name</mat-label>
                 <input matInput formControlName="name" (blur)="onChange('name')">
                 <mat-error *ngIf="reportForm.controls['name'].hasError('required')"
                   class="error">Name Required</mat-error>
@@ -42,10 +44,10 @@
             </div>
             <div class="formFieldWider">
               <mat-form-field appearance="fill" class="extraWideField">
-                <mat-label>Forecast Report Name</mat-label>
+                <mat-label>Short Name</mat-label>
                 <input matInput formControlName="short" (blur)="onChange('short')">
                 <mat-error *ngIf="reportForm.controls['short'].hasError('required')"
-                  class="error">Name Required</mat-error>
+                  class="error">Short Name Required</mat-error>
               </mat-form-field>
             </div>
             <div class="formFieldWider">
@@ -88,11 +90,14 @@
             <div class="flexlayout column center" style="width: 40px;">
               <mat-icon class="icon" 
                 *ngIf="compUnassigned.length > 0 && unassignedCompany !== ''"
+                (click)="onChange('addcompany')"
                 >
                 chevron_right
               </mat-icon>
               <mat-icon class="icon"
-                *ngIf="compAssigned.length > 0 && assignedCompany !== ''">
+                *ngIf="compAssigned.length > 0 && assignedCompany !== ''"
+                (click)="onChange('delcompany')"
+                >
                 chevron_left
               </mat-icon>
             </div>
@@ -120,6 +125,7 @@
               </div>
             </div>
           </div>
+          <h4>CofS Company Editor</h4>
           <form [formGroup]="companyForm" 
             class="flexlayout column center" 
             style="margin-top:10px;width: 99%;">
@@ -132,9 +138,72 @@
               </mat-form-field>
             </div>
             <div class="formFieldWide whiteback">
-              <mat-checkbox formControlName="exercise">
+              <mat-checkbox formControlName="exercises"
+                (click)="onChange('exercises')">
                 Show Exercise Section</mat-checkbox>
             </div>
+          </form>
+          <div class="flexlayout row center" 
+            *ngIf="assignedCompany !== ''">
+            <div class="flexlayout column center">
+              <h3>Unassigned Labor Codes</h3>
+              <div class="compList">
+                <div *ngFor="let item of laborUnassigned"
+                [class]="getUnassignedLaborStyle(item.id)"
+                (click)="onSelectUnassignedLabor(item.id)"
+                >{{item.label}}</div>
+              </div>
+            </div>
+            <div class="flexlayout column center" style="width: 40px;">
+              <mat-icon class="icon" 
+                *ngIf="laborUnassigned.length > 0 && unassignedLabor !== ''"
+                (click)="onChange('addlabor')"
+                >
+                chevron_right
+              </mat-icon>
+              <mat-icon class="icon"
+                *ngIf="laborAssigned.length > 0 && assignedLabor !== ''"
+                (click)="onChange('dellabor')"
+                >
+                chevron_left
+              </mat-icon>
+            </div>
+            <div class="flexlayout column center">
+              <h3>Assigned Labor Codes</h3>
+              <div class="flexlayout row center">
+                <div class="compList">
+                  <div *ngFor="let item of laborAssigned"
+                  [class]="getAssignedLaborStyle(item.id)"
+                  (click)="onSelectAssignedLabor(item.id)"
+                  >{{item.label}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h4 *ngIf="assignedCompany !== ''">Unlisted Labor Code </h4>
+          <form [formGroup]="laborForm" 
+            class="flexlayout row center"
+            *ngIf="assignedCompany !== ''">
+            <div class="formField">
+              <mat-form-field appearance="fill" class="fieldWidth">
+                <mat-label>Charge Number</mat-label>
+                <input matInput formControlName="chargenumber">
+                <mat-error *ngIf="laborForm.controls['chargenumber'].hasError('required')"
+                  class="error">Charge Number Required</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="formField">
+              <mat-form-field appearance="fill" class="fieldWidth">
+                <mat-label>Extension</mat-label>
+                <input matInput formControlName="extension">
+                <mat-error *ngIf="laborForm.controls['extension'].hasError('required')"
+                  class="error">Extension Required</mat-error>
+              </mat-form-field>
+            </div>
+            <button mat-raised-button color="accent"
+              *ngIf="laborForm.valid"
+              (click)="onAddLaborCharge()"
+            >Add</button>
           </form>
         </div>
       </div>

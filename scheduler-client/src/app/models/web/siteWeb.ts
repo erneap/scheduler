@@ -134,3 +134,21 @@ export interface ManualIngestChanges {
   companyid: string;
   changes: IngestChange[];
 }
+
+export interface NewCofSReport {
+  teamid: string;
+  siteid: string;
+  rptname: string;
+  shortname: string;
+  startdate: Date;
+  enddate: Date;
+}
+
+export interface UpdateCofSReport {
+  teamid: string;
+  siteid: string;
+  rptid: number;
+  companyid?: string;
+  field: string;
+  value: string;
+}

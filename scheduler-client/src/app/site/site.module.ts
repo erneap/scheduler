@@ -14,7 +14,6 @@ import { SiteForecastReportLaborCodesComponent } from './site-forecast-report-ed
 import { SiteReportEditorComponent } from './site-report-editor/site-report-editor.component';
 import { SiteCofsReportEditorComponent } from './site-cofs-report-editor/site-cofs-report-editor.component';
 
-
 @NgModule({
   declarations: [
   

@@ -1,9 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { ListItem } from 'src/app/generic/button-list/listitem';
+import { DeletionConfirmationComponent } from 'src/app/generic/deletion-confirmation/deletion-confirmation.component';
 import { CofSReport } from 'src/app/models/sites/cofsreport';
 import { ISite, Site } from 'src/app/models/sites/site';
 import { Team } from 'src/app/models/teams/team';
+import { SiteResponse } from 'src/app/models/web/siteWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
 import { SiteService } from 'src/app/services/site.service';
@@ -37,6 +40,11 @@ export class SiteCofsReportEditorComponent {
   companyForm: FormGroup;
   showSortUp: boolean = true;
   showSortDown: boolean = true;
+  laborUnassigned: ListItem[] = [];
+  laborAssigned: ListItem[] = [];
+  unassignedLabor: string = '';
+  assignedLabor: string = '';
+  laborForm: FormGroup
 
 
   constructor(
@@ -44,6 +52,7 @@ export class SiteCofsReportEditorComponent {
     protected dialogService: DialogService,
     protected siteService: SiteService,
     protected teamService: TeamService,
+    protected dialog: MatDialog,
     private fb: FormBuilder
   ) {
     const iTeam = this.teamService.getTeam();
@@ -56,8 +65,12 @@ export class SiteCofsReportEditorComponent {
     });
     this.companyForm = this.fb.group({
       signature: '',
-      exercise: false,
+      exercises: false,
     });
+    this.laborForm = this.fb.group({
+      chargenumber: ['', [Validators.required]],
+      extension: ['', [Validators.required]],
+    })
   }
 
   setReports() {
@@ -91,11 +104,127 @@ export class SiteCofsReportEditorComponent {
   }
 
   onChange(field: string) {
+    if (this.selected !== 'new') {
+      const rptID = Number(this.selected);
+      let companyid: string | undefined = undefined;
+      let value = '';
+      switch (field.toLowerCase()) {
+        case "short":
+          value = this.reportForm.value.short;
+          break;
+        case "name":
+          value = this.reportForm.value.name;
+          break;
+        case "startdate":
+          let dt = new Date(this.reportForm.value.startdate);
+          value = this.getDateString(dt);
+          break;
+        case "enddate":
+          let dte = new Date(this.reportForm.value.enddate);
+          value = this.getDateString(dte);
+          break;
+        case "addcompany":
+          value = this.unassignedCompany;
+          break;
+        case "delcompany":
+          value = this.assignedCompany;
+          break;
+        case "signature":
+          companyid = this.assignedCompany;
+          value = this.companyForm.value.signature;
+          break;
+        case "exercises":
+          companyid = this.assignedCompany;
+          value = `${this.companyForm.value.exercises}`;
+          break;
+        case "addlabor":
+          companyid = this.assignedCompany;
+          value = this.unassignedLabor;
+          break;
+        case "dellabor":
+          companyid = this.assignedCompany;
+          value = this.assignedLabor
+          break;
+      }
+      this.authService.statusMessage = "Updating CofS Report";
+      this.dialogService.showSpinner();
+      this.siteService.updateCofSReport(this.team.id, 
+        this.site.id, rptID, field, value, companyid)
+        .subscribe({
+        next: resp => {
+          this.dialogService.closeSpinner();
+          if (resp.headers.get('token') !== null) {
+            this.authService.setToken(resp.headers.get('token') as string);
+          }
+          const data: SiteResponse | null = resp.body;
+          if (data && data != null && data.site) {
+            this.site = new Site(data.site);
+            this.siteChanged.emit(new Site(data.site));
+            this.setReports();
+            this.setReport();
+            if (companyid) {
+              this.onSelectAssignedCompany(companyid);
+            }
+            const site = this.siteService.getSite();
+            if (site && data.site.id === site.id) {
+              this.siteService.setSite(new Site(data.site));
+            }
+            this.teamService.setSelectedSite(new Site(data.site));
+          }
+          this.authService.statusMessage = "Update complete"
+        },
+        error: err => {
+          this.dialogService.closeSpinner();
+          this.authService.statusMessage = err.message;
+        }
+      });
+    }
+  }
 
+  getDateString(dt: Date) : string {
+    let answer = '';
+    if (dt.getMonth() < 9) {
+      answer += "0"
+    }
+    answer += `${dt.getMonth() + 1}/`;
+    if (dt.getDate() < 10) {
+      answer += '0';
+    }
+    answer += `${dt.getDate()}/${dt.getFullYear()}`;
+    return answer;
   }
 
   onAddReport() {
-
+    this.authService.statusMessage = "Adding CofS report";
+    this.dialogService.closeSpinner();
+    this.siteService.createCofSReport(this.team.id, 
+      this.site.id, this.reportForm.value.name, 
+      this.reportForm.value.short, 
+      this.reportForm.value.start, 
+      this.reportForm.value.end).subscribe({
+      next: resp => {
+        this.dialogService.closeSpinner();
+        if (resp.headers.get('token') !== null) {
+          this.authService.setToken(resp.headers.get('token') as string);
+        }
+        const data: SiteResponse | null = resp.body;
+        if (data && data != null && data.site) {
+          this.site = new Site(data.site);
+          this.siteChanged.emit(new Site(data.site));
+          this.setReports();
+          const site = this.siteService.getSite();
+          if (site && data.site.id === site.id) {
+            this.siteService.setSite(new Site(data.site));
+          }
+          this.teamService.setSelectedSite(new Site(data.site));
+        }
+        this.authService.statusMessage = "Addition complete"
+      },
+      error: err => {
+        this.dialogService.closeSpinner();
+        this.authService.statusMessage = err.message;
+      }
+    });
   }
 
   setReport() {
@@ -142,6 +271,8 @@ export class SiteCofsReportEditorComponent {
     if (this.assignedCompany !== '') {
       this.onSelectAssignedCompany(this.assignedCompany);
     }
+    this.showSortDown = false;
+    this.showSortUp = false;
   }
 
   onSelectReport(id: string) {
@@ -158,6 +289,25 @@ export class SiteCofsReportEditorComponent {
   }
 
   onSelectAssignedCompany(id: string) {
+    this.laborAssigned = [];
+    this.laborUnassigned = [];
+    const iSite = this.siteService.getSite();
+    if (iSite) {
+      const site = new Site(iSite);
+      site.forecasts.forEach(fcst => {
+        if (fcst.startDate.getTime() <= this.report.enddate.getTime() &&
+        fcst.endDate.getTime() >= this.report.startdate.getTime()) {
+          if (fcst.laborCodes) {
+            fcst.laborCodes.forEach(lc => {
+              let label = `${lc.chargeNumber}-${lc.extension}`;
+              this.laborUnassigned.push(new ListItem(label, label));
+            });
+          }
+        }
+      });
+    }
+    this.showSortDown = false;
+    this.showSortUp = false;
     if (this.assignedCompany === id) {
       this.assignedCompany = '';
     } else {
@@ -165,19 +315,178 @@ export class SiteCofsReportEditorComponent {
     }
     if (this.assignedCompany === '') {
       this.companyForm.controls['signature'].setValue('');
-      this.companyForm.controls['exercise'].setValue(false);
+      this.companyForm.controls['exercises'].setValue(false);
     } else {
-      this.report.companies.forEach(co => {
+      this.report.companies.sort((a,b) => a.compareTo(b))
+      for (let c = 0; c < this.report.companies.length; c++) {
+        const co = this.report.companies[c];
         if (co.id === this.assignedCompany) {
+          this.showSortUp = (c > 0);
+          this.showSortDown = (c < this.report.companies.length - 1);
           this.companyForm.controls['signature']
             .setValue(co.signature);
-          this.companyForm.controls['exercise']
+          this.companyForm.controls['exercises']
             .setValue(co.exercises);
+          co.laborcodes.forEach(lc => {
+            let label = `${lc.chargeNumber}-${lc.extension}`;
+            let bFound = false;
+            for (let i=0; i < this.laborUnassigned.length && !bFound; i++) {
+              if (label === this.laborUnassigned[i].id) {
+                bFound = true;
+                this.laborUnassigned.splice(i, 1);
+              }
+            }
+            this.laborAssigned.push(new ListItem(label, label));
+          });
         }
-      });
+      }
     }
   }
 
   onChangeSort(direction: string) {
+    const rptID = Number(this.selected);
+    this.authService.statusMessage = "Changing Report Company Sort";
+    this.dialogService.showSpinner()
+    this.siteService.updateCofSReport(this.team.id, 
+      this.site.id, rptID, "sort", direction, 
+      this.assignedCompany).subscribe({
+      next: resp => {
+        this.dialogService.closeSpinner();
+        if (resp.headers.get('token') !== null) {
+          this.authService.setToken(resp.headers.get('token') as string);
+        }
+        const data: SiteResponse | null = resp.body;
+        if (data && data != null && data.site) {
+          this.site = new Site(data.site);
+          this.siteChanged.emit(new Site(data.site));
+          this.setReports();
+          this.setReport();
+          const site = this.siteService.getSite();
+          if (site && data.site.id === site.id) {
+            this.siteService.setSite(new Site(data.site));
+          }
+          this.teamService.setSelectedSite(new Site(data.site));
+        }
+        this.authService.statusMessage = "Addition complete"
+      },
+      error: err => {
+        this.dialogService.closeSpinner();
+        this.authService.statusMessage = err.message;
+      }
+    });
+  }
+
+  onSelectUnassignedLabor(id: string) {
+    if (this.unassignedLabor === id) {
+      this.unassignedLabor = '';
+    } else {
+      this.unassignedLabor = id;
+    }
+  }
+
+  onSelectAssignedLabor(id: string) {
+    if (this.assignedLabor === id) {
+      this.assignedLabor = '';
+    } else {
+      this.assignedLabor = id;
+    }
+  }
+
+  getUnassignedLaborStyle(id: string): string {
+    if (id === this.unassignedLabor) {
+      return "company active";
+    }
+    return "company";
+  }
+
+  getAssignedLaborStyle(id: string): string {
+    if (id === this.assignedLabor) {
+      return "company active";
+    }
+    return "company";
+  }
+
+  onAddLaborCharge() {
+    const chgNo = this.laborForm.value.chargenumber;
+    const ext = this.laborForm.value.extension;
+    const rptID = Number(this.selected);
+    const companyid = this.assignedCompany;
+    const field = "addlabor";
+    const value = `${chgNo}-${ext}`;
+    this.authService.statusMessage = "Updating CofS Report";
+    this.dialogService.showSpinner();
+    this.siteService.updateCofSReport(this.team.id, 
+      this.site.id, rptID, field, value, companyid)
+      .subscribe({
+      next: resp => {
+        this.dialogService.closeSpinner();
+        if (resp.headers.get('token') !== null) {
+          this.authService.setToken(resp.headers.get('token') as string);
+        }
+        const data: SiteResponse | null = resp.body;
+        if (data && data != null && data.site) {
+          this.site = new Site(data.site);
+          this.siteChanged.emit(new Site(data.site));
+          this.setReports();
+          this.setReport();
+          if (companyid) {
+            this.onSelectAssignedCompany(companyid);
+          }
+          const site = this.siteService.getSite();
+          if (site && data.site.id === site.id) {
+            this.siteService.setSite(new Site(data.site));
+          }
+          this.teamService.setSelectedSite(new Site(data.site));
+        }
+        this.authService.statusMessage = "Addition complete"
+      },
+      error: err => {
+        this.dialogService.closeSpinner();
+        this.authService.statusMessage = err.message;
+      }
+    });
+  }
+
+  onDeleteReport() {
+    if (this.selected !== 'new' && this.selected !== '') {
+      const dialogRef = this.dialog.open(DeletionConfirmationComponent, {
+        data: {title: 'Confirm CofS Report Deletion', 
+        message: 'Are you sure you want to delete this CofS Report?'},
+      });
+  
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === 'yes') {
+          const rptID = Number(this.selected);
+          this.authService.statusMessage = "Deleting CofS Report";
+          this.dialogService.showSpinner();
+          this.siteService.deleteCofSReport(this.team.id, this.site.id, rptID ).subscribe({
+            next: resp => {
+              this.dialogService.closeSpinner();
+              if (resp.headers.get('token') !== null) {
+                this.authService.setToken(resp.headers.get('token') as string);
+              }
+              const data: SiteResponse | null = resp.body;
+              if (data && data != null && data.site) {
+                this.site = new Site(data.site);
+                this.siteChanged.emit(new Site(data.site));
+                this.selected = 'new';
+                this.setReports();
+                this.setReport();
+                const site = this.siteService.getSite();
+                if (site && data.site.id === site.id) {
+                  this.siteService.setSite(new Site(data.site));
+                }
+                this.teamService.setSelectedSite(new Site(data.site));
+              }
+              this.authService.statusMessage = "Deletion complete"
+            },
+            error: err => {
+              this.dialogService.closeSpinner();
+              this.authService.statusMessage = err.message;
+            }
+          });
+        }
+      });
+    } 
   }
 }

@@ -1139,3 +1139,286 @@ func DeleteSiteForecastReport(c *gin.Context) {
 
 	c.JSON(http.StatusOK, web.SiteResponse{Team: nil, Site: site, Exception: ""})
 }
+
+func CreateSiteCofSReport(c *gin.Context) {
+	var data web.NewCofSReport
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.SiteResponse{Team: nil, Site: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	site, err := services.GetSite(data.TeamID, data.SiteID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.SiteResponse{Team: nil, Site: nil,
+				Exception: "Site Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	cID := 0
+	found := false
+	for _, rpt := range site.CofSReports {
+		if rpt.ID > cID {
+			cID = rpt.ID
+		}
+		if strings.EqualFold(rpt.Name, data.Name) ||
+			strings.EqualFold(rpt.ShortName, data.ShortName) {
+			found = true
+		}
+	}
+	if !found {
+		rpt := dbdata.CofSReport{
+			ID:        cID + 1,
+			Name:      data.Name,
+			ShortName: data.ShortName,
+			StartDate: data.StartDate,
+			EndDate:   data.EndDate,
+		}
+		site.CofSReports = append(site.CofSReports, rpt)
+	}
+
+	err = services.UpdateSite(data.TeamID, *site)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil,
+			Site: nil, Exception: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK,
+		web.SiteResponse{
+			Team: nil, Site: site, Exception: "",
+		})
+}
+
+func UpdateSiteCofSReport(c *gin.Context) {
+	var data web.UpdateCofSReport
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest,
+			web.SiteResponse{Team: nil, Site: nil, Exception: "Trouble with request"})
+		return
+	}
+
+	site, err := services.GetSite(data.TeamID, data.SiteID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.SiteResponse{Team: nil, Site: nil,
+				Exception: "Site Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	for r, rpt := range site.CofSReports {
+		if rpt.ID == data.ReportID {
+			switch strings.ToLower(data.Field) {
+			case "name":
+				rpt.Name = data.Value
+			case "short", "shortname":
+				rpt.ShortName = data.Value
+			case "startdate":
+				dt, err := time.ParseInLocation("01/02/2006",
+					data.Value, time.UTC)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, web.SiteResponse{
+						Team: nil, Site: nil,
+						Exception: err.Error()})
+				}
+				rpt.StartDate = dt
+			case "enddate":
+				dt, err := time.ParseInLocation("01/02/2006",
+					data.Value, time.UTC)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, web.SiteResponse{
+						Team: nil, Site: nil,
+						Exception: err.Error()})
+				}
+				rpt.EndDate = dt
+			case "dates":
+				dtparts := strings.Split(data.Value, "|")
+				if len(dtparts) > 1 {
+					dt, err := time.ParseInLocation("01/02/2006",
+						data.Value, time.UTC)
+					if err != nil {
+						c.JSON(http.StatusBadRequest, web.SiteResponse{
+							Team: nil, Site: nil,
+							Exception: err.Error()})
+					}
+					rpt.StartDate = dt
+					dt, err = time.ParseInLocation("01/02/2006",
+						data.Value, time.UTC)
+					if err != nil {
+						c.JSON(http.StatusBadRequest, web.SiteResponse{
+							Team: nil, Site: nil,
+							Exception: err.Error()})
+					}
+					rpt.EndDate = dt
+				}
+			case "addcompany":
+				found := false
+				sort := -1
+				for _, co := range rpt.Companies {
+					if strings.EqualFold(co.ID, data.Value) {
+						found = true
+						if co.SortID > sort {
+							sort = co.SortID
+						}
+					}
+				}
+				if !found {
+					co := dbdata.CofSCompany{
+						ID:             data.Value,
+						SignatureBlock: "",
+						SortID:         sort + 1,
+					}
+					rpt.Companies = append(rpt.Companies, co)
+				}
+			case "delcompany":
+				found := false
+				for i := 0; i < len(rpt.Companies) && !found; i++ {
+					if strings.EqualFold(rpt.Companies[i].ID, data.Value) {
+						found = true
+						rpt.Companies = append(rpt.Companies[:i], rpt.Companies[i+1:]...)
+					}
+				}
+			case "signature":
+				for c, co := range rpt.Companies {
+					if strings.EqualFold(co.ID, data.CompanyID) {
+						co.SignatureBlock = data.Value
+						rpt.Companies[c] = co
+					}
+				}
+			case "exercises":
+				for c, co := range rpt.Companies {
+					if strings.EqualFold(co.ID, data.CompanyID) {
+						val, _ := strconv.ParseBool(data.Value)
+						co.AddExercises = val
+						rpt.Companies[c] = co
+					}
+				}
+			case "addlabor":
+				for c, co := range rpt.Companies {
+					if strings.EqualFold(co.ID, data.CompanyID) {
+						parts := strings.Split(data.Value, "-")
+						found := false
+						for _, lc := range co.LaborCodes {
+							if strings.EqualFold(lc.ChargeNumber, parts[0]) &&
+								strings.EqualFold(lc.Extension, parts[1]) {
+								found = true
+							}
+						}
+						if !found {
+							lc := dbdata.EmployeeLaborCode{
+								ChargeNumber: parts[0],
+								Extension:    parts[1],
+							}
+							co.LaborCodes = append(co.LaborCodes, lc)
+						}
+						rpt.Companies[c] = co
+					}
+				}
+			case "dellabor":
+				for c, co := range rpt.Companies {
+					if strings.EqualFold(co.ID, data.CompanyID) {
+						parts := strings.Split(data.Value, "-")
+						found := false
+						for l := 0; l < len(co.LaborCodes) && !found; l++ {
+							lc := co.LaborCodes[l]
+							if strings.EqualFold(lc.ChargeNumber, parts[0]) &&
+								strings.EqualFold(lc.Extension, parts[1]) {
+								found = true
+								co.LaborCodes = append(co.LaborCodes[:l],
+									co.LaborCodes[l+1:]...)
+							}
+						}
+						rpt.Companies[c] = co
+					}
+				}
+			case "sort":
+				sort.Sort(dbdata.ByCofSCompany(rpt.Companies))
+				for c, co := range rpt.Companies {
+					if strings.EqualFold(co.ID, data.CompanyID) {
+						if strings.EqualFold(data.Value, "up") &&
+							c > 0 {
+							oldsort := co.SortID
+							co.SortID = rpt.Companies[c-1].SortID
+							rpt.Companies[c-1].SortID = oldsort
+						} else if strings.EqualFold(data.Value, "down") &&
+							c < len(rpt.Companies)-1 {
+							oldsort := co.SortID
+							co.SortID = rpt.Companies[c+1].SortID
+							rpt.Companies[c+1].SortID = oldsort
+						}
+						rpt.Companies[c] = co
+					}
+				}
+			}
+		}
+		site.CofSReports[r] = rpt
+	}
+
+	err = services.UpdateSite(data.TeamID, *site)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil,
+			Site: nil, Exception: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK,
+		web.SiteResponse{
+			Team: nil, Site: site, Exception: "",
+		})
+}
+
+func DeleteCofSReport(c *gin.Context) {
+	teamID := c.Param("teamid")
+	siteID := c.Param("siteid")
+	rptID, err := strconv.Atoi(c.Param("rptid"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+			Exception: err.Error()})
+	}
+
+	site, err := services.GetSite(teamID, siteID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, web.SiteResponse{Team: nil, Site: nil,
+				Exception: "Site Not Found"})
+		} else {
+			c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil, Site: nil,
+				Exception: err.Error()})
+		}
+		return
+	}
+
+	found := -1
+	for r, rpt := range site.CofSReports {
+		if rpt.ID == rptID {
+			found = r
+		}
+	}
+	if found >= 0 {
+		site.CofSReports = append(site.CofSReports[:found],
+			site.CofSReports[found+1:]...)
+	}
+
+	err = services.UpdateSite(teamID, *site)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.SiteResponse{Team: nil,
+			Site: nil, Exception: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK,
+		web.SiteResponse{
+			Team: nil, Site: site, Exception: "",
+		})
+}

@@ -127,6 +127,14 @@ func main() {
 						controllers.DeleteSiteLaborCode)
 				}
 			}
+
+			cofs := site.Group("/cofs")
+			{
+				cofs.POST("/", controllers.CreateSiteCofSReport)
+				cofs.PUT("/", controllers.UpdateSiteCofSReport)
+				cofs.DELETE("/:teamid/:siteid/:rptid",
+					controllers.DeleteCofSReport)
+			}
 		}
 
 		team := api.Group("/team", middleware.CheckJWT())
