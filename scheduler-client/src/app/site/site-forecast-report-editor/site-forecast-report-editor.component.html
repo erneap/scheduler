@@ -16,6 +16,7 @@
             <span class="flex-spacer"></span>
             <button mat-icon-button color="accent"
               *ngIf="selected !== 'new' && selected !== ''"
+              (click)="onDeleteReport()"
               matTooltip="Delete selected forecast report">
               <mat-icon>delete</mat-icon>
             </button>
