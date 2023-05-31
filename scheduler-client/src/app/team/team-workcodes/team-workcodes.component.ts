@@ -46,6 +46,7 @@ export class TeamWorkcodesComponent {
     }
     this.codeForm = this.fb.group({
       id: ['', [Validators.required]],
+      altcode: '',
       title: ['', [Validators.required]],
       start: '0',
       premimum: '',
@@ -78,6 +79,7 @@ export class TeamWorkcodesComponent {
     if (this.selected === 'new') {
       this.workcode = new Workcode();
       this.codeForm.controls['id'].setValue('');
+      this.codeForm.controls['altcode'].setValue('');
       this.codeForm.controls['title'].setValue('');
       this.codeForm.controls['start'].setValue('0');
       this.codeForm.controls['premimum'].setValue('');
@@ -89,6 +91,7 @@ export class TeamWorkcodesComponent {
           if (wc.id.toLowerCase() === this.selected.toLowerCase()) {
             this.workcode = new Workcode(wc);
             this.codeForm.controls['id'].setValue(wc.id);
+            this.codeForm.controls['altcode'].setValue(wc.altcode);
             this.codeForm.controls['title'].setValue(wc.title);
             this.codeForm.controls['start'].setValue(`${wc.start}`);
             this.codeForm.controls['premimum'].setValue(`${wc.shiftCode}`);
@@ -172,7 +175,8 @@ export class TeamWorkcodesComponent {
       Number(this.codeForm.value.start),
       this.codeForm.value.leave,
       this.codeForm.value.premimum,
-      colors[0], colors[1]).subscribe({
+      colors[0], colors[1], 
+      this.codeForm.value.altcode).subscribe({
         next: resp => {
           this.dialogService.closeSpinner();
           this.selected = this.codeForm.value.id;

@@ -3,6 +3,7 @@ export interface IWorkcode {
   title: string;
   start: number;
   shiftCode: number;
+  altcode: string;
   isLeave: boolean;
   textcolor: string;
   backcolor: string;
@@ -13,6 +14,7 @@ export class Workcode implements IWorkcode {
   title: string;
   start: number;
   shiftCode: number;
+  altcode: string;
   isLeave: boolean;
   textcolor: string;
   backcolor: string;
@@ -22,6 +24,7 @@ export class Workcode implements IWorkcode {
     this.title = (wc) ? wc.title : '';
     this.start = (wc) ? wc.start : 0;
     this.shiftCode = (wc) ? wc.shiftCode : 1;
+    this.altcode = (wc) ? wc.altcode : '';
     this.isLeave = (wc) ? wc.isLeave : false;
     this.textcolor = (wc) ? wc.textcolor : '000000';
     this.backcolor = (wc) ? wc.backcolor : 'ffffff';

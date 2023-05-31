@@ -129,6 +129,25 @@ func CreateReport(c *gin.Context) {
 		c.Data(http.StatusOK,
 			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 			b.Bytes())
+	case "cofs":
+		reportDate := time.Date(year, month, 1, 0, 0, 0, 0,
+			time.UTC)
+		fmt.Println(reportDate)
+		cofsReport := reports.ReportCofS{
+			Date:   reportDate,
+			TeamID: data.TeamID,
+			SiteID: data.SiteID,
+		}
+		if err := cofsReport.Create(); err != nil {
+			fmt.Println("Creation: " + err.Error())
+			c.JSON(http.StatusInternalServerError, "Creation: "+err.Error())
+			return
+		}
+		downloadName := "CofSReports-" + reportDate.Format("20060102") + ".zip"
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Disposition", "attachment; filename="+downloadName)
+		c.Data(http.StatusOK,
+			"application/zip", cofsReport.Buffer.Bytes())
 	default:
 		c.JSON(http.StatusBadRequest, web.SiteResponse{
 			Exception: "No valid report requested",

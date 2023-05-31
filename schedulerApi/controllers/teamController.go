@@ -181,6 +181,7 @@ func CreateWorkcode(c *gin.Context) {
 			wCode.TextColor = data.TextColor
 			wCode.IsLeave = data.IsLeave
 			wCode.ShiftCode = data.ShiftCode
+			wCode.AltCode = data.AltCode
 			wCode.StartTime = data.StartTime
 			found = true
 			team.Workcodes[w] = wCode
@@ -192,6 +193,7 @@ func CreateWorkcode(c *gin.Context) {
 			Title:     data.Title,
 			StartTime: data.StartTime,
 			ShiftCode: data.ShiftCode,
+			AltCode:   data.AltCode,
 			IsLeave:   data.IsLeave,
 			BackColor: data.BackColor,
 			TextColor: data.TextColor,
@@ -246,6 +248,8 @@ func UpdateTeamWorkcode(c *gin.Context) {
 				wCode.BackColor = data.Value
 			case "fore", "text", "textcolor":
 				wCode.TextColor = data.Value
+			case "alt", "altcode":
+				wCode.AltCode = data.Value
 			case "colors":
 				colors := strings.Split(data.Value, "-")
 				wCode.TextColor = colors[0]

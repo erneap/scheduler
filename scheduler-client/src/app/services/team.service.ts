@@ -80,7 +80,7 @@ export class TeamService extends CacheService {
   }
 
   addTeamWorkcode(team: string, workcode: string, title: string, start: number,
-  isLeave: boolean, premimum: string, text: string, back: string): 
+  isLeave: boolean, premimum: string, text: string, back: string, alt: string): 
   Observable<HttpResponse<SiteResponse>> {
     const url = '/scheduler/api/v1/team/workcode';
     const data: CreateTeamWorkcodeRequest = {
@@ -89,6 +89,7 @@ export class TeamService extends CacheService {
       title: title,
       start: start,
       shiftCode: premimum,
+      altcode: alt,
       isLeave: isLeave,
       textcolor: text,
       backcolor: back,

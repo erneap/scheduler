@@ -29,6 +29,8 @@
       <app-report-charge-number 
         *ngIf="reportType === 'chargenumber'"
         [reportType]="reportType"></app-report-charge-number>
+      <app-report-cert-of-service *ngIf="reportType === 'cofs'"
+        [reportType]="reportType"></app-report-cert-of-service>
     </mat-card-content>
   </mat-card>
 </div>

@@ -64,23 +64,44 @@ export class SiteEmployeeLaborCodesComponent {
         this.site = new Site(iSite);
       }
     }
-    if (this.site && this.site.forecasts) {
-      this.site.forecasts.forEach(fcst => {
-        if (fcst.laborCodes) {
-          fcst.laborCodes.forEach(lc => {
-            if (lc.startDate.getTime() < end.getTime() 
-              && lc.endDate.getTime() > start.getTime()) {
-              const elc: LaborCharge = {
-                chargenumber: lc.chargeNumber,
-                extension: lc.extension,
-                checked: this.employee.data.hasLaborCode(lc.chargeNumber, 
-                  lc.extension),
-              };
-              this.laborcodes.push(elc);
-            }
-          });
-        }
-      });
+    if (this.site) {
+      if (this.site.forecasts) {
+        this.site.forecasts.forEach(fcst => {
+          if (fcst.laborCodes) {
+            fcst.laborCodes.forEach(lc => {
+              if (lc.startDate.getTime() < end.getTime() 
+                && lc.endDate.getTime() > start.getTime()) {
+                const elc: LaborCharge = {
+                  chargenumber: lc.chargeNumber,
+                  extension: lc.extension,
+                  checked: this.employee.data.hasLaborCode(lc.chargeNumber, 
+                    lc.extension),
+                };
+                this.laborcodes.push(elc);
+              }
+            });
+          }
+        });
+      }
+      // Add generic workcodes for workcenter
+      if (this.site.workcenters) {
+        this.site.workcenters.forEach(wc => {
+          let elc: LaborCharge = {
+            chargenumber: wc.id,
+            extension: `${start.getFullYear()}`,
+            checked: this.employee.data.hasLaborCode(wc.id, 
+              `${start.getFullYear()}`),
+          }
+          this.laborcodes.push(elc);
+          elc = {
+            chargenumber: wc.id,
+            extension: `${end.getFullYear() + 1}`,
+            checked: this.employee.data.hasLaborCode(wc.id, 
+              `${end.getFullYear() + 1}`),
+          }
+          this.laborcodes.push(elc);
+        });
+      }
     }
   }
 

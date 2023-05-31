@@ -70,6 +70,7 @@
       "title": "Bereavement",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "B",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "cc0099"
@@ -79,6 +80,7 @@
       "title": "Holiday",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "H",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "0000ff"
@@ -88,6 +90,7 @@
       "title": "Jury Duty",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "J",
       "isLeave": true,
       "textcolor": "000000",
       "backcolor": "ff8000"
@@ -97,6 +100,7 @@
       "title": "Long-Term Disability",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "D",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "4d2600"
@@ -106,6 +110,7 @@
       "title": "Military Leave",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "M",
       "isLeave": true,
       "textcolor": "000000",
       "backcolor": "ff9966"
@@ -115,6 +120,7 @@
       "title": "Other Leave",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "99cc00"
@@ -124,6 +130,7 @@
       "title": "Patental Leave",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "F",
       "isLeave": true,
       "textcolor": "000000",
       "backcolor": "ff9999"
@@ -133,6 +140,7 @@
       "title": "Short-Term Disability",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "D",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "996633"
@@ -142,6 +150,7 @@
       "title": "Temporary Duty",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "T",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "ff794d"
@@ -151,15 +160,17 @@
       "title": "FLSA/Unpaid",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "000000"
     },
     {
       "id": "V",
-      "title": "Holiday",
+      "title": "PTO/Vacation",
       "start": 0,
       "shiftCode": "0",
+      "altcode": "P",
       "isLeave": true,
       "textcolor": "FFFFFF",
       "backcolor": "3366ff"

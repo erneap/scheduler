@@ -19,12 +19,13 @@ func (c ByCofSCompany) Less(i, j int) bool {
 func (c ByCofSCompany) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
 type CofSReport struct {
-	ID        int           `json:"id" bson:"id"`
-	Name      string        `json:"name" bson:"name"`
-	ShortName string        `json:"shortname" bson:"shortname"`
-	StartDate time.Time     `json:"startdate" bson:"startdate"`
-	EndDate   time.Time     `json:"enddate" bson:"enddate"`
-	Companies []CofSCompany `json:"companies,omitempty" bson:"companies,omitempty"`
+	ID             int           `json:"id" bson:"id"`
+	Name           string        `json:"name" bson:"name"`
+	ShortName      string        `json:"shortname" bson:"shortname"`
+	AssociatedUnit string        `json:"unit" bson:"unit"`
+	StartDate      time.Time     `json:"startdate" bson:"startdate"`
+	EndDate        time.Time     `json:"enddate" bson:"enddate"`
+	Companies      []CofSCompany `json:"companies,omitempty" bson:"companies,omitempty"`
 }
 
 type ByCofSReport []CofSReport

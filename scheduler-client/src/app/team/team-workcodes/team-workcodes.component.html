@@ -23,6 +23,14 @@
         </mat-form-field>
       </div>
       <div class="flexlayout row center">
+        <mat-form-field class="formField" 
+          *ngIf="workcode.isLeave || selected === 'new'">
+          <mat-label>Alternate ID</mat-label>
+          <input matInput formControlName="altcode"
+          (blur)="onUpdate('altcode')">
+        </mat-form-field>
+      </div>
+      <div class="flexlayout row center">
         <mat-form-field class="formFieldWide">
           <mat-label>Title</mat-label>
           <input matInput formControlName="title"

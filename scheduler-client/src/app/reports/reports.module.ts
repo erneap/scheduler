@@ -7,6 +7,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ReportScheduleComponent } from './report-schedule/report-schedule.component';
 import { ReportLeaveListComponent } from './report-leave-list/report-leave-list.component';
 import { ReportChargeNumberComponent } from './report-charge-number/report-charge-number.component';
+import { ReportCertOfServiceComponent } from './report-cert-of-service/report-cert-of-service.component';
 
 
 
@@ -15,7 +16,8 @@ import { ReportChargeNumberComponent } from './report-charge-number/report-charg
     ReportsComponent,
     ReportScheduleComponent,
     ReportLeaveListComponent,
-    ReportChargeNumberComponent
+    ReportChargeNumberComponent,
+    ReportCertOfServiceComponent
   ],
   imports: [
     CommonModule,
