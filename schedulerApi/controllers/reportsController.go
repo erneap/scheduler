@@ -148,6 +148,36 @@ func CreateReport(c *gin.Context) {
 		c.Header("Content-Disposition", "attachment; filename="+downloadName)
 		c.Data(http.StatusOK,
 			"application/zip", cofsReport.Buffer.Bytes())
+	case "midshift":
+		reportDate := time.Now().UTC()
+		midRpt := reports.MidShiftReport{
+			Date:   reportDate,
+			TeamID: data.TeamID,
+			SiteID: data.SiteID,
+		}
+
+		if err := midRpt.Create(); err != nil {
+			fmt.Println("Creation: " + err.Error())
+			c.JSON(http.StatusInternalServerError, "Creation: "+err.Error())
+			return
+		}
+		var b bytes.Buffer
+		if err := midRpt.Report.Write(&b); err != nil {
+			fmt.Println("Buffer Write: " + err.Error())
+			c.JSON(http.StatusInternalServerError, "Buffer Write: "+err.Error())
+			return
+		}
+
+		// get team to include in the download name
+		team, _ := services.GetTeam(data.TeamID)
+		site, _ := services.GetSite(data.TeamID, data.SiteID)
+		downloadName := strings.ReplaceAll(team.Name, " ", "_") + "-" + site.Name +
+			"-MidsSchedule.xlsx"
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Disposition", "attachment; filename="+downloadName)
+		c.Data(http.StatusOK,
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			b.Bytes())
 	default:
 		c.JSON(http.StatusBadRequest, web.SiteResponse{
 			Exception: "No valid report requested",

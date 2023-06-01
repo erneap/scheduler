@@ -8,6 +8,7 @@ import { ReportScheduleComponent } from './report-schedule/report-schedule.compo
 import { ReportLeaveListComponent } from './report-leave-list/report-leave-list.component';
 import { ReportChargeNumberComponent } from './report-charge-number/report-charge-number.component';
 import { ReportCertOfServiceComponent } from './report-cert-of-service/report-cert-of-service.component';
+import { ReportMidShiftComponent } from './report-mid-shift/report-mid-shift.component';
 
 
 
@@ -17,7 +18,8 @@ import { ReportCertOfServiceComponent } from './report-cert-of-service/report-ce
     ReportScheduleComponent,
     ReportLeaveListComponent,
     ReportChargeNumberComponent,
-    ReportCertOfServiceComponent
+    ReportCertOfServiceComponent,
+    ReportMidShiftComponent
   ],
   imports: [
     CommonModule,

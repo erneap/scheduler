@@ -18,7 +18,6 @@
             <mat-option value="chargenumber">Charge Number Status</mat-option>
             <mat-option value="midshift">Mid-Shift Rotation</mat-option>
             <mat-option value="cofs">Certificate Of Service</mat-option>
-            <mat-option value="contract">Contract Hours</mat-option>
           </mat-select>
         </mat-form-field>
       </form>
@@ -31,6 +30,8 @@
         [reportType]="reportType"></app-report-charge-number>
       <app-report-cert-of-service *ngIf="reportType === 'cofs'"
         [reportType]="reportType"></app-report-cert-of-service>
+      <app-report-mid-shift *ngIf="reportType === 'midshift'"
+        [reportType]="reportType"></app-report-mid-shift>
     </mat-card-content>
   </mat-card>
 </div>
