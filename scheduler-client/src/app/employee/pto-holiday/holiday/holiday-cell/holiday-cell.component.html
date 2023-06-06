@@ -1,5 +1,5 @@
 <div class="fxLayout-row-center" [style]="cellBackground">
-  <div class="code">{{holiday.id.toUpperCase()}}</div>
+  <div class="code">{{getHolidayID()}}</div>
   <div class="referenceDate">{{referenceDate}}</div>
   <div class="dates">
     <app-holiday-cell-display *ngFor="let day of holiday.leaveDays" 

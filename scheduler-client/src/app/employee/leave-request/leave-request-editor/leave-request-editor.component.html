@@ -19,6 +19,7 @@
       </div>
       <div class="formFieldWide">
         <mat-form-field class="fieldWidthWide">
+          <mat-label>Primary Leave Code</mat-label>
           <mat-select formControlName="primarycode"
             (selectionChange)="processChange('code')">
             <mat-option *ngFor="let wc of leaveList" [value]="wc.id">

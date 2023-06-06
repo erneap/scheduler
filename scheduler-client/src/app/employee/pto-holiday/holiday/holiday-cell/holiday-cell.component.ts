@@ -81,4 +81,8 @@ export class HolidayCellComponent {
       }
     })
   }
+
+  getHolidayID(): string {
+    return `${this.holiday.id.toUpperCase()}${this.holiday.sort}`;
+  }
 }
