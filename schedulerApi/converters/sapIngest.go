@@ -16,7 +16,7 @@ type SAPIngest struct {
 
 func (s *SAPIngest) Process() ([]ingest.ExcelRow, time.Time, time.Time) {
 	start := time.Now()
-	end := time.Now()
+	end := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
 	var records []ingest.ExcelRow
 	for _, file := range s.Files {
 		recs, fStart, fEnd := s.ProcessFile(file)
@@ -46,7 +46,7 @@ func (s *SAPIngest) ProcessFile(file *multipart.FileHeader) ([]ingest.ExcelRow, 
 		log.Println(err)
 	}
 	startDate := time.Now()
-	endDate := time.Now()
+	endDate := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
 	var records []ingest.ExcelRow
 	for i, row := range rows {
 		if i == 0 {

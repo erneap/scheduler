@@ -91,7 +91,7 @@ func IngestFiles(c *gin.Context) {
 	startDay := 0
 	var records []ingest.ExcelRow
 	start := time.Now()
-	end := time.Now()
+	end := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	for _, co := range team.Companies {
 		if co.ID == companyid {
@@ -107,6 +107,9 @@ func IngestFiles(c *gin.Context) {
 			Files: files,
 		}
 		records, start, end = sapIngest.Process()
+		fmt.Print(start)
+		fmt.Print(" - ")
+		fmt.Println(end)
 	}
 
 	// ensure the start date is the start of the company's workweek as provided
@@ -114,6 +117,9 @@ func IngestFiles(c *gin.Context) {
 	for int(start.Weekday()) != startDay {
 		start = start.AddDate(0, 0, -1)
 	}
+	fmt.Print(start)
+	fmt.Print(" - ")
+	fmt.Println(end)
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Algorithm for updating the employee records for leave and work
