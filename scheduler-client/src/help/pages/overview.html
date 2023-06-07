@@ -83,20 +83,45 @@
       define the workdays for the assignment.  All schedule 
       days start on a Sunday (first day of the week) and 
       include a multiple of 7 days.</li>
-    <li><b>Workday</b> – A workday contains the work code for a particular day numbered within the schedule, the work center assigned for that work and the number of hours expected to be worked.  A blank workday includes a blank code, a blank work center and zero hours.
+    <li><b>Workday</b> – A workday contains the work code for a particular day 
+      numbered within the schedule, the work center assigned for that work and 
+      the number of hours expected to be worked.  A blank workday includes a 
+      blank code, a blank work center and zero hours.</li>
       
-      2.4.	Variation – A variation is defined as a temporary alteration in the employee’s normal work schedule.  As an example:  The employee works Tuesday through Saturday, 8 hours per day, working day shift in the GEOINT work center, but you need them to work Mid Shift for 4 weeks.  You create a variation with the scheduled start and end dates for the variation, plus assign the variation’s schedule to the proper mid work code, work center and number of hours.  If the site is using a mid-rotation, you should set the IsMids flag of the variation to true.  A variation only has one schedule and can be set to whatever multiple of 7-day period to use.
+    <li><b>Variation</b> – A variation is defined as a temporary alteration in 
+      the employee’s normal work schedule.  As an example:  The employee works 
+      Tuesday through Saturday, 8 hours per day, working day shift in the GEOINT 
+      work center, but you need them to work Mid Shift for 4 weeks.  You create 
+      a variation with the scheduled start and end dates for the variation, 
+      plus assign the variation’s schedule to the proper mid work code, work 
+      center and number of hours.  If the site is using a mid-rotation, you 
+      should set the IsMids flag of the variation to true.  A variation only 
+      has one schedule and can be set to whatever multiple of 7-day period to 
+      use.</li>
       
-      2.5.	Leave – A leave is any non-workday.  It could be vacation time, a holiday, military or jury duty, or a few other options.  These are started by completing a leave request and the individual’s supervisor approving the leave.  All leaves include a leave code to show what type of leave it is and the number of hours to be used.  The system automatically adds a leave status (Actual, Approved, or Requested) to show where the leave is in the process.  
-      2.5.1.	Actual Status – This is normally determined by ingestion of the timecard data or from the company lead’s timecard manual input.
-      2.5.2.	Approved Status – This signifies that the supervisor has approved the leave request and will remain in this status until the timecard data modifies the status that the leave was actual taken.
-      2.5.3.	Requested Status – This signifies that the employee has requested the leave, but the supervisor hasn’t approved it yet.
+      <li><b>Leave</b> – A leave is any non-workday.  It could be vacation time, 
+        a holiday, military or jury duty, or a few other options.  These are 
+        started by completing a leave request and the individual’s supervisor 
+        approving the leave.  All leaves include a leave code to show what type 
+        of leave it is and the number of hours to be used.  The system 
+        automatically adds a leave status (Actual, Approved, or Requested) to 
+        show where the leave is in the process.
+        <ol class="level2">
+          <li><b>Actual Status</b> – This is normally determined by ingestion 
+            of the timecard data or from the company lead’s timecard manual 
+            input.</li>
+          <li><b>Approved Status</b> – This signifies that the supervisor has 
+            approved the leave request and will remain in this status until the 
+            timecard data modifies the status that the leave was actual taken.</li>
+          <li><b>Requested Status</b> – This signifies that the employee has 
+            requested the leave, but the supervisor hasn’t approved it yet.</li>
+        </ol>
       </li>
   </ol>
     
   <p class="bottomNav">
-    <a href="ground_out.html">Create/Edit Ground Outages</a>
-    <a href="newuser.html">Create a New User</a>
+    <a href="../index.html">Help Index</a>
+    <a href="layout.html">View Layout</a>
   </p>
 </body>
 </html>

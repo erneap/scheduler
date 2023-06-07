@@ -13,7 +13,6 @@ import { TeamListEditorComponent } from './admin-actions/team-list-editor/team-l
 import { TeamComponent } from './team/team.component';
 import { DataPurgeComponent } from './admin-actions/data-purge/data-purge.component';
 import { ReportsComponent } from './reports/reports.component';
-import { ClientHelpModule } from './client-help/client-help.module';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -37,7 +36,6 @@ const routes: Routes = [
   { path: 'admin/teams', component: TeamListEditorComponent },
   { path: 'admin/purge', component: DataPurgeComponent },
   { path: 'reports', component: ReportsComponent },
-  { path: 'help', component: ClientHelpModule },
   { path: '**', component: NotFoundComponent}
 ];
 

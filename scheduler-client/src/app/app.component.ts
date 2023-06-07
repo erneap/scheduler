@@ -49,7 +49,7 @@ export class AppComponent {
   }
 
   getHelp() {
-    let url = '/scheduler/help';
+    let url = '/help/index.html';
     window.open(url, "help_win");
   }
 }
