@@ -14,7 +14,8 @@ type SAPIngest struct {
 	Files []*multipart.FileHeader
 }
 
-func (s *SAPIngest) Process() ([]ingest.ExcelRow, time.Time, time.Time) {
+func (s *SAPIngest) Process() ([]ingest.ExcelRow, time.Time,
+	time.Time) {
 	start := time.Now()
 	end := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
 	var records []ingest.ExcelRow
