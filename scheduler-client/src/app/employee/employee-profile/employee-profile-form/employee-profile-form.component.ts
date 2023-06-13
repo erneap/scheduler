@@ -103,8 +103,14 @@ export class EmployeeProfileFormComponent {
 
   setPassword() {
     if (this.profileForm.valid) {
-      const user = this.authService.getUser();
-      const id = (user && user.id) ? user.id : '';
+      let id = "";
+      if (this.employee && this.employee.id !== "") {
+        id = this.employee.id;
+      } else {
+        const user = this.authService.getUser();
+        id = (user && user.id) ? user.id : '';
+      }
+    
       const passwd = this.profileForm.value.password;
       this.dialogService.showSpinner();
       this.authService.statusMessage = "Updating User Password";
@@ -135,7 +141,13 @@ export class EmployeeProfileFormComponent {
 
   updateUserField(field: string) {
     let value: string = '';
-    const user = this.authService.getUser();
+    let id = "";
+    if (this.employee && this.employee.id !== "") {
+      id = this.employee.id;
+    } else {
+      const user = this.authService.getUser();
+      id = (user && user.id) ? user.id : '';
+    }
     switch(field.toLowerCase()) {
       case "email":
         value = this.profileForm.value.email;
@@ -152,7 +164,7 @@ export class EmployeeProfileFormComponent {
     }
     this.dialogService.showSpinner();
     this.authService.statusMessage = `Updating User's ${field.toUpperCase()}`;
-    this.empService.updateEmployee(this.employee.id, field, value)
+    this.empService.updateEmployee(id, field, value)
       .subscribe({
         next: (resp) => {
           this.dialogService.closeSpinner();
