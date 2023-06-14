@@ -14,7 +14,7 @@
       style="height: 20px;">Leave Requests</a>
     </mat-nav-list>
   </mat-expansion-panel>
-  <mat-expansion-panel>
+  <mat-expansion-panel expanded="true">
     <mat-expansion-panel-header>
       <mat-panel-title>Site Schedule</mat-panel-title>
     </mat-expansion-panel-header>
@@ -29,7 +29,7 @@
         style="height: 20px;">Mids Listing</a>
     </mat-nav-list>
   </mat-expansion-panel>
-  <mat-expansion-panel 
+  <mat-expansion-panel expanded="true"
     *ngIf="authService.isScheduler || authService.isSiteLeader || authService.isCompanyLead">
     <mat-expansion-panel-header>
       <mat-panel-title>Editing</mat-panel-title>
@@ -61,7 +61,7 @@
       style="height: 20px;">Data Purge</a>
     </mat-nav-list>
   </mat-expansion-panel>
-  <mat-expansion-panel 
+  <mat-expansion-panel expanded="true" 
     *ngIf="authService.isScheduler || authService.isSiteLeader || authService.isCompanyLead">
     <mat-expansion-panel-header>
       <mat-panel-title>Reports</mat-panel-title>
