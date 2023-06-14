@@ -14,6 +14,7 @@ import (
 
 type ScheduleReport struct {
 	Report      *excelize.File
+	Date        time.Time
 	Year        int
 	TeamID      string
 	SiteID      string
@@ -27,6 +28,7 @@ func (sr *ScheduleReport) Create() error {
 	sr.Styles = make(map[string]int)
 	sr.Workcodes = make(map[string]bool)
 	sr.Report = excelize.NewFile()
+	sr.Date = time.Now().UTC()
 
 	// get employees with assignments for the site that are assigned
 	// during the year.
@@ -312,7 +314,7 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 
 	style = sr.Styles["weekday"]
 	sr.Report.SetCellStyle(sheetLabel, GetCellID(0, 2), GetCellID(0, 2), style)
-	sr.Report.SetCellValue(sheetLabel, GetCellID(0, 2), startDate.Format("01/02/2006"))
+	sr.Report.SetCellValue(sheetLabel, GetCellID(0, 2), sr.Date.Format("01/02/2006"))
 
 	current := time.Date(sr.Year, time.Month(monthID), 1, 0, 0, 0, 0, time.UTC)
 	for current.Before(endDate) {
