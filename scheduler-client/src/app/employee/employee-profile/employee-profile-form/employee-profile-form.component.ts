@@ -121,12 +121,28 @@ export class EmployeeProfileFormComponent {
             if (resp.headers.get('token') !== null) {
               this.authService.setToken(resp.headers.get('token') as string);
             }
-            const data: Message | null = resp.body;
+            const data: EmployeeResponse | null = resp.body;
             if (data && data !== null) {
-              this.formError = data.message;
-              if (data.message.toLowerCase() === 'password changed') {
+              this.formError = data.exception;
+              if (data.exception === '') {
                 this.profileForm.controls['password'].setValue(undefined);
                 this.profileForm.controls['password2'].setValue(undefined);
+              }
+              if (data.employee && data.employee !== null) {
+                const iEmp = this.empService.getEmployee();
+                if (iEmp && iEmp.id === data.employee.id) {
+                  this.empService.setEmployee(new Employee(data.employee));
+                }
+                const site = this.siteService.getSite();
+                if (site && site.employees && site.employees.length && data.employee) {
+                  let found = false;
+                  for (let i=0; i < site.employees.length && !found; i++) {
+                    if (site.employees[i].id === data.employee.id) {
+                      site.employees[i] = new Employee(data.employee);
+                    }
+                  }
+                }
+                this.changed.emit(new Employee(data.employee));
               }
             }
             this.authService.statusMessage = "Update complete";

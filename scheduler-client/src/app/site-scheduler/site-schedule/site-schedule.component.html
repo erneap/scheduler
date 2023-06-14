@@ -1,16 +1,15 @@
-<div class="fxLayout flexlayout row center">
-  <mat-card style="background-color: #3f51b5; color: white;">
-      <mat-card-header style="text-align: center;">
-          <mat-card-title>
-              <div class="mat-headline">Site Schedule</div>
-            </mat-card-title>
-      </mat-card-header>
-      <mat-card-content class="flexlayout row center">
-          <app-site-schedule-month></app-site-schedule-month>
-      </mat-card-content>
-  </mat-card>
-  <div class="flexlayout column center">
-    <app-site-ingest-month-legend-code *ngFor="let lc of leavecodes"
-      [leavecode]="lc"></app-site-ingest-month-legend-code>
+<div class="toplevel">
+  <div class="calendarDiv flexlayout column topleft">
+    <div class="labelDiv flexlayout row left">Site Schedule</div>
+    <div class="calendar">
+      <app-site-schedule-month></app-site-schedule-month>
+    </div>
+  </div>
+  <div class="legendDiv flexlayout column topleft">
+    <div class="labelDiv flexlayout row left">Code Legend</div>
+    <div class="calendar">
+      <app-site-ingest-month-legend [leavecodes]="leavecodes">
+      </app-site-ingest-month-legend>
+    </div>
   </div>
 </div>

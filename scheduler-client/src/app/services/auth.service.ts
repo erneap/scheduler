@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { CacheService } from './cache.service';
 import { IUser, User } from '../models/users/user';
-import { AuthenticationResponse, ChangePasswordRequest, Message, UpdateRequest }
+import { AuthenticationResponse, ChangePasswordRequest, 
+  EmployeeResponse, UpdateRequest }
   from '../models/web/employeeWeb';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpResponse } from '@angular/common/http';
@@ -166,13 +167,15 @@ export class AuthService extends CacheService {
       { observe: 'response'});
   }
 
-  changePassword(id: string, passwd: string): Observable<HttpResponse<Message>> {
+  changePassword(id: string, passwd: string): 
+    Observable<HttpResponse<EmployeeResponse>> {
     const url = '/scheduler/api/v1/user/password';
     const data: ChangePasswordRequest = {
       id: id,
       password: passwd,
     }
-    return this.httpClient.put<Message>(url, data, { observe: 'response'});
+    return this.httpClient.put<EmployeeResponse>(url, data,
+      { observe: 'response'});
   }
 
   getAllUsers(): Observable<HttpResponse<UsersResponse>> {

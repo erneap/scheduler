@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Workcenter } from 'src/app/models/sites/workcenter';
+import { DialogService } from 'src/app/services/dialog-service.service';
 import { SiteService } from 'src/app/services/site.service';
 
 @Component({
@@ -22,7 +23,8 @@ export class SiteScheduleMonthComponent {
   dates: Date[] = [];
 
   constructor(
-    protected siteService: SiteService
+    protected siteService: SiteService,
+    protected dialogService: DialogService
   ) {
     const now = new Date();
     this.month = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -49,6 +51,7 @@ export class SiteScheduleMonthComponent {
   }
 
   setWorkcenters() {
+    this.dialogService.showSpinner();
     this.workcenters = [];
     const wkctrMap = new Map<string, number>();
     const site = this.siteService.getSite();
@@ -95,6 +98,7 @@ export class SiteScheduleMonthComponent {
         });
       }
     }
+    this.dialogService.closeSpinner();
   }
 
   showShift(shiftID: string): boolean {

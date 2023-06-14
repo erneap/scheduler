@@ -28,6 +28,7 @@ import { SiteIngestMonthLegendCodeComponent } from './site-ingest-month/site-ing
   ],
   exports: [
     SiteIngestMonthLegendCodeComponent,
+    SiteIngestMonthLegendComponent
   ]
 })
 export class SiteIngestModule { }

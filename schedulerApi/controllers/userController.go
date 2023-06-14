@@ -159,8 +159,8 @@ func ChangePassword(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(data.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest,
-			web.AuthenticationResponse{User: &dbdata.User{},
-				Token: "", Exception: err.Error()})
+			web.EmployeeResponse{Employee: nil,
+				Exception: err.Error()})
 		return
 	}
 
@@ -171,13 +171,22 @@ func ChangePassword(c *gin.Context) {
 
 	err = services.UpdateUser(*user)
 	if err != nil {
-		log.Println(err)
 		c.JSON(http.StatusNotFound,
-			web.AuthenticationResponse{User: &dbdata.User{},
-				Token: "", Exception: "Problem Updating Database"})
+			web.EmployeeResponse{Employee: nil,
+				Exception: "Problem Updating Database"})
 		return
 	}
-	c.JSON(http.StatusOK, web.Message{Message: "Password Changed"})
+
+	emp, err := services.GetEmployee(user.ID.Hex())
+	if err != nil {
+		c.JSON(http.StatusNotFound,
+			web.EmployeeResponse{Employee: nil,
+				Exception: "Employee Retrieval: " + err.Error()})
+	}
+	c.JSON(http.StatusOK, web.EmployeeResponse{
+		Employee:  emp,
+		Exception: "",
+	})
 }
 
 func ChangeUser(c *gin.Context) {
