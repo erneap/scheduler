@@ -73,6 +73,15 @@ func (sr *ScheduleReport) Create() error {
 	// remove the provided sheet "Sheet1" from the workbook
 	sr.Report.DeleteSheet("Sheet1")
 
+	// save the file
+	filename := "/tmp/siteschedule.xlsx"
+	err = sr.Report.SaveAs(filename)
+
+	// reload the file
+	if err == nil {
+		sr.Report, _ = excelize.OpenFile(filename)
+	}
+
 	return nil
 }
 
@@ -284,10 +293,32 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 
 	// create sheet for the month
 	sheetLabel := startDate.Format("Jan06")
+	var (
+		size          = 1
+		orientation   = "landscape"
+		fitToHeight   = 1
+		fitToWidth    = 1
+		blackAndWhite = false
+		fitToPage     = true
+	)
+
 	sr.Report.NewSheet(sheetLabel)
 	options := excelize.ViewOptions{}
 	options.ShowGridLines = &[]bool{false}[0]
 	sr.Report.SetSheetView(sheetLabel, 0, &options)
+	if err := sr.Report.SetPageLayout(sheetLabel,
+		&excelize.PageLayoutOptions{
+			Size:          &size,
+			Orientation:   &orientation,
+			FitToHeight:   &fitToHeight,
+			FitToWidth:    &fitToWidth,
+			BlackAndWhite: &blackAndWhite,
+		}); err != nil {
+		return err
+	}
+	sr.Report.SetSheetProps(sheetLabel, &excelize.SheetPropsOptions{
+		FitToPage: &fitToPage,
+	})
 
 	// set all the column widths
 	sr.Report.SetColWidth(sheetLabel, "A", "A", 17.0)

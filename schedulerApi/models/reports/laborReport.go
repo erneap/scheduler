@@ -101,6 +101,7 @@ func (lr *LaborReport) Create() error {
 			}
 			lr.Employees = append(lr.Employees, emp)
 		}
+		lr.Report.UpdateLinkedValue()
 	}
 
 	//////////////////////////////////////////////////////////
@@ -1264,7 +1265,7 @@ func (lr *LaborReport) CreateStatisticsReport() error {
 	lr.Report.SetColWidth(sheetName, GetColumn(1),
 		GetColumn(2), 12.0)
 	lr.Report.SetColWidth(sheetName, GetColumn(3),
-		GetColumn(10), 8.57)
+		GetColumn(10), 12.0)
 
 	// Current as of header
 	style := lr.Styles["headerctr"]
