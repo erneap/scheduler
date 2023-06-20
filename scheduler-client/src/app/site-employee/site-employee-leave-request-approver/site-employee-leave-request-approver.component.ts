@@ -108,6 +108,7 @@ export class SiteEmployeeLeaveRequestApproverComponent {
   }
 
   employeeChanged(emp: Employee) {
+    console.log(emp);
     if (this.site.employees) {
       for (let i=0; i < this.site.employees.length; i++) {
         if (this.site.employees[i].id === emp.id) {

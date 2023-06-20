@@ -181,67 +181,68 @@
       "id": "rtx",
       "name": "Raytheon Technologies",
       "ingest": "sap",
+      "startDay": 6,
       "ingestPwd": "",
       "holidays": [
         {
-          "id": "H1",
+          "id": "H",
           "name": "New Years Day",
           "sort": 1
         },
         {
-          "id": "H2",
+          "id": "H",
           "name": "Martin Luther King Birthday",
           "sort": 2
         },
         {
-          "id": "H3",
+          "id": "H",
           "name": "Presidents Day",
           "sort": 3
         },
         {
-          "id": "H4",
+          "id": "H",
           "name": "Memorial Day",
           "sort": 4
         },
         {
-          "id": "H5",
+          "id": "H",
           "name": "Juneteenth Day",
           "sort": 5
         },
         {
-          "id": "H6",
+          "id": "H",
           "name": "Independence Day",
           "sort": 6
         },
         {
-          "id": "H7",
+          "id": "H",
           "name": "Labor Day",
           "sort": 7
         },
         {
-          "id": "H8",
+          "id": "H",
           "name": "Columbus Day",
           "sort": 8
         },
         {
-          "id": "H9",
+          "id": "H",
           "name": "Veterans Day",
           "sort": 9
         },
         {
-          "id": "H10",
+          "id": "H",
           "name": "Thanksgiving Day",
           "sort": 10
         },
         {
-          "id": "H11",
+          "id": "H",
           "name": "Christmas Day",
           "sort": 11
         },
         {
-          "id": "F1",
+          "id": "F",
           "name": "Floating",
-          "sort": 12
+          "sort": 1
         }
       ]
     },

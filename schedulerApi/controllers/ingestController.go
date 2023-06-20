@@ -112,6 +112,7 @@ func IngestFiles(c *gin.Context) {
 		fmt.Println(end)
 	}
 
+	fmt.Printf("%d - %d\n", start.Weekday(), startDay)
 	// ensure the start date is the start of the company's workweek as provided
 	// in the company record.
 	for int(start.Weekday()) != startDay {

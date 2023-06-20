@@ -4,13 +4,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { Employee, IEmployee } from 'src/app/models/employees/employee';
 import { LeaveRequest } from 'src/app/models/employees/leave';
 import { Workcode } from 'src/app/models/teams/workcode';
-import { EmployeeResponse } from 'src/app/models/web/employeeWeb';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog-service.service';
 import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
 import { TeamService } from 'src/app/services/team.service';
-import { DeleteLeaveRequestDialogComponent } from '../delete-leave-request-dialog/delete-leave-request-dialog.component';
 
 @Component({
   selector: 'app-leave-request-form',
@@ -111,6 +109,7 @@ export class LeaveRequestFormComponent {
 
   changedEmployee(iEmp: Employee) {
     this.changed.emit(iEmp);
+    this.setCurrent();
   }
 
   getButtonClass(id: string): string {

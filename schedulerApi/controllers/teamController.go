@@ -79,8 +79,13 @@ func CreateTeam(c *gin.Context) {
 		},
 	}
 	emp.AddAssignment("leads", "leads", time.Now().UTC())
-	services.CreateEmployee(emp, data.Leader.Password, "scheduler-teamleader",
-		team.ID.Hex(), "leads")
+	temp, err := services.CreateEmployee(emp, data.Leader.Password,
+		"scheduler-teamleader", team.ID.Hex(), "leads")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(temp)
+	}
 
 	c.JSON(http.StatusOK, web.SiteResponse{Team: team, Site: nil, Exception: ""})
 }
