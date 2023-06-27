@@ -26,6 +26,12 @@
               *ngIf="anyChecked"
               (click)="onAcknowledge()">Acknowledge Checked Messages</button>
             <button mat-raised-button color="warn"
+              *ngIf="gotoApprovers"
+              (click)="onApprovers()"
+              >
+              Proceed to Leave Request Approver
+            </button>
+            <button mat-raised-button color="warn"
               *ngIf="gotoLeaveRequests"
               (click)="onLeaveRequest()"
               >
