@@ -39,3 +39,8 @@ type TeamsResponse struct {
 	Teams     []dbdata.Team `json:"teams,omitempty"`
 	Exception string        `json:"exception"`
 }
+
+type NotificationResponse struct {
+	Messages  []dbdata.Notification `json:"messages,omitempty"`
+	Exception string                `json:"exception"`
+}

@@ -13,6 +13,8 @@ import { IpService } from '../services/ip-service.service';
 import { EmployeeService } from '../services/employee.service';
 import { SiteService } from '../services/site.service';
 import { TeamService } from '../services/team.service';
+import { MessageService } from '../services/message.service';
+import { NotificationResponse } from '../models/web/internalWeb';
 
 @Component({
   selector: 'app-home',
@@ -35,7 +37,8 @@ export class HomeComponent {
     private router: Router,
     public dialog: MatDialog,
     private dialogService: DialogService,
-    protected ipService: IpService
+    protected ipService: IpService,
+    protected msgService: MessageService
   ) {
     this.loginForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -105,6 +108,20 @@ export class HomeComponent {
         }
         if (data.employee) {
           this.employeeService.setEmployee(data.employee);
+          this.msgService.getEmployeeMessages(data.employee.id).subscribe({
+            next: resp => {
+              const data: NotificationResponse | null = resp.body;
+              if (data && data !== null && data.messages) {
+                this.msgService.setMessages(data.messages)
+                this.msgService.showAlerts = data.messages.length > 0;
+                this.router.navigateByUrl('/notifications')
+              }
+            },
+            error: err => {
+              this.authService.statusMessage = "Error retrieving alerts: "
+                + err.exception;
+            }
+          });
         }
         if (data.site) {
           this.siteService.setSite(data.site);
@@ -115,6 +132,7 @@ export class HomeComponent {
           team = data.team.name;
         }
         this.authService.setWebLabel(team, site);
+        this.msgService.startAlerts();
         if (data.exception && data.exception !== '') {
           this.loginError = data.exception;
           this.authService.isAuthenticated = false;

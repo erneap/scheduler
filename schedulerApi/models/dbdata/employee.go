@@ -13,15 +13,16 @@ import (
 )
 
 type Employee struct {
-	ID            primitive.ObjectID    `json:"id" bson:"_id"`
-	TeamID        primitive.ObjectID    `json:"team" bson:"team"`
-	SiteID        string                `json:"site" bson:"site"`
-	UserID        primitive.ObjectID    `json:"userid" bson:"userid"`
-	Email         string                `json:"email" bson:"email"`
-	Name          EmployeeName          `json:"name" bson:"name"`
-	Data          EmployeeData          `json:"data" bson:"data"`
-	User          *User                 `json:"user,omitempty" bson:"-"`
-	Work          []Work                `json:"work,omitempty"`
+	ID     primitive.ObjectID `json:"id" bson:"_id"`
+	TeamID primitive.ObjectID `json:"team" bson:"team"`
+	SiteID string             `json:"site" bson:"site"`
+	UserID primitive.ObjectID `json:"userid" bson:"userid"`
+	Email  string             `json:"email" bson:"email"`
+	Name   EmployeeName       `json:"name" bson:"name"`
+	Data   EmployeeData       `json:"data" bson:"data"`
+	User   *User              `json:"user,omitempty" bson:"-"`
+	Work   []Work             `json:"work,omitempty"`
+}
 
 type ByEmployees []Employee
 

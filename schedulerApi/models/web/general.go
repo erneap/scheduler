@@ -7,3 +7,13 @@ type JWTClaim struct {
 	EmailAddress string `json:"emailAddress"`
 	jwt.StandardClaims
 }
+
+type MessageRequest struct {
+	To      string `json:"to"`
+	From    string `json:"from"`
+	Message string `json:"message"`
+}
+
+type NotificationAck struct {
+	Messages []string `json:"messages"`
+}

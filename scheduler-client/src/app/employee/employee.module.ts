@@ -23,6 +23,8 @@ import { EmployeeProfileComponent } from './employee-profile/employee-profile.co
 import { EmployeeProfileFormComponent } from './employee-profile/employee-profile-form/employee-profile-form.component';
 import { LeaveRequestFormComponent } from './leave-request/leave-request-form/leave-request-form.component';
 import { LeaveRequestEditorComponent } from './leave-request/leave-request-editor/leave-request-editor.component';
+import { NotificationsComponent } from './notifications/notifications.component';
+import { NotificationsMessageComponent } from './notifications/notifications-message/notifications-message.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +47,9 @@ import { LeaveRequestEditorComponent } from './leave-request/leave-request-edito
     EmployeeProfileComponent,
     EmployeeProfileFormComponent,
     LeaveRequestFormComponent,
-    LeaveRequestEditorComponent
+    LeaveRequestEditorComponent,
+    NotificationsComponent,
+    NotificationsMessageComponent
   ],
   imports: [
     CommonModule,

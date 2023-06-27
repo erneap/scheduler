@@ -190,6 +190,15 @@ func main() {
 		{
 			reports.POST("/", controllers.CreateReport)
 		}
+
+		notes := api.Group("/messages", middleware.CheckJWT())
+		{
+			notes.GET("/", controllers.GetAllMessages)
+			notes.GET("/message/:id", controllers.GetMessage)
+			notes.GET("/employee/:userid", controllers.GetMessagesForEmployee)
+			notes.POST("/", controllers.CreateMessage)
+			notes.PUT("/acknowledge", controllers.AcknowledgeMessages)
+		}
 	}
 
 	// listen on port 3000

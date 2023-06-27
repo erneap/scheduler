@@ -25,10 +25,12 @@ type LaborReport struct {
 	Employees         []dbdata.Employee
 	StatsRow          int
 	CurrentAsOf       time.Time
+	EndWork           time.Time
 }
 
 func (lr *LaborReport) Create() error {
 	lr.CurrentAsOf = time.Now().UTC()
+	lr.EndWork = time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
 	lr.StatsRow = 3
 	lr.Styles = make(map[string]int)
 	lr.ConditionalStyles = make(map[string]int)
@@ -98,6 +100,9 @@ func (lr *LaborReport) Create() error {
 						emp.Work = append(emp.Work, work.Work...)
 					}
 				}
+			}
+			if emp.GetLastWorkday().After(lr.EndWork) {
+				lr.EndWork = emp.GetLastWorkday()
 			}
 			lr.Employees = append(lr.Employees, emp)
 		}
@@ -1118,7 +1123,7 @@ func (lr *LaborReport) CreateContractReport(
 		}
 		if current {
 			days := math.Ceil(fr.EndDate.Sub(fr.StartDate).Hours() / 24.0)
-			daysToNow := math.Ceil(lr.CurrentAsOf.Sub(fr.StartDate).Hours() / 24.0)
+			daysToNow := math.Ceil(lr.EndWork.Sub(fr.StartDate).Hours() / 24.0)
 			lr.StatsRow += 1
 			codeTxt := lCode.ChargeNumber + " " + lCode.Extension
 			totalHours := lCode.HoursPerEmployee * float64(lCode.MinimumEmployees)

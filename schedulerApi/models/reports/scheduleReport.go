@@ -334,7 +334,7 @@ func (sr *ScheduleReport) AddMonth(monthID int) error {
 	default:
 		endColumn = "AE"
 	}
-	sr.Report.SetColWidth(sheetLabel, "B", endColumn, 3.5)
+	sr.Report.SetColWidth(sheetLabel, "B", endColumn, 4.0)
 
 	// monthly headers to include month label and days of the month
 	style := sr.Styles["month"]

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { SiteService } from './services/site.service';
 import { TeamService } from './services/team.service';
+import { MessageService } from './services/message.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ export class AppComponent {
     public authService: AuthService,
     protected siteService: SiteService,
     protected teamService: TeamService,
+    protected msgService: MessageService,
     private router: Router
   ) {
     iconRegistry.addSvgIcon('calendar',
@@ -29,6 +31,8 @@ export class AppComponent {
     this.authService.getUser();
     if (this.authService.isTokenExpired()) {
       this.router.navigate(['/home']);
+    } else {
+      this.msgService.startAlerts();
     }
     const site = this.siteService.getSite();
     const team = this.teamService.getTeam();
@@ -44,6 +48,7 @@ export class AppComponent {
   }
 
   logout() {
+    this.msgService.clearMessages();
     this.authService.logout();
     this.router.navigate(['/home']);
   }

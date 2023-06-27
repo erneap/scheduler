@@ -4,6 +4,7 @@ import { Employee, IEmployee } from "../employees/employee";
 import { HttpErrorResponse } from "@angular/common/http";
 import { throwError } from "rxjs";
 import { Router } from "@angular/router";
+import { INotification } from "../employees/notification";
 
 export class WorkWeek {
   private week: Workday[];
@@ -107,4 +108,19 @@ export function handleError(error: HttpErrorResponse) {
     }
   }
   return throwError(() => new Error(message));
+}
+
+export interface MessageRequest {
+  to: string;
+  from: string;
+  message: string;
+}
+
+export interface NotificationAck {
+  messages: string[];
+}
+
+export interface NotificationResponse {
+  messages: INotification[];
+  exception: string;
 }

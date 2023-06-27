@@ -109,6 +109,7 @@ export class LeaveRequestFormComponent {
 
   changedEmployee(iEmp: Employee) {
     this.changed.emit(iEmp);
+    this.employee = iEmp;
     this.setCurrent();
   }
 

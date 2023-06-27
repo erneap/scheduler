@@ -18,6 +18,12 @@
       (click)="logout()">
       <mat-icon>lock</mat-icon>
     </button>
+    <button mat-icon-button *ngIf="this.msgService.showAlerts"
+      matTooltip="Notifications Available"
+      routerLink="/notifications"
+      >
+      <mat-icon class="warning-icon">notification_important</mat-icon>
+    </button>
     <button mat-icon-button *ngIf="this.authService.isAuthenticated"
     (click)="getHelp()" 
       matTooltip="Get Assistance">

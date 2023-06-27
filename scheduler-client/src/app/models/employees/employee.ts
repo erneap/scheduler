@@ -177,7 +177,7 @@ export class EmployeeData implements IEmployeeData {
       if (lv.leavedate.getFullYear() === date.getFullYear()
         && lv.leavedate.getMonth() === date.getMonth()
         && lv.leavedate.getDate() === date.getDate()
-        && lv.hours >= (stdHours/2)) {
+        && lv.hours > (stdHours/2)) {
         answer.code = lv.code;
         answer.hours = lv.hours;
         answer.workcenter = '';

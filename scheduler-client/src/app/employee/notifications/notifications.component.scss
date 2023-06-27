@@ -1,0 +1,35 @@
+.checkbox {
+  width: 35px;
+  align-items: center;
+  align-content: center;
+}
+
+.message {
+  width: 565px;
+  font-size: 12pt;
+  align-items: left;
+  justify-content: stretch;
+  margin: 2px 5px;
+}
+
+.date {
+  width: 200px;
+  font-size: 12pt;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px 2px;
+}
+
+.notification {
+  width: 800px;
+  flex-direction: row;
+  padding: 0;
+  margin: 0;
+}
+
+.title {
+  background-color: lightpink;
+  color: black;
+  font-weight: bold;
+}

@@ -11,6 +11,7 @@ import { EmployeeService } from 'src/app/services/employee.service';
 import { SiteService } from 'src/app/services/site.service';
 import { TeamService } from 'src/app/services/team.service';
 import { DeleteLeaveRequestDialogComponent } from '../delete-leave-request-dialog/delete-leave-request-dialog.component';
+import { MessageService } from 'src/app/services/message.service';
 
 @Component({
   selector: 'app-leave-request-editor',
@@ -46,6 +47,7 @@ export class LeaveRequestEditorComponent {
     protected siteService: SiteService,
     protected teamService: TeamService,
     protected dialogService: DialogService,
+    protected msgService: MessageService,
     private fb: FormBuilder,
     protected dialog: MatDialog
   ) { 
@@ -150,7 +152,6 @@ export class LeaveRequestEditorComponent {
       const code = this.editorForm.value.primarycode;
       this.dialogService.showSpinner();
       this.authService.statusMessage = "Processing leave request";
-      console.log(this.employee.name.getLastFirst());
       this.empService.addNewLeaveRequest(this.employee.id, start, end, code)
         .subscribe({
           next: (resp) => {
@@ -174,8 +175,30 @@ export class LeaveRequestEditorComponent {
                       }
                   });
                 }
+                const iEmp = this.empService.getEmployee();
+                if (iEmp && iEmp.id === this.employee.id) {
+                  this.empService.setEmployee(data.employee);
+                }
               }
               this.setCurrent();
+              const site = this.siteService.getSite()
+              if (site && site.employees) {
+                const message = `New Leave Request for ${this.employee.name.getFullName()}`
+                  + " was created.";
+                console.log(message);
+                site.employees.forEach(sEmp => {
+                  const tEmp = new Employee(sEmp);
+                  if (tEmp.user) {
+                    if (tEmp.user.isInGroup("scheduler", "siteleader") 
+                      || tEmp.user.isInGroup("scheduler", "scheduler")) {
+                      this.msgService.createMessage(sEmp.id, this.employee.id, message)
+                      .subscribe(() => {
+                        console.log("Message Sent");
+                      });
+                    }
+                  }
+                });
+              }
             }
             this.authService.statusMessage = "Leave Request processing complete";
             this.changed.emit(new Employee(this.employee));
@@ -228,8 +251,26 @@ export class LeaveRequestEditorComponent {
                     this.request = new LeaveRequest(req)
                   }
                 });
+                const iEmp = this.empService.getEmployee();
+                if (iEmp && iEmp.id === this.employee.id) {
+                  this.empService.setEmployee(data.employee);
+                }
               }
               this.setCurrent();
+              if (field.toLowerCase() === 'start' || field.toLowerCase() === 'end') {
+                const site = this.siteService.getSite()
+                if (site && site.employees) {
+                  const message = `Leave request dates for ${this.employee.name.getFullName()}`
+                    + " were changed and needs to be reapproved.";
+                  site.employees.forEach(sEmp => {
+                    if (sEmp.user 
+                      && (sEmp.user.isInGroup("scheduler", "siteleader") 
+                      || sEmp.user.isInGroup("scheduler", "scheduler"))) {
+                      this.msgService.createMessage(sEmp.id, this.employee.id, message)
+                    }
+                  });
+                }
+              }
             }
             this.authService.statusMessage = "Update complete";
             this.changed.emit(new Employee(this.employee));
@@ -262,6 +303,7 @@ export class LeaveRequestEditorComponent {
                     this.request = new LeaveRequest(req)
                   }
                 });
+                
               }
               this.setCurrent();
             }
@@ -350,6 +392,9 @@ export class LeaveRequestEditorComponent {
               });
             }
             this.setCurrent();
+            const oEmp = new Employee(iEmp);
+            const message = `Leave request was approved by ${oEmp.name.getFullName()}.`;
+            this.msgService.createMessage(this.employee.id, iEmp.id, message);
           }
           this.authService.statusMessage = "Approval Complete";
           this.changed.emit(new Employee(this.employee));
