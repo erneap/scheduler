@@ -1262,15 +1262,17 @@ func UpdateSiteCofSReport(c *gin.Context) {
 					}
 					rpt.EndDate = dt
 				}
+			case "unit":
+				rpt.AssociatedUnit = data.Value
 			case "addcompany":
 				found := false
 				sort := -1
 				for _, co := range rpt.Companies {
 					if strings.EqualFold(co.ID, data.Value) {
 						found = true
-						if co.SortID > sort {
-							sort = co.SortID
-						}
+					}
+					if co.SortID > sort {
+						sort = co.SortID
 					}
 				}
 				if !found {

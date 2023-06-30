@@ -60,6 +60,7 @@ export class SiteCofsReportEditorComponent {
     this.reportForm = this.fb.group({
       name: ['', [Validators.required]],
       short: ['', [Validators.required]],
+      unit: ['', [Validators.required]],
       start: [new Date(), [Validators.required]],
       end: [new Date(), [Validators.required]],
     });
@@ -114,6 +115,9 @@ export class SiteCofsReportEditorComponent {
           break;
         case "name":
           value = this.reportForm.value.name;
+          break;
+        case "unit":
+          value = this.reportForm.value.unit;
           break;
         case "startdate":
           let dt = new Date(this.reportForm.value.startdate);
@@ -235,6 +239,7 @@ export class SiteCofsReportEditorComponent {
             this.report = new CofSReport(rpt);
             this.reportForm.controls['name'].setValue(rpt.name);
             this.reportForm.controls['short'].setValue(rpt.shortname);
+            this.reportForm.controls['unit'].setValue(rpt.unit);
             this.reportForm.controls['start'].setValue(rpt.startdate);
             this.reportForm.controls['end'].setValue(rpt.enddate);
           }
@@ -244,6 +249,7 @@ export class SiteCofsReportEditorComponent {
       this.report = new CofSReport();
       this.reportForm.controls['name'].setValue('');
       this.reportForm.controls['short'].setValue('');
+      this.reportForm.controls['unit'].setValue('');
       this.reportForm.controls['start'].setValue(new Date());
       this.reportForm.controls['end'].setValue(new Date());
     }

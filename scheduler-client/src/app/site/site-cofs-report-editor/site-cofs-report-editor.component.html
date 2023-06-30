@@ -51,6 +51,14 @@
               </mat-form-field>
             </div>
             <div class="formFieldWider">
+              <mat-form-field appearance="fill" class="extraWideField">
+                <mat-label>Associated Unit</mat-label>
+                <input matInput formControlName="unit" (blur)="onChange('unit')">
+                <mat-error *ngIf="reportForm.controls['unit'].hasError('required')"
+                  class="error">Associated Unit Required</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="formFieldWider">
               <mat-form-field appearance="fill">
                 <mat-label>Report date range</mat-label>
                 <mat-date-range-input [rangePicker]="picker">

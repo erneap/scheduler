@@ -38,6 +38,7 @@ export interface ICofSReport {
   id: number;
   name: string;
   shortname: string;
+  unit: string;
   startdate: Date;
   enddate: Date;
   companies?: ICofSCompany[];
@@ -47,6 +48,7 @@ export class CofSReport implements ICofSReport {
   id: number;
   name: string;
   shortname: string;
+  unit: string;
   startdate: Date;
   enddate: Date;
   companies: CofSCompany[];
@@ -55,6 +57,7 @@ export class CofSReport implements ICofSReport {
     this.id = (rpt) ? rpt.id : 0;
     this.name = (rpt) ? rpt.name : "";
     this.shortname = (rpt) ? rpt.shortname : "";
+    this.unit = (rpt) ? rpt.unit : "";
     this.startdate = (rpt) ? new Date(rpt.startdate) : new Date();
     this.enddate = (rpt) ? new Date(rpt.enddate) : new Date();
     this.companies = [];
