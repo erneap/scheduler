@@ -233,7 +233,7 @@ func (cr *ReportCofS) CreateEmployeeData(count, coCount int,
 		time.UTC)
 	for current.Before(cr.EndDate) {
 		hours := 0.0
-		label := fmt.Sprintf("Section%dRow%d_%d", coCount,
+		label := fmt.Sprintf("Section%dRow%d_%02d", coCount,
 			count, current.Day())
 		for _, lc := range labor {
 			hours += emp.GetWorkedHoursForLabor(lc.ChargeNumber,
